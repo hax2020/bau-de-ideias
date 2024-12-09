@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo de Essencialidade dos Nutrientes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #fff5ee;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            text-align: center;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        button {
+            padding: 10px;
+            font-size: 18px;
+            margin: 20px;
+            cursor: pointer;
+            background-color: #191970;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        button:hover {
+            background-color: #15154d;
+        }
+
+        img {
+            width: 100%;
+            max-width: 480px;
+            height: auto;
+            margin-top: 20px;
+            border-radius: 10px;
+            object-fit: contain;
+        }
+
+        #endScreen {
+            display: none;
+            text-align: center;
+        }
+
+        #endScreen h2 {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="gameContainer">
+        <div id="imageContainer">
+            <img id="nutrientImage" src="https://i.imgur.com/fU2PeUz.png" alt="Imagem do Nutriente">
+        </div>
+        <button id="drawNutrientBtn">Sorteie um Nutriente</button>
+    </div>
+
+    <div class="container" id="endScreen">
+        <h2>Fim de jogo</h2>
+        <button id="restartBtn">Jogar Novamente</button>
+    </div>
+
+    <script>
+        // Links das imagens (cartas)
+        const imageLinks = [
+            "https://i.imgur.com/fU2PeUz.png", // Imagem inicial
+            "https://i.imgur.com/324W38r.png", // Carta 1 N
+            "https://imgur.com/vQr0XK6.png", // Carta 2 P
+            "https://i.imgur.com/CSMms3J.png", // Carta 3 K
+            "https://i.imgur.com/MRYk0HC.png", // Carta 4 Ca
+            "https://imgur.com/ARxU4k9.png", // Carta 5 Mg
+            "https://i.imgur.com/3CfME9a.png", // Carta 6 S
+            "https://i.imgur.com/2I9j3Y0.png", // Carta 7 Fe
+            "https://i.imgur.com/2JonEYY.png", // Carta 8 Zn
+            "https://i.imgur.com/JrZORGP.png", // Carta 9 Cu
+            "https://i.imgur.com/DqLhDmd.png", // Carta 10 Mn
+            "https://i.imgur.com/dj1DweO.png"  // Carta 11 B
+        ];
+
+        let remainingImages = [...imageLinks.slice(1)]; // Mantém a carta inicial fixa
+
+        // Referências ao DOM
+        const drawNutrientBtn = document.getElementById('drawNutrientBtn');
+        const nutrientImage = document.getElementById('nutrientImage');
+        const gameContainer = document.getElementById('gameContainer');
+        const endScreen = document.getElementById('endScreen');
+        const restartBtn = document.getElementById('restartBtn');
+
+        // Função para sortear uma imagem aleatória entre as restantes
+        function getRandomImage() {
+            if (remainingImages.length === 0) {
+                // Exibe a tela de fim de jogo
+                gameContainer.style.display = 'none';
+                endScreen.style.display = 'block';
+                return null;
+            } else {
+                const randomIndex = Math.floor(Math.random() * remainingImages.length);
+                const selectedImage = remainingImages[randomIndex];
+                remainingImages.splice(randomIndex, 1); // Remove a imagem sorteada
+                return selectedImage;
+            }
+        }
+
+        // Evento de clique para sortear um novo nutriente
+        drawNutrientBtn.addEventListener('click', () => {
+            const newImage = getRandomImage();
+            if (newImage) {
+                nutrientImage.src = newImage;
+            }
+        });
+
+        // Reiniciar o jogo
+        restartBtn.addEventListener('click', () => {
+            // Restaura a tela inicial e reseta o ciclo
+            remainingImages = [...imageLinks.slice(1)];
+            nutrientImage.src = imageLinks[0]; // Mostra a imagem inicial
+            gameContainer.style.display = 'block';
+            endScreen.style.display = 'none';
+        });
+    </script>
+</body>
+</html>
