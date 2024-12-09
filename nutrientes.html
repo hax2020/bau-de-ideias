@@ -11,10 +11,11 @@
             justify-content: center;
             align-items: center;
             flex-direction: column;
+            flex-wrap: wrap;
             min-height: 100vh;
             margin: 0;
             background-color: #fff5ee;
-            padding: 10px;
+            padding: 20px;
             box-sizing: border-box;
         }
 
@@ -22,12 +23,13 @@
             text-align: center;
             width: 100%;
             max-width: 600px;
+            margin: 10px;
         }
 
         button {
-            padding: 10px;
-            font-size: 18px;
-            margin: 20px;
+            padding: 10px 15px;
+            font-size: 16px;
+            margin: 10px 0;
             cursor: pointer;
             background-color: #191970;
             color: white;
@@ -35,6 +37,7 @@
             border-radius: 5px;
             width: 100%;
             max-width: 300px;
+            transition: background-color 0.3s ease;
         }
 
         button:hover {
@@ -45,7 +48,7 @@
             width: 100%;
             max-width: 480px;
             height: auto;
-            margin-top: 20px;
+            margin: 20px auto;
             border-radius: 10px;
             object-fit: contain;
         }
@@ -57,6 +60,23 @@
 
         #endScreen h2 {
             margin-bottom: 20px;
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            button {
+                font-size: 14px;
+                padding: 8px 12px;
+            }
+
+            img {
+                max-width: 100%;
+                margin-top: 15px;
+            }
+
+            body {
+                padding: 10px;
+            }
         }
     </style>
 </head>
@@ -74,47 +94,42 @@
     </div>
 
     <script>
-        // Links das imagens (cartas)
         const imageLinks = [
-            "https://i.imgur.com/fU2PeUz.png", // Imagem inicial
-            "https://i.imgur.com/324W38r.png", // Carta 1 N
-            "https://imgur.com/vQr0XK6.png", // Carta 2 P
-            "https://i.imgur.com/CSMms3J.png", // Carta 3 K
-            "https://i.imgur.com/MRYk0HC.png", // Carta 4 Ca
-            "https://imgur.com/ARxU4k9.png", // Carta 5 Mg
-            "https://i.imgur.com/3CfME9a.png", // Carta 6 S
-            "https://i.imgur.com/2I9j3Y0.png", // Carta 7 Fe
-            "https://i.imgur.com/2JonEYY.png", // Carta 8 Zn
-            "https://i.imgur.com/JrZORGP.png", // Carta 9 Cu
-            "https://i.imgur.com/DqLhDmd.png", // Carta 10 Mn
-            "https://i.imgur.com/dj1DweO.png"  // Carta 11 B
+            "https://i.imgur.com/fU2PeUz.png", 
+            "https://i.imgur.com/324W38r.png", 
+            "https://imgur.com/vQr0XK6.png", 
+            "https://i.imgur.com/CSMms3J.png", 
+            "https://i.imgur.com/MRYk0HC.png", 
+            "https://imgur.com/ARxU4k9.png", 
+            "https://i.imgur.com/3CfME9a.png", 
+            "https://i.imgur.com/2I9j3Y0.png", 
+            "https://i.imgur.com/2JonEYY.png", 
+            "https://i.imgur.com/JrZORGP.png", 
+            "https://i.imgur.com/DqLhDmd.png", 
+            "https://i.imgur.com/dj1DweO.png"
         ];
 
-        let remainingImages = [...imageLinks.slice(1)]; // Mantém a carta inicial fixa
+        let remainingImages = [...imageLinks.slice(1)];
 
-        // Referências ao DOM
         const drawNutrientBtn = document.getElementById('drawNutrientBtn');
         const nutrientImage = document.getElementById('nutrientImage');
         const gameContainer = document.getElementById('gameContainer');
         const endScreen = document.getElementById('endScreen');
         const restartBtn = document.getElementById('restartBtn');
 
-        // Função para sortear uma imagem aleatória entre as restantes
         function getRandomImage() {
             if (remainingImages.length === 0) {
-                // Exibe a tela de fim de jogo
                 gameContainer.style.display = 'none';
                 endScreen.style.display = 'block';
                 return null;
             } else {
                 const randomIndex = Math.floor(Math.random() * remainingImages.length);
                 const selectedImage = remainingImages[randomIndex];
-                remainingImages.splice(randomIndex, 1); // Remove a imagem sorteada
+                remainingImages.splice(randomIndex, 1);
                 return selectedImage;
             }
         }
 
-        // Evento de clique para sortear um novo nutriente
         drawNutrientBtn.addEventListener('click', () => {
             const newImage = getRandomImage();
             if (newImage) {
@@ -122,11 +137,9 @@
             }
         });
 
-        // Reiniciar o jogo
         restartBtn.addEventListener('click', () => {
-            // Restaura a tela inicial e reseta o ciclo
             remainingImages = [...imageLinks.slice(1)];
-            nutrientImage.src = imageLinks[0]; // Mostra a imagem inicial
+            nutrientImage.src = imageLinks[0];
             gameContainer.style.display = 'block';
             endScreen.style.display = 'none';
         });
