@@ -8,60 +8,58 @@
     body {
         font-family: Arial, sans-serif;
     }
-    }
     .container {
-        width: 90%;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+    .form-container {
+        flex: 1;
+        min-width: 300px;
         max-width: 500px;
-        margin: 0 auto;
-        padding: 20px;
+    }
+    .result-container {
+        flex: 1;
+        min-width: 200px;
         border: 1px solid #ccc;
+        padding: 10px;
         border-radius: 5px;
+        background-color: #f9f9f9;
     }
     label {
         display: block;
         margin-bottom: 10px;
     }
-    input[type="text"], input[type="number"] {
+    input[type="text"], input[type="number"], select {
         width: 100%;
         padding: 8px;
         margin-bottom: 15px;
         border: 1px solid #ccc;
         border-radius: 3px;
     }
-    input[type="submit"] {
-        background-color: #4CAF50;
-        color: white;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 3px;
-        cursor: pointer;
-    }
-    input[type="submit"]:hover {
-        background-color: #45a049;
-    }
 </style>
 </head>
 <body>
 <div class="container">
-    <h2>Calculadora de Calcário</h2>
-    <p><strong>Consulte a lista a seguir para definir o pH desejado para sua cultura:</strong></p>
-    <p><strong>pH 6,5:</strong> Alfafa, aspargo, macieira, oliveira, piretro.</p>
-    <p><strong>pH 6,0:</strong> Abacateiro, abóbora, abobrinha, alcachofra, alface, alho, almeirão, ameixeira, amendoim, arroz de sequeiro, aveia, bananeira, batata-doce, berinjela, beterraba, brócolis, canade-açúcar, camomila, canola, capim-limão, caquizeiro, cebola, cenoura, centeio, cevada, chicória, chuchu, citros, consorciação de gramíneas e leguminosas de estação fria, consorciação de gramíneas e leguminosas de estação quente, couve-flor, crisântemo, ervilha, ervilha forrageira, ervilhaca, estévia, feijão, figueira, gengibre, girassol, gramíneas forrageiras de estação fria, gramíneas forrageiras de estação quente, hortelã, leguminosas forrageiras de estação fria, leguminosas forrageiras de estação quente, linho, mandioquinha-salsa, maracujazeiro, melancia, melão, milho, milho pipoca, moranga, morangueiro, nabo, nabo forrageiro, nectarineira, nogueira-pecã, painço, palma-rosa, pepino, pereira, pessegueiro, pimentão, quivizeiro, rabanete, repolho, roseira de corte, rúcula, soja, sorgo, tabaco, tomate, tremoço, trigo, triticale, urucum, vetiver e videira.</p>
-    <p><strong>pH 5,5:</strong> Alfavaca, amoreira-preta, arroz irrigado no sistema de semeadura em solo seco, batata, calêndula, camomila, cardamomo, carqueja, chá, citronela-de-Java, coentro, cúrcuma, erva-doce, funcho, guaco, manjericão, mirtilo, palmeira-juçara, palmeira-real, pupunheira e salsa.</p>
-    <form id="calcForm">
-        <label for="pH">Selecione o pH desejado:</label>
-        <select id="pH">
-            <option value="6.5">pH 6.5</option>
-            <option value="6.0">pH 6.0</option>
-            <option value="5.5">pH 5.5</option>
-        </select><br>
-        <label for="smp">Informe o Índice SMP (de 0.0 a 14.0):</label>
-        <input type="number" id="smp" step="0.1" min="0" max="14" required><br>
-        <label for="prnt">Informe o PRNT do calcário (de 0 a 100):</label>
-        <input type="number" id="prnt" min="0" max="100" required><br>
-        <input type="submit" value="Calcular">
-    </form>
-    <div id="resultado"></div>
+    <div class="form-container">
+        <h2>Calculadora de Calcário</h2>
+        <form id="calcForm">
+            <label for="pH">Selecione o pH desejado:</label>
+            <select id="pH">
+                <option value="6.5">pH 6.5</option>
+                <option value="6.0">pH 6.0</option>
+                <option value="5.5">pH 5.5</option>
+            </select>
+            <label for="smp">Informe o Índice SMP (de 0.0 a 14.0):</label>
+            <input type="number" id="smp" step="0.1" min="0" max="14">
+            <label for="prnt">Informe o PRNT do calcário (de 0 a 100):</label>
+            <input type="number" id="prnt" min="0" max="100">
+        </form>
+    </div>
+    <div class="result-container" id="resultado">
+        <strong>Resultado:</strong><br>
+        Quantidade de calcário necessária será exibida aqui.
+    </div>
 </div>
 
 <script>
@@ -151,15 +149,26 @@
         }
     }
 
-    document.getElementById("calcForm").addEventListener("submit", function(event) {
-        event.preventDefault();
-        var pH = parseFloat(document.getElementById("pH").value);
-        var smp = parseFloat(document.getElementById("smp").value);
-        var prnt = parseInt(document.getElementById("prnt").value);
+    document.querySelectorAll("#pH, #smp, #prnt").forEach(input => {
+        input.addEventListener("input", function() {
+            var pH = parseFloat(document.getElementById("pH").value);
+            var smp = parseFloat(document.getElementById("smp").value);
+            var prnt = parseFloat(document.getElementById("prnt").value);
 
-        var valorBase = calcValorBaseCalcario(pH, smp);
-        var resultado = valorBase * (100 / prnt);
-        document.getElementById("resultado").innerHTML = "Quantidade de calcário necessária: " + resultado.toFixed(2) + " toneladas por hectare.";
+            if (!isNaN(pH) && !isNaN(smp) && !isNaN(prnt) && prnt > 0) {
+                var valorBase = calcValorBaseCalcario(pH, smp);
+                var resultado = valorBase * (100 / prnt);
+                document.getElementById("resultado").innerHTML =
+                    "<strong>Resultado:</strong><br>" +
+                    "Quantidade de calcário necessária: " +
+                    resultado.toFixed(2) +
+                    " toneladas por hectare.";
+            } else {
+                document.getElementById("resultado").innerHTML =
+                    "<strong>Resultado:</strong><br>" +
+                    "Por favor, preencha todos os campos corretamente.";
+            }
+        });
     });
 </script>
 </body>
