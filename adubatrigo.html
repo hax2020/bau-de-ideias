@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Adubos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-top: 20px;
+        }
+
+        form {
+            max-width: 600px;
+            margin: 20px auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin: 10px 0 5px;
+            color: #555;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        button {
+            width: 100%;
+            background: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        #result {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #dff0d8;
+            border: 1px solid #d6e9c6;
+            color: #3c763d;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Calculadora de Adubos para Trigo</h1>
+    
+    <form id="analysisForm">
+        <label for="organicMatter">Teor de Matéria Orgânica no Solo (%)</label>
+        <input type="number" id="organicMatter" name="organicMatter" step="0.01" required>
+        
+        <label for="classTextural">Classe Textural</label>
+        <select id="classTextural" name="classTextural" required>
+            <option value="1">Classe Textural 1</option>
+            <option value="2">Classe Textural 2</option>
+            <option value="3">Classe Textural 3</option>
+            <option value="4">Classe Textural 4</option>
+        </select>
+        
+        <label for="phosphorus">Teor de Fósforo no Solo (mg/dm³)</label>
+        <input type="number" id="phosphorus" name="phosphorus" step="0.01" required>
+        
+        <label for="ctc">CTC pH 7,0 (cmol/dm³)</label>
+        <input type="number" id="ctc" name="ctc" step="0.01" required>
+        
+        <label for="potassium">Teor de Potássio do Solo (mg/dm³)</label>
+        <input type="number" id="potassium" name="potassium" step="0.01" required>
+
+        <label for="previousCrop">Cultura Anterior</label>
+        <select id="previousCrop" name="previousCrop" required>
+            <option value="graminea">Gramínea</option>
+            <option value="leguminosa">Leguminosa</option>
+        </select>
+
+        <label for="cultivation">Cultivo</label>
+        <select id="cultivation" name="cultivation" required>
+            <option value="1">1º Cultivo</option>
+            <option value="2">2º Cultivo</option>
+        </select>
+
+        <label for="nitrogenFertilizer">Adubo Nitrogenado</label>
+        <select id="nitrogenFertilizer" name="nitrogenFertilizer" required>
+            <option value="ureia">Ureia (45% N)</option>
+            <option value="nitrato_calcio">Nitrato de Cálcio (14% N)</option>
+            <option value="nitrato_amonio">Nitrato de Amônio (32% N)</option>
+        </select>
+
+        <label for="phosphateFertilizer">Adubo Fosfatado</label>
+        <select id="phosphateFertilizer" name="phosphateFertilizer" required>
+            <option value="super_triplo">Superfosfato Triplo (41% P)</option>
+            <option value="super_simples">Superfosfato Simples (18% P)</option>
+            <option value="fosfato_natural">Fosfato Natural (27% P)</option>
+        </select>
+
+        <label for="potassiumFertilizer">Adubo Potássico</label>
+        <select id="potassiumFertilizer" name="potassiumFertilizer" required>
+            <option value="cloreto_potassio">Cloreto de Potássio (58% K)</option>
+            <option value="sulfato_potassio">Sulfato de Potássio (48% K)</option>
+        </select>
+
+        <button type="button" onclick="calculateFertilizer()">Calcular Adubo</button>
+    </form>
+    
+    <div id="result"></div>
+    
+    <script>
+        function calculateFertilizer() {
+            const organicMatter = parseFloat(document.getElementById('organicMatter').value);
+            const phosphorus = parseFloat(document.getElementById('phosphorus').value);
+            const potassium = parseFloat(document.getElementById('potassium').value);
+            const previousCrop = document.getElementById('previousCrop').value;
+            const cultivation = document.getElementById('cultivation').value;
+            const nitrogenFertilizer = document.getElementById('nitrogenFertilizer').value;
+            const phosphateFertilizer = document.getElementById('phosphateFertilizer').value;
+            const potassiumFertilizer = document.getElementById('potassiumFertilizer').value;
+
+            // Nitrogênio
+            let nitrogenNeeded = previousCrop === 'graminea'
+                ? (organicMatter <= 2.5 ? 80 : organicMatter >= 5 ? 20 : 60)
+                : (organicMatter <= 2.5 ? 60 : organicMatter >= 5 ? 20 : 50);
+
+            const nitrogenForPlanting = 20; // 20 kg de N para o plantio
+            const nitrogenForCover = nitrogenNeeded - nitrogenForPlanting; // Restante para a cobertura
+
+            const nitrogenPercentage = nitrogenFertilizer === 'ureia' ? 0.45
+                : nitrogenFertilizer === 'nitrato_calcio' ? 0.14 : 0.32;
+
+            const nitrogenPlantingAmount = (nitrogenForPlanting / nitrogenPercentage).toFixed(2);
+            const nitrogenCoverAmount = (nitrogenForCover / nitrogenPercentage).toFixed(2);
+
+            // Fósforo
+            const phosphorusNeeded = cultivation === '1' ? 85 : 45; // Valores hipotéticos
+            const phosphorusPercentage = phosphateFertilizer === 'super_triplo' ? 0.41
+                : phosphateFertilizer === 'super_simples' ? 0.18 : 0.27;
+            const phosphorusAmount = (phosphorusNeeded / phosphorusPercentage).toFixed(2);
+
+            // Potássio
+            const potassiumNeeded = cultivation === '1' ? 60 : 30; // Valores hipotéticos
+            const potassiumPercentage = potassiumFertilizer === 'cloreto_potassio' ? 0.58 : 0.48;
+            const potassiumAmount = (potassiumNeeded / potassiumPercentage).toFixed(2);
+
+            document.getElementById('result').innerHTML = `
+                <strong>Resultado:</strong><br>
+                Nitrogênio no Plantio: ${nitrogenPlantingAmount} kg<br>
+                Nitrogênio em Cobertura: ${nitrogenCoverAmount} kg<br>
+                Fósforo: ${phosphorusAmount} kg<br>
+                Potássio: ${potassiumAmount} kg
+            `;
+        }
+    </script>
+</body>
+</html>
