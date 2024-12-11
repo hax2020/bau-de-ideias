@@ -1,0 +1,17 @@
+/* Estilo global para o corpo da página */
+body {
+  background-color: #000000;  /* Cor de fundo preta */
+  color: #FFFFFF;  /* Cor do texto branca */
+  font-family: Arial, sans-serif;  /* Fonte simples */
+  margin: 0;
+  padding: 0;
+  height: 100vh;  /* Ocupa toda a altura da tela */
+}
+
+/* Estilo para o título (h1) */
+h1 {
+  color: #FFCC00;  /* Cor do título amarela */
+  text-align: center;  /* Alinha o título no centro */
+  font-size: 3em;  /* Tamanho grande do título */
+  margin-top: 50px;  /* Espaço acima do título */
+}
