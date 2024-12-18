@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Ficha - Mago: A Ascensão</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f9f9f9;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        textarea {
+            resize: vertical;
+            height: 100px;
+        }
+        .button {
+            margin-top: 20px;
+            text-align: center;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            background-color: #007BFF;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Ficha de Personagem - Mago: A Ascensão</h1>
+        
+        <label for="nome">Nome:</label>
+        <input type="text" id="nome" name="nome">
+
+        <label for="conceito">Conceito:</label>
+        <input type="text" id="conceito" name="conceito">
+
+        <label for="essencia">Essência:</label>
+        <input type="text" id="essencia" name="essencia">
+
+        <label for="tradição">Tradição:</label>
+        <input type="text" id="tradição" name="tradição">
+
+        <label for="arete">Arete:</label>
+        <input type="number" id="arete" name="arete" min="1" max="10">
+
+        <label for="atributos">Atributos:</label>
+        <textarea id="atributos" name="atributos" placeholder="Digite os atributos separando por linhas..."></textarea>
+
+        <label for="habilidades">Habilidades:</label>
+        <textarea id="habilidades" name="habilidades" placeholder="Digite as habilidades separando por linhas..."></textarea>
+
+        <label for="esferas">Esferas:</label>
+        <textarea id="esferas" name="esferas" placeholder="Digite as esferas separando por linhas..."></textarea>
+
+        <label for="histórico">Histórico:</label>
+        <textarea id="histórico" name="histórico" placeholder="Digite o histórico do personagem..."></textarea>
+
+        <div class="button">
+            <button onclick="salvarFicha()">Salvar Ficha</button>
+        </div>
+    </div>
+
+    <script>
+        function salvarFicha() {
+            const nome = document.getElementById('nome').value;
+            const conceito = document.getElementById('conceito').value;
+            const essencia = document.getElementById('essencia').value;
+            const tradição = document.getElementById('tradição').value;
+            const arete = document.getElementById('arete').value;
+            const atributos = document.getElementById('atributos').value;
+            const habilidades = document.getElementById('habilidades').value;
+            const esferas = document.getElementById('esferas').value;
+            const histórico = document.getElementById('histórico').value;
+
+            const conteudo = `Ficha de Personagem - Mago: A Ascensão\n\n` +
+                `Nome: ${nome}\n` +
+                `Conceito: ${conceito}\n` +
+                `Essência: ${essencia}\n` +
+                `Tradição: ${tradição}\n` +
+                `Arete: ${arete}\n` +
+                `\nAtributos:\n${atributos}\n` +
+                `\nHabilidades:\n${habilidades}\n` +
+                `\nEsferas:\n${esferas}\n` +
+                `\nHistórico:\n${histórico}\n`;
+
+            const blob = new Blob([conteudo], { type: 'text/plain' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `${nome}_ficha.txt`;
+            link.click();
+        }
+    </script>
+</body>
+</html>
