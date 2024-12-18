@@ -27,16 +27,23 @@
             margin-top: 10px;
             font-weight: bold;
         }
-        input, textarea {
+        input {
             width: 100%;
             padding: 10px;
             margin-top: 5px;
             border: 1px solid #ccc;
             border-radius: 4px;
         }
-        textarea {
-            resize: vertical;
-            height: 100px;
+        .section {
+            margin-bottom: 20px;
+        }
+        .attribute-group, .skill-group, .sphere-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .attribute-group div, .skill-group div, .sphere-group div {
+            flex: 1 1 calc(33.333% - 10px);
         }
         .button {
             margin-top: 20px;
@@ -75,14 +82,48 @@
         <label for="arete">Arete:</label>
         <input type="number" id="arete" name="arete" min="1" max="10">
 
-        <label for="atributos">Atributos:</label>
-        <textarea id="atributos" name="atributos" placeholder="Digite os atributos separando por linhas..."></textarea>
+        <div class="section">
+            <label>Atributos:</label>
+            <div class="attribute-group">
+                <div>Força: <input type="text" id="força" name="força"></div>
+                <div>Destreza: <input type="text" id="destreza" name="destreza"></div>
+                <div>Vigor: <input type="text" id="vigor" name="vigor"></div>
+                <div>Carisma: <input type="text" id="carisma" name="carisma"></div>
+                <div>Manipulação: <input type="text" id="manipulação" name="manipulação"></div>
+                <div>Aparência: <input type="text" id="aparência" name="aparência"></div>
+                <div>Percepção: <input type="text" id="percepção" name="percepção"></div>
+                <div>Inteligência: <input type="text" id="inteligência" name="inteligência"></div>
+                <div>Raciocínio: <input type="text" id="raciocínio" name="raciocínio"></div>
+            </div>
+        </div>
 
-        <label for="habilidades">Habilidades:</label>
-        <textarea id="habilidades" name="habilidades" placeholder="Digite as habilidades separando por linhas..."></textarea>
+        <div class="section">
+            <label>Habilidades:</label>
+            <div class="skill-group">
+                <div>Prontidão: <input type="text" id="prontidão" name="prontidão"></div>
+                <div>Esportes: <input type="text" id="esportes" name="esportes"></div>
+                <div>Briga: <input type="text" id="briga" name="briga"></div>
+                <div>Esquiva: <input type="text" id="esquiva" name="esquiva"></div>
+                <div>Empatia: <input type="text" id="empatia" name="empatia"></div>
+                <div>Intimidação: <input type="text" id="intimidação" name="intimidação"></div>
+                <!-- Adicione mais habilidades conforme necessário -->
+            </div>
+        </div>
 
-        <label for="esferas">Esferas:</label>
-        <textarea id="esferas" name="esferas" placeholder="Digite as esferas separando por linhas..."></textarea>
+        <div class="section">
+            <label>Esferas:</label>
+            <div class="sphere-group">
+                <div>Correspondência: <input type="text" id="correspondência" name="correspondência"></div>
+                <div>Entropia: <input type="text" id="entropia" name="entropia"></div>
+                <div>Forças: <input type="text" id="forças" name="forças"></div>
+                <div>Vida: <input type="text" id="vida" name="vida"></div>
+                <div>Mente: <input type="text" id="mente" name="mente"></div>
+                <div>Matéria: <input type="text" id="matéria" name="matéria"></div>
+                <div>Primórdio: <input type="text" id="primórdio" name="primórdio"></div>
+                <div>Espírito: <input type="text" id="espírito" name="espírito"></div>
+                <div>Tempo: <input type="text" id="tempo" name="tempo"></div>
+            </div>
+        </div>
 
         <label for="histórico">Histórico:</label>
         <textarea id="histórico" name="histórico" placeholder="Digite o histórico do personagem..."></textarea>
@@ -99,9 +140,34 @@
             const essencia = document.getElementById('essencia').value;
             const tradição = document.getElementById('tradição').value;
             const arete = document.getElementById('arete').value;
-            const atributos = document.getElementById('atributos').value;
-            const habilidades = document.getElementById('habilidades').value;
-            const esferas = document.getElementById('esferas').value;
+
+            const atributos = `Força: ${document.getElementById('força').value}\n` +
+                `Destreza: ${document.getElementById('destreza').value}\n` +
+                `Vigor: ${document.getElementById('vigor').value}\n` +
+                `Carisma: ${document.getElementById('carisma').value}\n` +
+                `Manipulação: ${document.getElementById('manipulação').value}\n` +
+                `Aparência: ${document.getElementById('aparência').value}\n` +
+                `Percepção: ${document.getElementById('percepção').value}\n` +
+                `Inteligência: ${document.getElementById('inteligência').value}\n` +
+                `Raciocínio: ${document.getElementById('raciocínio').value}`;
+
+            const habilidades = `Prontidão: ${document.getElementById('prontidão').value}\n` +
+                `Esportes: ${document.getElementById('esportes').value}\n` +
+                `Briga: ${document.getElementById('briga').value}\n` +
+                `Esquiva: ${document.getElementById('esquiva').value}\n` +
+                `Empatia: ${document.getElementById('empatia').value}\n` +
+                `Intimidação: ${document.getElementById('intimidação').value}`;
+
+            const esferas = `Correspondência: ${document.getElementById('correspondência').value}\n` +
+                `Entropia: ${document.getElementById('entropia').value}\n` +
+                `Forças: ${document.getElementById('forças').value}\n` +
+                `Vida: ${document.getElementById('vida').value}\n` +
+                `Mente: ${document.getElementById('mente').value}\n` +
+                `Matéria: ${document.getElementById('matéria').value}\n` +
+                `Primórdio: ${document.getElementById('primórdio').value}\n` +
+                `Espírito: ${document.getElementById('espírito').value}\n` +
+                `Tempo: ${document.getElementById('tempo').value}`;
+
             const histórico = document.getElementById('histórico').value;
 
             const conteudo = `Ficha de Personagem - Mago: A Ascensão\n\n` +
