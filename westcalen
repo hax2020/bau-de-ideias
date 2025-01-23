@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendário de Westeros</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 60%;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        label, select, input {
+            font-size: 16px;
+            margin: 10px 0;
+            padding: 10px;
+            width: 100%;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 4px;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #e7f3e7;
+            border: 1px solid #4CAF50;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Calendário de Westeros</h1>
+        <label for="lua">Escolha o Mês (Lua):</label>
+        <select id="lua">
+            <option value="1">Lua do Dragão</option>
+            <option value="2">Lua do Veado</option>
+            <option value="3">Lua do Sol</option>
+            <option value="4">Lua do Mar</option>
+            <option value="5">Lua da Torre</option>
+            <option value="6">Lua do Bronze</option>
+            <option value="7">Lua da Rosa</option>
+            <option value="8">Lua do Leão</option>
+            <option value="9">Lua do Falcão</option>
+            <option value="10">Lua do Kraken</option>
+            <option value="11">Lua da Estrela</option>
+            <option value="12">Lua do Rio</option> 
+            <option value="13">Lua dos Sete</option>
+        </select>
+
+        <label for="dia">Escolha o Dia:</label>
+        <input type="number" id="dia" min="1" max="28" placeholder="Digite o número do dia (1-28)">
+
+        <button onclick="calcularDia()">Calcular Dia da Semana</button>
+
+        <div id="resultado" class="result"></div>
+    </div>
+
+    <script>
+        // Array com os dias da semana
+        const diasDaSemana = [
+            "Dia do Pai", 
+            "Dia da Mãe", 
+            "Dia do Guerreiro", 
+            "Dia da Donzela", 
+            "Dia do Ferreiro", 
+            "Dia da Velha", 
+            "Dia do Estranho"
+        ];
+
+        // Função para calcular o dia da semana
+        function calcularDia() {
+            const lua = parseInt(document.getElementById('lua').value); // Lua selecionada
+            const dia = parseInt(document.getElementById('dia').value); // Dia do mês
+            const semana = 7; // Número de dias da semana
+
+            if (dia < 1 || dia > 28) {
+                document.getElementById('resultado').innerHTML = "Por favor, insira um número de dia entre 1 e 28.";
+                return;
+            }
+
+            // Considerando o primeiro dia do ano como o "Dia do Pai" (primeiro dia da primeira Lua)
+            // Calculamos o dia da semana com base no número do dia e no mês selecionado
+            const diasPassados = (lua - 1) * 28 + (dia - 1); // Total de dias passados até o dia selecionado
+            const diaDaSemana = diasPassados % semana; // Modulo 7 para achar o dia da semana
+
+            document.getElementById('resultado').innerHTML = `O ${dia}º dia da ${getLuaNome(lua)} será: ${diasDaSemana[diaDaSemana]}.`;
+        }
+
+        // Função para obter o nome da Lua
+        function getLuaNome(lua) {
+            const luas = [
+                "Lua do Dragão", 
+                "Lua do Veado", 
+                "Lua do Sol", 
+                "Lua do Mar", 
+                "Lua da Torre", 
+                "Lua do Bronze", 
+                "Lua da Rosa", 
+                "Lua do Leão", 
+                "Lua do Falcão", 
+                "Lua do Kraken", 
+                "Lua da Estrela", 
+                "Lua do Rio", 
+                "Lua dos Sete"
+            ];
+            return luas[lua - 1];
+        }
+    </script>
+</body>
+</html>
