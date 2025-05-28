@@ -123,6 +123,7 @@
         let team1Students = [];
         let team2Students = [];
         let currentTeam = null;
+        let questionHistory = [];
 
         document.getElementById('addButton').addEventListener('click', function() {
             const questionInput = document.getElementById('questionInput');
@@ -187,6 +188,26 @@
                 document.getElementById('scoreBox').style.display = 'block';
                 document.getElementById('nextQuestionButton').style.display = 'none';
                 document.getElementById('selectedStudent').innerText = '';
+
+                const historyDiv = document.createElement('div');
+                historyDiv.style.textAlign = 'left';
+                historyDiv.style.width = '80%';
+                historyDiv.style.margin = '30px auto';
+                historyDiv.style.padding = '20px';
+                historyDiv.style.backgroundColor = '#fff';
+                historyDiv.style.border = '1px solid #000';
+
+                const title = document.createElement('h2');
+                title.innerText = 'Resumo das Perguntas Respondidas';
+                historyDiv.appendChild(title);
+
+                questionHistory.forEach((entry, index) => {
+                    const p = document.createElement('p');
+                    p.innerHTML = `<strong>${index + 1}. Pergunta:</strong> ${entry.question}<br><strong>Aluno:</strong> ${entry.student} (${entry.team === 'team1' ? document.getElementById('team1Name').innerText : document.getElementById('team2Name').innerText})<br><strong>Resultado:</strong> <span class="${entry.result === 'Certa' ? 'correct' : 'incorrect'}">${entry.result}</span>`;
+                    historyDiv.appendChild(p);
+                });
+
+                document.body.appendChild(historyDiv);
                 return;
             }
             const question = drawnQuestions.pop();
@@ -205,25 +226,40 @@
             }
         }
 
-        document.getElementById('rightButtonTeam1').addEventListener('click', function() {
-            team1CorrectAnswers++;
-            document.getElementById('team1CorrectCount').innerText = team1CorrectAnswers;
-        });
+        function registerAnswer(team, isCorrect) {
+            const currentQuestion = document.getElementById('questionBox').innerText;
+            const studentName = document.getElementById('selectedStudent').innerText.replace("Aluno selecionado: ", "");
 
-        document.getElementById('wrongButtonTeam1').addEventListener('click', function() {
-            team1WrongAnswers++;
-            document.getElementById('team1WrongCount').innerText = team1WrongAnswers;
-        });
+            questionHistory.push({
+                question: currentQuestion,
+                student: studentName,
+                team,
+                result: isCorrect ? "Certa" : "Errada"
+            });
 
-        document.getElementById('rightButtonTeam2').addEventListener('click', function() {
-            team2CorrectAnswers++;
-            document.getElementById('team2CorrectCount').innerText = team2CorrectAnswers;
-        });
+            if (team === 'team1') {
+                if (isCorrect) {
+                    team1CorrectAnswers++;
+                    document.getElementById('team1CorrectCount').innerText = team1CorrectAnswers;
+                } else {
+                    team1WrongAnswers++;
+                    document.getElementById('team1WrongCount').innerText = team1WrongAnswers;
+                }
+            } else {
+                if (isCorrect) {
+                    team2CorrectAnswers++;
+                    document.getElementById('team2CorrectCount').innerText = team2CorrectAnswers;
+                } else {
+                    team2WrongAnswers++;
+                    document.getElementById('team2WrongCount').innerText = team2WrongAnswers;
+                }
+            }
+        }
 
-        document.getElementById('wrongButtonTeam2').addEventListener('click', function() {
-            team2WrongAnswers++;
-            document.getElementById('team2WrongCount').innerText = team2WrongAnswers;
-        });
+        document.getElementById('rightButtonTeam1').addEventListener('click', () => registerAnswer('team1', true));
+        document.getElementById('wrongButtonTeam1').addEventListener('click', () => registerAnswer('team1', false));
+        document.getElementById('rightButtonTeam2').addEventListener('click', () => registerAnswer('team2', true));
+        document.getElementById('wrongButtonTeam2').addEventListener('click', () => registerAnswer('team2', false));
 
         document.getElementById('nextQuestionButton').addEventListener('click', function() {
             drawQuestion();
