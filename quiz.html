@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz Educacional com Alunos</title>
+    <title>Quiz Educacional</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -62,11 +62,6 @@
             font-weight: bold;
             margin-bottom: 10px;
         }
-        #studentNameDisplay {
-            font-size: 20px;
-            font-weight: bold;
-            margin-top: 10px;
-        }
     </style>
 </head>
 <body>
@@ -74,20 +69,20 @@
     <div id="inputBox">
         <input type="text" id="themeInput" placeholder="Digite o tema das perguntas" />
         <input type="text" id="team1Input" placeholder="Digite o nome da Equipe 1" />
-        <div id="team1Students">
-            <input type="text" class="studentInput" placeholder="Aluno 1 da Equipe 1">
-            <input type="text" class="studentInput" placeholder="Aluno 2 da Equipe 1">
-            <input type="text" class="studentInput" placeholder="Aluno 3 da Equipe 1">
-            <input type="text" class="studentInput" placeholder="Aluno 4 da Equipe 1">
-            <input type="text" class="studentInput" placeholder="Aluno 5 da Equipe 1">
-        </div>
         <input type="text" id="team2Input" placeholder="Digite o nome da Equipe 2" />
-        <div id="team2Students">
-            <input type="text" class="studentInput" placeholder="Aluno 1 da Equipe 2">
-            <input type="text" class="studentInput" placeholder="Aluno 2 da Equipe 2">
-            <input type="text" class="studentInput" placeholder="Aluno 3 da Equipe 2">
-            <input type="text" class="studentInput" placeholder="Aluno 4 da Equipe 2">
-            <input type="text" class="studentInput" placeholder="Aluno 5 da Equipe 2">
+        <div id="studentsTeam1">
+            <input class="studentInput" type="text" placeholder="Aluno 1 da Equipe 1" />
+            <input class="studentInput" type="text" placeholder="Aluno 2 da Equipe 1" />
+            <input class="studentInput" type="text" placeholder="Aluno 3 da Equipe 1" />
+            <input class="studentInput" type="text" placeholder="Aluno 4 da Equipe 1" />
+            <input class="studentInput" type="text" placeholder="Aluno 5 da Equipe 1" />
+        </div>
+        <div id="studentsTeam2">
+            <input class="studentInput" type="text" placeholder="Aluno 1 da Equipe 2" />
+            <input class="studentInput" type="text" placeholder="Aluno 2 da Equipe 2" />
+            <input class="studentInput" type="text" placeholder="Aluno 3 da Equipe 2" />
+            <input class="studentInput" type="text" placeholder="Aluno 4 da Equipe 2" />
+            <input class="studentInput" type="text" placeholder="Aluno 5 da Equipe 2" />
         </div>
         <textarea id="questionInput" placeholder="Digite as perguntas aqui, uma por linha"></textarea>
         <button id="addButton">Adicionar Perguntas</button>
@@ -95,18 +90,18 @@
         <button id="startDrawButton" disabled>Iniciar Sorteio</button>
     </div>
     <div id="questionBox">Clique no botão para sortear uma pergunta</div>
-    <div id="studentNameDisplay"></div>
+    <p id="selectedStudent" style="font-weight: bold;"></p>
     <div id="scoreBox" style="display: none;">
-        <p id="team1Score" class="correct">Equipe 1 - <span id="team1Name"></span>: <span id="team1CorrectCount">0</span> Certas, <span id="team1WrongCount">0</span> Erradas</p>
-        <p id="team2Score" class="correct">Equipe 2 - <span id="team2Name"></span>: <span id="team2CorrectCount">0</span> Certas, <span id="team2WrongCount">0</span> Erradas</p>
+        <p id="team1Score" class="correct">Equipe 1 - <span id="team1Name"></span>: <span id="team1CorrectCount">0</span> Respostas Certas, <span id="team1WrongCount">0</span> Respostas Erradas</p>
+        <p id="team2Score" class="correct">Equipe 2 - <span id="team2Name"></span>: <span id="team2CorrectCount">0</span> Respostas Certas, <span id="team2WrongCount">0</span> Respostas Erradas</p>
     </div>
     <div class="teamBox" style="display: none;">
-        <div class="teamColumn">
+        <div class="teamColumn" id="team1Buttons">
             <div class="teamName" id="team1DisplayName"></div>
             <button id="rightButtonTeam1">Resposta Certa</button>
             <button id="wrongButtonTeam1">Resposta Errada</button>
         </div>
-        <div class="teamColumn">
+        <div class="teamColumn" id="team2Buttons">
             <div class="teamName" id="team2DisplayName"></div>
             <button id="rightButtonTeam2">Resposta Certa</button>
             <button id="wrongButtonTeam2">Resposta Errada</button>
@@ -121,15 +116,13 @@
         let questions = [];
         let drawnQuestions = [];
         let originalQuestions = [];
-        let team1Students = [];
-        let team2Students = [];
-        let currentStudent = '';
         let team1CorrectAnswers = 0;
         let team1WrongAnswers = 0;
         let team2CorrectAnswers = 0;
         let team2WrongAnswers = 0;
-        let team1Answered = false;
-        let team2Answered = false;
+        let team1Students = [];
+        let team2Students = [];
+        let currentTeam = null;
 
         document.getElementById('addButton').addEventListener('click', function() {
             const questionInput = document.getElementById('questionInput');
@@ -153,11 +146,12 @@
             const themeInput = document.getElementById('themeInput').value.trim();
             const team1Name = document.getElementById('team1Input').value.trim();
             const team2Name = document.getElementById('team2Input').value.trim();
-            team1Students = Array.from(document.querySelectorAll('#team1Students .studentInput')).map(input => input.value.trim()).filter(name => name);
-            team2Students = Array.from(document.querySelectorAll('#team2Students .studentInput')).map(input => input.value.trim()).filter(name => name);
 
-            if (!themeInput || !team1Name || !team2Name || team1Students.length !== 5 || team2Students.length !== 5) {
-                alert("Preencha todos os campos e cadastre 5 alunos por equipe.");
+            team1Students = Array.from(document.querySelectorAll('#studentsTeam1 .studentInput')).map(input => input.value.trim()).filter(name => name);
+            team2Students = Array.from(document.querySelectorAll('#studentsTeam2 .studentInput')).map(input => input.value.trim()).filter(name => name);
+
+            if (!themeInput || !team1Name || !team2Name || team1Students.length < 5 || team2Students.length < 5) {
+                alert("Por favor, preencha todos os campos e cadastre 5 alunos por equipe.");
                 return;
             }
 
@@ -189,116 +183,54 @@
         function drawQuestion() {
             if (drawnQuestions.length === 0) {
                 document.getElementById('questionBox').innerText = "PERGUNTAS FINALIZADAS";
-                document.getElementById('studentNameDisplay').innerText = '';
                 disableAllButtons();
                 document.getElementById('scoreBox').style.display = 'block';
                 document.getElementById('nextQuestionButton').style.display = 'none';
+                document.getElementById('selectedStudent').innerText = '';
                 return;
             }
             const question = drawnQuestions.pop();
             document.getElementById('questionBox').innerText = question;
-            const allStudents = [...team1Students, ...team2Students];
-            currentStudent = allStudents[Math.floor(Math.random() * allStudents.length)];
-            document.getElementById('studentNameDisplay').innerText = `Aluno a responder: ${currentStudent}`;
-            enableAllButtons();
-            team1Answered = false;
-            team2Answered = false;
-        }
 
-        function enableAllButtons() {
-            document.getElementById('rightButtonTeam1').disabled = false;
-            document.getElementById('wrongButtonTeam1').disabled = false;
-            document.getElementById('rightButtonTeam2').disabled = false;
-            document.getElementById('wrongButtonTeam2').disabled = false;
-        }
+            currentTeam = Math.random() < 0.5 ? 'team1' : 'team2';
+            const selectedStudent = currentTeam === 'team1' ? team1Students[Math.floor(Math.random() * team1Students.length)] : team2Students[Math.floor(Math.random() * team2Students.length)];
+            document.getElementById('selectedStudent').innerText = `Aluno selecionado: ${selectedStudent}`;
 
-        function disableAllButtons() {
-            document.getElementById('rightButtonTeam1').disabled = true;
-            document.getElementById('wrongButtonTeam1').disabled = true;
-            document.getElementById('rightButtonTeam2').disabled = true;
-            document.getElementById('wrongButtonTeam2').disabled = true;
+            if (currentTeam === 'team1') {
+                document.getElementById('team1Buttons').style.display = 'block';
+                document.getElementById('team2Buttons').style.display = 'none';
+            } else {
+                document.getElementById('team1Buttons').style.display = 'none';
+                document.getElementById('team2Buttons').style.display = 'block';
+            }
         }
 
         document.getElementById('rightButtonTeam1').addEventListener('click', function() {
-            if (!team1Answered) {
-                team1CorrectAnswers++;
-                document.getElementById('team1CorrectCount').innerText = team1CorrectAnswers;
-                team1Answered = true;
-                disableTeam1Buttons();
-            }
+            team1CorrectAnswers++;
+            document.getElementById('team1CorrectCount').innerText = team1CorrectAnswers;
         });
 
         document.getElementById('wrongButtonTeam1').addEventListener('click', function() {
-            if (!team1Answered) {
-                team1WrongAnswers++;
-                document.getElementById('team1WrongCount').innerText = team1WrongAnswers;
-                team1Answered = true;
-                disableTeam1Buttons();
-            }
+            team1WrongAnswers++;
+            document.getElementById('team1WrongCount').innerText = team1WrongAnswers;
         });
 
         document.getElementById('rightButtonTeam2').addEventListener('click', function() {
-            if (!team2Answered) {
-                team2CorrectAnswers++;
-                document.getElementById('team2CorrectCount').innerText = team2CorrectAnswers;
-                team2Answered = true;
-                disableTeam2Buttons();
-            }
+            team2CorrectAnswers++;
+            document.getElementById('team2CorrectCount').innerText = team2CorrectAnswers;
         });
 
         document.getElementById('wrongButtonTeam2').addEventListener('click', function() {
-            if (!team2Answered) {
-                team2WrongAnswers++;
-                document.getElementById('team2WrongCount').innerText = team2WrongAnswers;
-                team2Answered = true;
-                disableTeam2Buttons();
-            }
+            team2WrongAnswers++;
+            document.getElementById('team2WrongCount').innerText = team2WrongAnswers;
         });
-
-        function disableTeam1Buttons() {
-            document.getElementById('rightButtonTeam1').disabled = true;
-            document.getElementById('wrongButtonTeam1').disabled = true;
-        }
-
-        function disableTeam2Buttons() {
-            document.getElementById('rightButtonTeam2').disabled = true;
-            document.getElementById('wrongButtonTeam2').disabled = true;
-        }
 
         document.getElementById('nextQuestionButton').addEventListener('click', function() {
             drawQuestion();
         });
 
         document.getElementById('resetButton').addEventListener('click', function() {
-            questions = [];
-            drawnQuestions = [];
-            originalQuestions = [];
-            team1CorrectAnswers = 0;
-            team1WrongAnswers = 0;
-            team2CorrectAnswers = 0;
-            team2WrongAnswers = 0;
-            team1Answered = false;
-            team2Answered = false;
-            team1Students = [];
-            team2Students = [];
-            document.getElementById('questionInput').value = '';
-            document.getElementById('themeInput').value = '';
-            document.getElementById('team1Input').value = '';
-            document.getElementById('team2Input').value = '';
-            document.querySelectorAll('.studentInput').forEach(input => input.value = '');
-            document.getElementById('team1CorrectCount').innerText = 0;
-            document.getElementById('team1WrongCount').innerText = 0;
-            document.getElementById('team2CorrectCount').innerText = 0;
-            document.getElementById('team2WrongCount').innerText = 0;
-            document.getElementById('questionCount').innerText = '0/40 perguntas adicionadas';
-            document.getElementById('inputBox').style.display = 'block';
-            document.getElementById('questionBox').innerText = 'Clique no botão para sortear uma pergunta';
-            document.getElementById('studentNameDisplay').innerText = '';
-            document.querySelector('.teamBox').style.display = 'none';
-            document.getElementById('nextQuestionButton').style.display = 'none';
-            document.getElementById('resetButton').style.display = 'none';
-            document.getElementById('scoreBox').style.display = 'none';
-            document.getElementById('startDrawButton').disabled = true;
+            location.reload();
         });
     </script>
 </body>
