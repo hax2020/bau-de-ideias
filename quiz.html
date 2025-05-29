@@ -1,149 +1,152 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz Educacional</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-        }
-        h1 {
-            background-color: #4CAF50;
-            color: white;
-            padding: 20px;
-            margin: 0;
-        }
-        #inputBox, #questionBox, #scoreBox {
-            font-size: 16px;
-            border: 1px solid #000;
-            padding: 10px;
-            width: 60%;
-            margin: 20px auto;
-            background-color: white;
-        }
-        #rightButtonTeam1, #wrongButtonTeam1, #rightButtonTeam2, #wrongButtonTeam2, #addButton, #startDrawButton, #resetButton, #nextQuestionButton {
-            display: block;
-            margin: 20px auto;
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        #questionInput, #themeInput, #team1Input, #team2Input, .studentInput {
-            width: 80%;
-            margin: 10px auto;
-            display: block;
-            padding: 10px;
-        }
-        .correct {
-            color: darkgreen;
-            font-weight: bold;
-        }
-        .incorrect {
-            color: darkred;
-            font-weight: bold;
-        }
-        .teamBox {
-            display: flex;
-            justify-content: space-around;
-            margin: 20px auto;
-            width: 60%;
-        }
-        .teamColumn {
-            width: 45%;
-            text-align: center;
-        }
-        .teamName {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        #historyBox {
-            text-align: left;
-            width: 80%;
-            margin: 30px auto;
-            padding: 20px;
-            background-color: #fff;
-            border: 1px solid #000;
-        }
-        .historyItem {
-            margin-bottom: 10px;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quiz Educacional</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f0f0f0;
+    }
+    h1, h2 {
+      text-align: center;
+    }
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-around;
+    }
+    .box {
+      background: white;
+      padding: 15px;
+      margin: 10px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      width: 300px;
+    }
+    button {
+      margin-top: 10px;
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+    .hidden {
+      display: none;
+    }
+  </style>
 </head>
 <body>
-    <h1>Quiz Educacional</h1>
-    <div id="inputBox">
-        <input type="text" id="themeInput" placeholder="Digite o tema das perguntas" />
-        <input type="text" id="team1Input" placeholder="Digite o nome da Equipe 1" />
-        <input type="text" id="team2Input" placeholder="Digite o nome da Equipe 2" />
-        <div id="studentsTeam1">
-            <input class="studentInput" type="text" placeholder="Aluno 1 da Equipe 1" />
-            <input class="studentInput" type="text" placeholder="Aluno 2 da Equipe 1" />
-            <input class="studentInput" type="text" placeholder="Aluno 3 da Equipe 1" />
-            <input class="studentInput" type="text" placeholder="Aluno 4 da Equipe 1" />
-            <input class="studentInput" type="text" placeholder="Aluno 5 da Equipe 1" />
-        </div>
-        <div id="studentsTeam2">
-            <input class="studentInput" type="text" placeholder="Aluno 1 da Equipe 2" />
-            <input class="studentInput" type="text" placeholder="Aluno 2 da Equipe 2" />
-            <input class="studentInput" type="text" placeholder="Aluno 3 da Equipe 2" />
-            <input class="studentInput" type="text" placeholder="Aluno 4 da Equipe 2" />
-            <input class="studentInput" type="text" placeholder="Aluno 5 da Equipe 2" />
-        </div>
-        <textarea id="questionInput" placeholder="Digite as perguntas aqui, uma por linha"></textarea>
-        <button id="addButton" onclick="addQuestions()">Adicionar Perguntas</button>
-        <p id="questionCount">0/40 perguntas adicionadas</p>
-        <button id="startDrawButton" disabled>Iniciar Sorteio</button>
+  <h1>Quiz Educacional</h1>
+
+  <div class="container">
+    <div class="box">
+      <h2>Perguntas</h2>
+      <textarea id="questionsInput" rows="10" cols="35" placeholder="Insira até 40 perguntas, uma por linha."></textarea><br>
+      <button onclick="saveQuestions()">Salvar Perguntas</button>
     </div>
-    <div id="questionBox">Clique no botão para sortear uma pergunta</div>
-    <p id="selectedStudent" style="font-weight: bold;"></p>
-    <div id="scoreBox" style="display: none;">
-        <p id="team1Score" class="correct">Equipe 1 - <span id="team1Name"></span>: <span id="team1CorrectCount">0</span> Respostas Certas, <span id="team1WrongCount">0</span> Respostas Erradas</p>
-        <p id="team2Score" class="correct">Equipe 2 - <span id="team2Name"></span>: <span id="team2CorrectCount">0</span> Respostas Certas, <span id="team2WrongCount">0</span> Respostas Erradas</p>
+
+    <div class="box">
+      <h2>Equipe 1</h2>
+      <textarea id="team1Input" rows="10" cols="35" placeholder="Insira até 20 nomes, um por linha."></textarea><br>
+      <button onclick="saveTeam(1)">Salvar Equipe 1</button>
     </div>
-    <div class="teamBox" style="display: none;">
-        <div class="teamColumn" id="team1Buttons">
-            <div class="teamName" id="team1DisplayName"></div>
-            <button id="rightButtonTeam1">Resposta Certa</button>
-            <button id="wrongButtonTeam1">Resposta Errada</button>
-        </div>
-        <div class="teamColumn" id="team2Buttons">
-            <div class="teamName" id="team2DisplayName"></div>
-            <button id="rightButtonTeam2">Resposta Certa</button>
-            <button id="wrongButtonTeam2">Resposta Errada</button>
-        </div>
+
+    <div class="box">
+      <h2>Equipe 2</h2>
+      <textarea id="team2Input" rows="10" cols="35" placeholder="Insira até 20 nomes, um por linha."></textarea><br>
+      <button onclick="saveTeam(2)">Salvar Equipe 2</button>
     </div>
-    <button id="nextQuestionButton" style="display: none;">Próxima Pergunta</button>
-    <button id="resetButton" style="display: none;">Recomeçar</button>
-    <div id="historyBox" style="display: none;"></div>
+  </div>
 
-    <script>
-        function addQuestions() {
-            const questionInput = document.getElementById('questionInput');
-            const questions = questionInput.value.trim().split('\n').map(q => q.trim()).filter(q => q);
+  <div class="box" style="margin: 20px auto;">
+    <button onclick="startQuiz()">Sortear 5 Perguntas</button>
+    <div id="quiz" class="hidden">
+      <p id="question"></p>
+      <button onclick="answer(true)">Acertou</button>
+      <button onclick="answer(false)">Errou</button>
+      <p>Equipe Atual: <span id="currentTeam"></span></p>
+      <p>Pergunta <span id="questionIndex">0</span> de 5</p>
+      <h3>Placar</h3>
+      <p>Equipe 1: <span id="score1">0</span></p>
+      <p>Equipe 2: <span id="score2">0</span></p>
+    </div>
+    <h2 id="finalResult" class="hidden"></h2>
+  </div>
 
-            if (!questions.length) return;
+  <script>
+    let allQuestions = [];
+    let selectedQuestions = [];
+    let teams = {1: [], 2: []};
+    let scores = {1: 0, 2: 0};
+    let currentQuestion = 0;
+    let currentTeam = 1;
 
-            let count = parseInt(document.getElementById('questionCount').innerText);
-            const total = questions.length + count;
-            if (total > 40) {
-                alert('Você só pode adicionar até 40 perguntas.');
-                return;
-            }
+    function saveQuestions() {
+      const input = document.getElementById('questionsInput').value.trim().split('\n');
+      if (input.length > 40) {
+        alert('Máximo de 40 perguntas permitido.');
+        return;
+      }
+      allQuestions = input.filter(q => q.trim() !== '');
+      alert('Perguntas salvas com sucesso!');
+    }
 
-            document.getElementById('questionCount').innerText = `${total}/40 perguntas adicionadas`;
-            questionInput.value = '';
-            document.getElementById('startDrawButton').disabled = false;
+    function saveTeam(teamNumber) {
+      const input = document.getElementById(`team${teamNumberInput}`).value.trim().split('\n');
+      if (input.length > 20) {
+        alert(`Máximo de 20 nomes na equipe ${teamNumber}.`);
+        return;
+      }
+      teams[teamNumber] = input.filter(name => name.trim() !== '');
+      alert(`Equipe ${teamNumber} salva com sucesso!`);
+    }
 
-            // Salvar perguntas na memória global
-            if (!window.drawnQuestions) window.drawnQuestions = [];
-            window.drawnQuestions.push(...questions);
-        }
-    </script>
+    function startQuiz() {
+      if (allQuestions.length < 5) {
+        alert('Você precisa de pelo menos 5 perguntas salvas.');
+        return;
+      }
+      selectedQuestions = allQuestions.sort(() => 0.5 - Math.random()).slice(0, 5);
+      currentQuestion = 0;
+      scores = {1: 0, 2: 0};
+      currentTeam = 1;
+      document.getElementById('quiz').classList.remove('hidden');
+      document.getElementById('finalResult').classList.add('hidden');
+      showQuestion();
+    }
+
+    function showQuestion() {
+      document.getElementById('question').innerText = selectedQuestions[currentQuestion];
+      document.getElementById('currentTeam').innerText = `Equipe ${currentTeam}`;
+      document.getElementById('questionIndex').innerText = currentQuestion + 1;
+    }
+
+    function answer(correct) {
+      if (correct) scores[currentTeam]++;
+
+      document.getElementById('score1').innerText = scores[1];
+      document.getElementById('score2').innerText = scores[2];
+
+      currentTeam = currentTeam === 1 ? 2 : 1;
+
+      if (currentTeam === 1) currentQuestion++;
+
+      if (currentQuestion >= selectedQuestions.length) {
+        endQuiz();
+      } else {
+        showQuestion();
+      }
+    }
+
+    function endQuiz() {
+      document.getElementById('quiz').classList.add('hidden');
+      const resultText = scores[1] > scores[2] ? 'Equipe 1 venceu!' :
+                         scores[2] > scores[1] ? 'Equipe 2 venceu!' :
+                         'Empate!';
+      document.getElementById('finalResult').innerText = `Placar final: ${scores[1]} x ${scores[2]} - ${resultText}`;
+      document.getElementById('finalResult').classList.remove('hidden');
+    }
+  </script>
 </body>
 </html>
