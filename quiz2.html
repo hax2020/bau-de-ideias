@@ -99,7 +99,7 @@
         return;
       }
       teams[teamNumber] = input.filter(name => name.trim() !== '');
-      alert(`Equipe ${teamNumber} salva com sucesso!`);
+      alert(`Equipe ${teamNumber} cadastrada com sucesso! Total de membros: ${teams[teamNumber].length}`);
     }
 
     function startQuiz() {
