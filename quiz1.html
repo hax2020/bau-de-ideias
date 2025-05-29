@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Educacional</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            background-color: #4CAF50;
+            color: white;
+            padding: 20px;
+            margin: 0;
+        }
+        #inputBox, #questionBox, #scoreBox {
+            font-size: 16px;
+            border: 1px solid #000;
+            padding: 10px;
+            width: 60%;
+            margin: 20px auto;
+            background-color: white;
+        }
+        #rightButtonTeam1, #wrongButtonTeam1, #rightButtonTeam2, #wrongButtonTeam2, #addButton, #startDrawButton, #resetButton, #nextQuestionButton {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #questionInput, #themeInput, #team1Input, #team2Input, .studentInput {
+            width: 80%;
+            margin: 10px auto;
+            display: block;
+            padding: 10px;
+        }
+        .correct {
+            color: darkgreen;
+            font-weight: bold;
+        }
+        .incorrect {
+            color: darkred;
+            font-weight: bold;
+        }
+        .teamBox {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px auto;
+            width: 60%;
+        }
+        .teamColumn {
+            width: 45%;
+            text-align: center;
+        }
+        .teamName {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        #historyBox {
+            text-align: left;
+            width: 80%;
+            margin: 30px auto;
+            padding: 20px;
+            background-color: #fff;
+            border: 1px solid #000;
+        }
+        .historyItem {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Quiz Educacional</h1>
+    <div id="inputBox">
+        <input type="text" id="themeInput" placeholder="Digite o tema das perguntas" />
+        <input type="text" id="team1Input" placeholder="Digite o nome da Equipe 1" />
+        <input type="text" id="team2Input" placeholder="Digite o nome da Equipe 2" />
+        <div id="studentsTeam1">
+            <input class="studentInput" type="text" placeholder="Aluno 1 da Equipe 1" />
+            <input class="studentInput" type="text" placeholder="Aluno 2 da Equipe 1" />
+            <input class="studentInput" type="text" placeholder="Aluno 3 da Equipe 1" />
+            <input class="studentInput" type="text" placeholder="Aluno 4 da Equipe 1" />
+            <input class="studentInput" type="text" placeholder="Aluno 5 da Equipe 1" />
+        </div>
+        <div id="studentsTeam2">
+            <input class="studentInput" type="text" placeholder="Aluno 1 da Equipe 2" />
+            <input class="studentInput" type="text" placeholder="Aluno 2 da Equipe 2" />
+            <input class="studentInput" type="text" placeholder="Aluno 3 da Equipe 2" />
+            <input class="studentInput" type="text" placeholder="Aluno 4 da Equipe 2" />
+            <input class="studentInput" type="text" placeholder="Aluno 5 da Equipe 2" />
+        </div>
+        <textarea id="questionInput" placeholder="Digite as perguntas aqui, uma por linha"></textarea>
+        <button id="addButton">Adicionar Perguntas</button>
+        <p id="questionCount">0/40 perguntas adicionadas</p>
+        <button id="startDrawButton" disabled>Iniciar Sorteio</button>
+    </div>
+    <div id="questionBox">Clique no botão para sortear uma pergunta</div>
+    <p id="selectedStudent" style="font-weight: bold;"></p>
+    <div id="scoreBox" style="display: none;">
+        <p id="team1Score" class="correct">Equipe 1 - <span id="team1Name"></span>: <span id="team1CorrectCount">0</span> Respostas Certas, <span id="team1WrongCount">0</span> Respostas Erradas</p>
+        <p id="team2Score" class="correct">Equipe 2 - <span id="team2Name"></span>: <span id="team2CorrectCount">0</span> Respostas Certas, <span id="team2WrongCount">0</span> Respostas Erradas</p>
+    </div>
+    <div class="teamBox" style="display: none;">
+        <div class="teamColumn" id="team1Buttons">
+            <div class="teamName" id="team1DisplayName"></div>
+            <button id="rightButtonTeam1">Resposta Certa</button>
+            <button id="wrongButtonTeam1">Resposta Errada</button>
+        </div>
+        <div class="teamColumn" id="team2Buttons">
+            <div class="teamName" id="team2DisplayName"></div>
+            <button id="rightButtonTeam2">Resposta Certa</button>
+            <button id="wrongButtonTeam2">Resposta Errada</button>
+        </div>
+    </div>
+    <button id="nextQuestionButton" style="display: none;">Próxima Pergunta</button>
+    <button id="resetButton" style="display: none;">Recomeçar</button>
+    <div id="historyBox" style="display: none;"></div>
+
+    <script>
+        // (o restante do script permanece igual até drawQuestion)
+        function drawQuestion() {
+            if (drawnQuestions.length === 0) {
+                document.getElementById('questionBox').innerText = "PERGUNTAS FINALIZADAS";
+                disableAllButtons();
+                document.getElementById('scoreBox').style.display = 'block';
+                document.getElementById('nextQuestionButton').style.display = 'none';
+                document.getElementById('selectedStudent').innerText = '';
+
+                const historyDiv = document.getElementById('historyBox');
+                historyDiv.innerHTML = '<h2>Resumo das Perguntas Respondidas</h2>';
+                historyDiv.style.display = 'block';
+
+                questionHistory.forEach((entry, index) => {
+                    const p = document.createElement('p');
+                    p.className = 'historyItem';
+                    p.innerHTML = `<strong>${index + 1}. Pergunta:</strong> ${entry.question}<br><strong>Aluno:</strong> ${entry.student} (${entry.team === 'team1' ? document.getElementById('team1Name').innerText : document.getElementById('team2Name').innerText})<br><strong>Resultado:</strong> <span class="${entry.result === 'Certa' ? 'correct' : 'incorrect'}">${entry.result}</span>`;
+                    historyDiv.appendChild(p);
+                });
+
+                return;
+            }
+
+            // ...continua igual
+        }
+
+        function disableAllButtons() {
+            document.querySelectorAll('button').forEach(btn => {
+                btn.disabled = true;
+            });
+        }
+    </script>
+</body>
+</html>
