@@ -16,9 +16,7 @@
       --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
       --transition: 0.3s ease;
     }
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
     body {
       margin: 0;
       font-family: 'Roboto', sans-serif;
@@ -35,11 +33,7 @@
       text-align: center;
       box-shadow: var(--box-shadow);
     }
-    header h1 {
-      margin: 0;
-      font-weight: 500;
-      font-size: 1.75rem;
-    }
+    header h1 { margin: 0; font-weight: 500; font-size: 1.75rem; }
     main {
       flex: 1;
       padding: 2rem;
@@ -58,10 +52,7 @@
       box-shadow: var(--box-shadow);
       transition: transform var(--transition), box-shadow var(--transition);
     }
-    .card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
-    }
+    .card:hover { transform: translateY(-4px); box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
     .card h2 {
       margin-top: 0;
       font-weight: 500;
@@ -77,10 +68,7 @@
       font-size: 1rem;
       transition: border-color var(--transition);
     }
-    .card textarea:focus {
-      border-color: var(--primary-color);
-      outline: none;
-    }
+    .card textarea:focus { border-color: var(--primary-color); outline: none; }
     .btn {
       display: inline-block;
       margin-top: 1rem;
@@ -96,17 +84,9 @@
       text-decoration: none;
       text-align: center;
     }
-    .btn:hover:not(:disabled) {
-      background-color: #45a049;
-      transform: translateY(-2px);
-    }
-    .btn:disabled {
-      background-color: #ccc;
-      cursor: not-allowed;
-    }
-    #quizSection {
-      margin-top: 2rem;
-    }
+    .btn:hover:not(:disabled) { background-color: #45a049; transform: translateY(-2px); }
+    .btn:disabled { background-color: #ccc; cursor: not-allowed; }
+    #quizSection { margin-top: 2rem; }
     #quiz {
       background: var(--card-bg);
       padding: 1.5rem;
@@ -114,33 +94,18 @@
       box-shadow: var(--box-shadow);
       margin-top: 1rem;
     }
-    #quiz p, #quiz h3 {
-      margin: 0.5rem 0;
-    }
-    #quiz div {
-      margin: 1rem 0;
-      display: flex;
-      gap: 1rem;
-    }
+    #quiz p, #quiz h3 { margin: 0.5rem 0; }
+    #quiz .actions { display: flex; gap: 1rem; margin: 1rem 0; }
     #finalResult {
       text-align: center;
       font-size: 1.5rem;
       margin-top: 1.5rem;
       color: var(--secondary-color);
     }
-    .hidden {
-      display: none;
-    }
+    .hidden { display: none; }
     @media (max-width: 600px) {
-      header {
-        padding: 1rem;
-      }
-      main {
-        padding: 1rem;
-      }
-      .btn {
-        width: 100%;
-      }
+      main { padding: 1rem; }
+      .btn { width: 100%; }
     }
   </style>
 </head>
@@ -153,28 +118,26 @@
       <div class="card">
         <h2>Perguntas</h2>
         <textarea id="questionsInput" rows="8" placeholder="Insira até 40 perguntas, uma por linha."></textarea>
-        <button class="btn" onclick="saveQuestions()">Salvar Perguntas</button>
+        <button class="btn" id="saveQuestionsBtn">Salvar Perguntas</button>
       </div>
       <div class="card">
         <h2>Equipe 1</h2>
         <textarea id="team1Input" rows="8" placeholder="Insira até 20 nomes, um por linha."></textarea>
-        <button class="btn" onclick="saveTeam(1)">Salvar Equipe 1</button>
+        <button class="btn" id="saveTeam1Btn">Salvar Equipe 1</button>
       </div>
       <div class="card">
         <h2>Equipe 2</h2>
         <textarea id="team2Input" rows="8" placeholder="Insira até 20 nomes, um por linha."></textarea>
-        <button class="btn" onclick="saveTeam(2)">Salvar Equipe 2</button>
+        <button class="btn" id="saveTeam2Btn">Salvar Equipe 2</button>
       </div>
     </div>
-
     <section id="quizSection">
-      <button class="btn" onclick="startQuiz()">Sortear 5 Perguntas</button>
-
+      <button class="btn" id="startQuizBtn">Sortear 5 Perguntas</button>
       <div id="quiz" class="hidden">
         <p><strong>Pergunta:</strong> <span id="question"></span></p>
-        <div>
-          <button class="btn" onclick="answer(true)">Acertou</button>
-          <button class="btn" onclick="answer(false)">Errou</button>
+        <div class="actions">
+          <button class="btn" id="correctBtn">Acertou</button>
+          <button class="btn" id="wrongBtn">Errou</button>
         </div>
         <p>Quem responde: <span id="currentTeam"></span></p>
         <p>Pergunta <span id="questionIndex">0</span> de 5</p>
@@ -182,50 +145,83 @@
         <p>Equipe 1: <span id="score1">0</span></p>
         <p>Equipe 2: <span id="score2">0</span></p>
       </div>
-
       <h2 id="finalResult" class="hidden"></h2>
     </section>
   </main>
-
   <script>
-    // JavaScript logic remains unchanged
     let allQuestions = [];
     let selectedQuestions = [];
-    let teams = {1: [], 2: []};
-    let scores = {1: 0, 2: 0};
+    const teams = {1: [], 2: []};
+    const scores = {1: 0, 2: 0};
     let currentQuestion = 0;
     let currentTeam = 1;
 
+    document.getElementById('saveQuestionsBtn').addEventListener('click', saveQuestions);
+    document.getElementById('saveTeam1Btn').addEventListener('click', () => saveTeam(1));
+    document.getElementById('saveTeam2Btn').addEventListener('click', () => saveTeam(2));
+    document.getElementById('startQuizBtn').addEventListener('click', startQuiz);
+    document.getElementById('correctBtn').addEventListener('click', () => answer(true));
+    document.getElementById('wrongBtn').addEventListener('click', () => answer(false));
+
     function saveQuestions() {
       const input = document.getElementById('questionsInput').value.trim().split('\n');
-      if (input.length > 40) {
-        alert('Máximo de 40 perguntas permitido.');
-        return;
-      }
-      allQuestions = input.filter(q => q.trim() !== '');
-      alert('Perguntas salvas com sucesso!');
+      if (input.length > 40) return alert('Máximo de 40 perguntas permitido.');
+      allQuestions = input.filter(q => q.trim());
+      alert(`Perguntas salvas: ${allQuestions.length}`);
     }
 
     function saveTeam(teamNumber) {
       const input = document.getElementById(`team${teamNumber}Input`).value.trim().split('\n');
-      if (input.length > 20) {
-        alert(`Máximo de 20 nomes na equipe ${teamNumber}.`);
-        return;
-      }
-      teams[teamNumber] = input.filter(name => name.trim() !== '');
-      alert(`Equipe ${teamNumber} cadastrada com sucesso! Total de membros: ${teams[teamNumber].length}`);
+      if (input.length > 20) return alert(`Máximo de 20 nomes na equipe ${teamNumber}.`);
+      teams[teamNumber] = input.filter(name => name.trim());
+      alert(`Equipe ${teamNumber} cadastrada: ${teams[teamNumber].length} membros`);
     }
 
     function startQuiz() {
-      if (allQuestions.length < 5) {
-        alert('Você precisa de pelo menos 5 perguntas salvas.');
-        return;
-      }
-      if (teams[1].length === 0 || teams[2].length === 0) {
-        alert('As duas equipes precisam ter pelo menos um membro cadastrado.');
-        return;
-      }
-      selectedQuestions = allQuestions.sort(() => 0.5 - Math.random()).slice(0, 5);
-      current<QuestionIndexing error. ??? Keep closing script. Fill remainder. Sorry.    </script>
+      if (allQuestions.length < 5) return alert('Você precisa de pelo menos 5 perguntas.');
+      if (!teams[1].length || !teams[2].length) return alert('Cadastre pelo menos 1 membro em cada equipe.');
+
+      selectedQuestions = [...allQuestions].sort(() => Math.random() - 0.5).slice(0, 5);
+      currentQuestion = 0;
+      scores[1] = 0; scores[2] = 0;
+      currentTeam = 1;
+
+      document.getElementById('quiz').classList.remove('hidden');
+      document.getElementById('finalResult').classList.add('hidden');
+      enableAnswerButtons(true);
+      showQuestion();
+    }
+
+    function showQuestion() {
+      document.getElementById('question').innerText = selectedQuestions[currentQuestion];
+      const members = teams[currentTeam];
+      const name = members.length ? members[Math.floor(Math.random() * members.length)] : 'Sem membros';
+      document.getElementById('currentTeam').innerText = `${name} (Equipe ${currentTeam})`;
+      document.getElementById('questionIndex').innerText = currentQuestion + 1;
+      document.getElementById('score1').innerText = scores[1];
+      document.getElementById('score2').innerText = scores[2];
+    }
+
+    function answer(correct) {
+      if (correct) scores[currentTeam]++;
+      currentTeam = currentTeam === 1 ? 2 : 1;
+      if (currentTeam === 1) currentQuestion++;
+      if (currentQuestion >= selectedQuestions.length) return endQuiz();
+      showQuestion();
+    }
+
+    function endQuiz() {
+      document.getElementById('quiz').classList.add('hidden');
+      enableAnswerButtons(false);
+      const result = scores[1] > scores[2] ? 'Equipe 1 venceu!' : scores[2] > scores[1] ? 'Equipe 2 venceu!' : 'Empate!';
+      document.getElementById('finalResult').innerText = `Placar final: ${scores[1]} x ${scores[2]} - ${result}`;
+      document.getElementById('finalResult').classList.remove('hidden');
+    }
+
+    function enableAnswerButtons(enable) {
+      document.getElementById('correctBtn').disabled = !enable;
+      document.getElementById('wrongBtn').disabled = !enable;
+    }
+  </script>
 </body>
 </html>
