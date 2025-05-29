@@ -96,7 +96,7 @@
             <input class="studentInput" type="text" placeholder="Aluno 5 da Equipe 2" />
         </div>
         <textarea id="questionInput" placeholder="Digite as perguntas aqui, uma por linha"></textarea>
-        <button id="addButton">Adicionar Perguntas</button>
+        <button id="addButton" onclick="addQuestions()">Adicionar Perguntas</button>
         <p id="questionCount">0/40 perguntas adicionadas</p>
         <button id="startDrawButton" disabled>Iniciar Sorteio</button>
     </div>
@@ -123,36 +123,26 @@
     <div id="historyBox" style="display: none;"></div>
 
     <script>
-        // (o restante do script permanece igual até drawQuestion)
-        function drawQuestion() {
-            if (drawnQuestions.length === 0) {
-                document.getElementById('questionBox').innerText = "PERGUNTAS FINALIZADAS";
-                disableAllButtons();
-                document.getElementById('scoreBox').style.display = 'block';
-                document.getElementById('nextQuestionButton').style.display = 'none';
-                document.getElementById('selectedStudent').innerText = '';
+        function addQuestions() {
+            const questionInput = document.getElementById('questionInput');
+            const questions = questionInput.value.trim().split('\n').map(q => q.trim()).filter(q => q);
 
-                const historyDiv = document.getElementById('historyBox');
-                historyDiv.innerHTML = '<h2>Resumo das Perguntas Respondidas</h2>';
-                historyDiv.style.display = 'block';
+            if (!questions.length) return;
 
-                questionHistory.forEach((entry, index) => {
-                    const p = document.createElement('p');
-                    p.className = 'historyItem';
-                    p.innerHTML = `<strong>${index + 1}. Pergunta:</strong> ${entry.question}<br><strong>Aluno:</strong> ${entry.student} (${entry.team === 'team1' ? document.getElementById('team1Name').innerText : document.getElementById('team2Name').innerText})<br><strong>Resultado:</strong> <span class="${entry.result === 'Certa' ? 'correct' : 'incorrect'}">${entry.result}</span>`;
-                    historyDiv.appendChild(p);
-                });
-
+            let count = parseInt(document.getElementById('questionCount').innerText);
+            const total = questions.length + count;
+            if (total > 40) {
+                alert('Você só pode adicionar até 40 perguntas.');
                 return;
             }
 
-            // ...continua igual
-        }
+            document.getElementById('questionCount').innerText = `${total}/40 perguntas adicionadas`;
+            questionInput.value = '';
+            document.getElementById('startDrawButton').disabled = false;
 
-        function disableAllButtons() {
-            document.querySelectorAll('button').forEach(btn => {
-                btn.disabled = true;
-            });
+            // Salvar perguntas na memória global
+            if (!window.drawnQuestions) window.drawnQuestions = [];
+            window.drawnQuestions.push(...questions);
         }
     </script>
 </body>
