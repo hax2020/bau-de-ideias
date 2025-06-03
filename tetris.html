@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Tetris com [o]</title>
+  <style>
+    body {
+      background: #111;
+      color: #0f0;
+      font-family: monospace;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    #tetris {
+      display: grid;
+      grid-template-columns: repeat(10, 22px);
+      grid-template-rows: repeat(20, 22px);
+      gap: 2px;
+    }
+    .cell {
+      width: 20px;
+      height: 20px;
+      text-align: center;
+      line-height: 20px;
+      color: #0f0;
+    }
+    .filled {
+      color: #0f0;
+    }
+  </style>
+</head>
+<body>
+  <div id="tetris"></div>
+
+  <script>
+    const width = 10;
+    const height = 20;
+    const tetris = document.getElementById('tetris');
+    let cells = [];
+
+    // Criar grade
+    for (let i = 0; i < width * height; i++) {
+      const cell = document.createElement('div');
+      cell.classList.add('cell');
+      tetris.appendChild(cell);
+      cells.push(cell);
+    }
+
+    // Tetromino simples (exemplo)
+    const lTetromino = [
+      [1, width + 1, width * 2 + 1, 2],
+      [width, width + 1, width + 2, width * 2 + 2],
+      [1, width + 1, width * 2 + 1, width * 2],
+      [width, width * 2, width * 2 + 1, width * 2 + 2]
+    ];
+
+    let currentPosition = 4;
+    let currentRotation = 0;
+    let current = lTetromino[currentRotation];
+
+    function draw() {
+      current.forEach(index => {
+        cells[currentPosition + index].innerText = '[o]';
+        cells[currentPosition + index].classList.add('filled');
+      });
+    }
+
+    function undraw() {
+      current.forEach(index => {
+        cells[currentPosition + index].innerText = '';
+        cells[currentPosition + index].classList.remove('filled');
+      });
+    }
+
+    function moveDown() {
+      undraw();
+      currentPosition += width;
+      draw();
+    }
+
+    draw();
+    let timerId = setInterval(moveDown, 1000);
+
+    document.addEventListener('keydown', control);
+
+    function control(e) {
+      if (e.key === 'ArrowLeft') moveLeft();
+      else if (e.key === 'ArrowRight') moveRight();
+      else if (e.key === 'ArrowUp') rotate();
+      else if (e.key === 'ArrowDown') moveDown();
+    }
+
+    function moveLeft() {
+      undraw();
+      if (!current.some(index => (currentPosition + index) % width === 0)) {
+        currentPosition -= 1;
+      }
+      draw();
+    }
+
+    function moveRight() {
+      undraw();
+      if (!current.some(index => (currentPosition + index) % width === width - 1)) {
+        currentPosition += 1;
+      }
+      draw();
+    }
+
+    function rotate() {
+      undraw();
+      currentRotation = (currentRotation + 1) % 4;
+      current = lTetromino[currentRotation];
+      draw();
+    }
+  </script>
+</body>
+</html>
