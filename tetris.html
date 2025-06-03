@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Tetris Html</title>
+  <title>Tetris com [o]</title>
   <style>
     body {
       background: #111;
@@ -126,8 +126,10 @@
 
     function undraw() {
       current.forEach(index => {
-        cells[currentPosition + index].innerText = '';
-        cells[currentPosition + index].classList.remove('filled');
+        if (!cells[currentPosition + index].classList.contains('taken')) {
+          cells[currentPosition + index].innerText = '';
+          cells[currentPosition + index].classList.remove('filled');
+        }
       });
     }
 
@@ -145,7 +147,17 @@
     function freeze() {
       current.forEach(index => {
         cells[currentPosition + index].classList.add('taken');
+        cells[currentPosition + index].innerText = '[o]';
+        cells[currentPosition + index].classList.add('filled');
       });
+
+      // Fim de jogo
+      if (current.some(index => currentPosition + index < width && cells[currentPosition + index].classList.contains('taken'))) {
+        clearInterval(timerId);
+        alert('Fim de Jogo!');
+        return;
+      }
+
       checkLines();
       currentRotation = 0;
       current = lTetromino[currentRotation];
