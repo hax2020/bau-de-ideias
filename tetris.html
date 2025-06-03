@@ -2,16 +2,35 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Tetris com [o]</title>
+  <title>Tetris Html</title>
   <style>
     body {
       background: #111;
       color: #0f0;
       font-family: monospace;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
       height: 100vh;
+      margin: 0;
+    }
+    #score {
+      margin-top: 10px;
+      font-size: 18px;
+    }
+    .game-area {
+      display: flex;
+      align-items: flex-start;
+      margin-top: 20px;
+    }
+    #borda-esquerda, #borda-direita {
+      display: flex;
+      flex-direction: column;
+    }
+    .borda {
+      width: 20px;
+      height: 20px;
+      text-align: center;
     }
     #tetris {
       display: grid;
@@ -29,18 +48,57 @@
     .filled {
       color: #0f0;
     }
+    #base {
+      display: flex;
+    }
+    .base-cell {
+      width: 20px;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
-  <div id="tetris"></div>
+  <h1>TETRIS</h1>
+  <div id="score">Placar: <span id="score-value">0</span></div>
+  <div class="game-area">
+    <div id="borda-esquerda"></div>
+    <div id="tetris"></div>
+    <div id="borda-direita"></div>
+  </div>
+  <div id="base"></div>
 
   <script>
     const width = 10;
     const height = 20;
     const tetris = document.getElementById('tetris');
+    const bordaEsquerda = document.getElementById('borda-esquerda');
+    const bordaDireita = document.getElementById('borda-direita');
+    const base = document.getElementById('base');
+    const scoreDisplay = document.getElementById('score-value');
+    let score = 0;
     let cells = [];
 
-    // Criar grade
+    // Criar colunas da borda e base
+    for (let i = 0; i < height; i++) {
+      const left = document.createElement('div');
+      left.classList.add('borda');
+      left.innerText = '|';
+      bordaEsquerda.appendChild(left);
+
+      const right = document.createElement('div');
+      right.classList.add('borda');
+      right.innerText = '|';
+      bordaDireita.appendChild(right);
+    }
+
+    for (let i = 0; i < width + 2; i++) {
+      const baseCell = document.createElement('div');
+      baseCell.classList.add('base-cell');
+      baseCell.innerText = '_';
+      base.appendChild(baseCell);
+    }
+
+    // Criar grade principal
     for (let i = 0; i < width * height; i++) {
       const cell = document.createElement('div');
       cell.classList.add('cell');
@@ -48,7 +106,6 @@
       cells.push(cell);
     }
 
-    // Tetromino simples (exemplo)
     const lTetromino = [
       [1, width + 1, width * 2 + 1, 2],
       [width, width + 1, width + 2, width * 2 + 2],
@@ -76,8 +133,42 @@
 
     function moveDown() {
       undraw();
-      currentPosition += width;
+      const newPosition = currentPosition + width;
+      if (!current.some(index => cells[newPosition + index] === undefined || cells[newPosition + index].classList.contains('taken'))) {
+        currentPosition = newPosition;
+        draw();
+      } else {
+        freeze();
+      }
+    }
+
+    function freeze() {
+      current.forEach(index => {
+        cells[currentPosition + index].classList.add('taken');
+      });
+      checkLines();
+      currentRotation = 0;
+      current = lTetromino[currentRotation];
+      currentPosition = 4;
       draw();
+    }
+
+    function checkLines() {
+      for (let i = 0; i < height; i++) {
+        const rowStart = i * width;
+        const row = [...Array(width).keys()].map(j => rowStart + j);
+        if (row.every(index => cells[index].classList.contains('taken'))) {
+          row.forEach(index => {
+            cells[index].classList.remove('taken', 'filled');
+            cells[index].innerText = '';
+          });
+          const removed = cells.splice(rowStart, width);
+          cells = removed.concat(cells);
+          cells.forEach(cell => tetris.appendChild(cell));
+          score += 10;
+          scoreDisplay.innerText = score;
+        }
+      }
     }
 
     draw();
@@ -95,7 +186,10 @@
     function moveLeft() {
       undraw();
       if (!current.some(index => (currentPosition + index) % width === 0)) {
-        currentPosition -= 1;
+        const nextPosition = currentPosition - 1;
+        if (!current.some(index => cells[nextPosition + index].classList.contains('taken'))) {
+          currentPosition = nextPosition;
+        }
       }
       draw();
     }
@@ -103,7 +197,10 @@
     function moveRight() {
       undraw();
       if (!current.some(index => (currentPosition + index) % width === width - 1)) {
-        currentPosition += 1;
+        const nextPosition = currentPosition + 1;
+        if (!current.some(index => cells[nextPosition + index].classList.contains('taken'))) {
+          currentPosition = nextPosition;
+        }
       }
       draw();
     }
