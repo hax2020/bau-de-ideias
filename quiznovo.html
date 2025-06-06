@@ -1,227 +1,108 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Quiz Educacional</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --primary-color: #4CAF50;
-      --secondary-color: #ff9800;
-      --bg-color: #f7f9fc;
-      --card-bg: #ffffff;
-      --text-color: #333333;
-      --border-radius: 8px;
-      --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      --transition: 0.3s ease;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: 'Roboto', sans-serif;
-      background-color: var(--bg-color);
-      color: var(--text-color);
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
-    header {
-      background-color: var(--primary-color);
-      color: #fff;
-      padding: 1.5rem;
-      text-align: center;
-      box-shadow: var(--box-shadow);
-    }
-    header h1 { margin: 0; font-weight: 500; font-size: 1.75rem; }
-    main {
-      flex: 1;
-      padding: 2rem;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-    .container {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1.5rem;
-    }
-    .card {
-      background: var(--card-bg);
-      padding: 1.5rem;
-      border-radius: var(--border-radius);
-      box-shadow: var(--box-shadow);
-      transition: transform var(--transition), box-shadow var(--transition);
-    }
-    .card:hover { transform: translateY(-4px); box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
-    .card h2 {
-      margin-top: 0;
-      font-weight: 500;
-      font-size: 1.25rem;
-      color: var(--primary-color);
-    }
-    .card textarea {
-      width: 100%;
-      padding: 0.75rem;
-      border: 1px solid #ddd;
-      border-radius: var(--border-radius);
-      resize: vertical;
-      font-size: 1rem;
-      transition: border-color var(--transition);
-    }
-    .card textarea:focus { border-color: var(--primary-color); outline: none; }
-    .btn {
-      display: inline-block;
-      margin-top: 1rem;
-      padding: 0.75rem 1.25rem;
-      font-size: 1rem;
-      font-weight: 500;
-      border: none;
-      border-radius: var(--border-radius);
-      cursor: pointer;
-      transition: background-color var(--transition), transform var(--transition);
-      color: #fff;
-      background-color: var(--primary-color);
-      text-decoration: none;
-      text-align: center;
-    }
-    .btn:hover:not(:disabled) { background-color: #45a049; transform: translateY(-2px); }
-    .btn:disabled { background-color: #ccc; cursor: not-allowed; }
-    #quizSection { margin-top: 2rem; }
-    #quiz {
-      background: var(--card-bg);
-      padding: 1.5rem;
-      border-radius: var(--border-radius);
-      box-shadow: var(--box-shadow);
-      margin-top: 1rem;
-    }
-    #quiz p, #quiz h3 { margin: 0.5rem 0; }
-    #quiz .actions { display: flex; gap: 1rem; margin: 1rem 0; }
-    #finalResult {
-      text-align: center;
-      font-size: 1.5rem;
-      margin-top: 1.5rem;
-      color: var(--secondary-color);
-    }
-    .hidden { display: none; }
-    @media (max-width: 600px) {
-      main { padding: 1rem; }
-      .btn { width: 100%; }
-    }
-  </style>
-</head>
-<body>
-  <header>
-    <h1>Quiz Educacional</h1>
-  </header>
-  <main>
-    <div class="container">
-      <div class="card">
-        <h2>Perguntas</h2>
-        <textarea id="questionsInput" rows="8" placeholder="Insira até 40 perguntas, uma por linha."></textarea>
-        <button class="btn" id="saveQuestionsBtn">Salvar Perguntas</button>
-      </div>
-      <div class="card">
-        <h2>Equipe 1</h2>
-        <textarea id="team1Input" rows="8" placeholder="Insira até 20 nomes, um por linha."></textarea>
-        <button class="btn" id="saveTeam1Btn">Salvar Equipe 1</button>
-      </div>
-      <div class="card">
-        <h2>Equipe 2</h2>
-        <textarea id="team2Input" rows="8" placeholder="Insira até 20 nomes, um por linha."></textarea>
-        <button class="btn" id="saveTeam2Btn">Salvar Equipe 2</button>
-      </div>
-    </div>
-    <section id="quizSection">
-      <button class="btn" id="startQuizBtn">Sortear 5 Perguntas</button>
-      <div id="quiz" class="hidden">
-        <p><strong>Pergunta:</strong> <span id="question"></span></p>
-        <div class="actions">
-          <button class="btn" id="correctBtn">Acertou</button>
-          <button class="btn" id="wrongBtn">Errou</button>
-        </div>
-        <p>Quem responde: <span id="currentTeam"></span></p>
-        <p>Pergunta <span id="questionIndex">0</span> de 5</p>
-        <h3>Placar</h3>
-        <p>Equipe 1: <span id="score1">0</span></p>
-        <p>Equipe 2: <span id="score2">0</span></p>
-      </div>
-      <h2 id="finalResult" class="hidden"></h2>
-    </section>
-  </main>
-  <script>
-    let allQuestions = [];
-    let selectedQuestions = [];
-    const teams = {1: [], 2: []};
-    const scores = {1: 0, 2: 0};
-    let currentQuestion = 0;
-    let currentTeam = 1;
+<script>
+  let allQuestions = [];
+  let selectedQuestions = [];
+  const teams = {1: [], 2: []};
+  const usedMembers = {1: [], 2: []};
+  const scores = {1: 0, 2: 0};
+  let currentQuestion = 0;
+  let currentTeam = 1;
 
-    document.getElementById('saveQuestionsBtn').addEventListener('click', saveQuestions);
-    document.getElementById('saveTeam1Btn').addEventListener('click', () => saveTeam(1));
-    document.getElementById('saveTeam2Btn').addEventListener('click', () => saveTeam(2));
-    document.getElementById('startQuizBtn').addEventListener('click', startQuiz);
-    document.getElementById('correctBtn').addEventListener('click', () => answer(true));
-    document.getElementById('wrongBtn').addEventListener('click', () => answer(false));
+  document.getElementById('saveQuestionsBtn').addEventListener('click', saveQuestions);
+  document.getElementById('saveTeam1Btn').addEventListener('click', () => saveTeam(1));
+  document.getElementById('saveTeam2Btn').addEventListener('click', () => saveTeam(2));
+  document.getElementById('startQuizBtn').addEventListener('click', startQuiz);
+  document.getElementById('correctBtn').addEventListener('click', () => answer(true));
+  document.getElementById('wrongBtn').addEventListener('click', () => answer(false));
 
-    function saveQuestions() {
-      const input = document.getElementById('questionsInput').value.trim().split('\n');
-      if (input.length > 40) return alert('Máximo de 40 perguntas permitido.');
-      allQuestions = input.filter(q => q.trim());
-      alert(`Perguntas salvas: ${allQuestions.length}`);
+  function saveQuestions() {
+    const input = document.getElementById('questionsInput').value.trim().split('\n');
+    if (input.length > 40) return alert('Máximo de 40 perguntas permitido.');
+    allQuestions = input.filter(q => q.trim());
+    alert(`Perguntas salvas: ${allQuestions.length}`);
+  }
+
+  function saveTeam(teamNumber) {
+    const input = document.getElementById(`team${teamNumber}Input`).value.trim().split('\n');
+    if (input.length > 20) return alert(`Máximo de 20 nomes na equipe ${teamNumber}.`);
+    teams[teamNumber] = input.filter(name => name.trim());
+    alert(`Equipe ${teamNumber} cadastrada: ${teams[teamNumber].length} membros`);
+  }
+
+  function startQuiz() {
+    if (allQuestions.length < 5) return alert('Você precisa de pelo menos 5 perguntas.');
+    if (!teams[1].length || !teams[2].length) return alert('Cadastre pelo menos 1 membro em cada equipe.');
+
+    selectedQuestions = [...allQuestions].sort(() => Math.random() - 0.5).slice(0, 5);
+    currentQuestion = 0;
+    scores[1] = 0;
+    scores[2] = 0;
+    usedMembers[1] = [];
+    usedMembers[2] = [];
+    currentTeam = 1;
+
+    document.getElementById('quiz').classList.remove('hidden');
+    document.getElementById('finalResult').classList.add('hidden');
+    enableAnswerButtons(true);
+    showQuestion();
+  }
+
+  function showQuestion() {
+    if (currentQuestion >= selectedQuestions.length) return endQuiz();
+
+    const questionText = selectedQuestions[currentQuestion];
+    document.getElementById('question').innerText = questionText;
+    document.getElementById('questionIndex').innerText = currentQuestion + 1;
+    document.getElementById('score1').innerText = scores[1];
+    document.getElementById('score2').innerText = scores[2];
+
+    const members = teams[currentTeam];
+    const used = usedMembers[currentTeam];
+    const available = members.filter(name => !used.includes(name));
+
+    if (available.length === 0) {
+      // Reset para permitir todos novamente, sem repetir até usar todos.
+      usedMembers[currentTeam] = [];
+      return showQuestion(); // Tenta de novo
     }
 
-    function saveTeam(teamNumber) {
-      const input = document.getElementById(`team${teamNumber}Input`).value.trim().split('\n');
-      if (input.length > 20) return alert(`Máximo de 20 nomes na equipe ${teamNumber}.`);
-      teams[teamNumber] = input.filter(name => name.trim());
-      alert(`Equipe ${teamNumber} cadastrada: ${teams[teamNumber].length} membros`);
+    const randomIndex = Math.floor(Math.random() * available.length);
+    const chosen = available[randomIndex];
+    usedMembers[currentTeam].push(chosen);
+
+    document.getElementById('currentTeam').innerText = `${chosen} (Equipe ${currentTeam})`;
+  }
+
+  function answer(correct) {
+    if (correct) scores[currentTeam]++;
+    
+    currentTeam = currentTeam === 1 ? 2 : 1;
+
+    // Quando ambos já responderam, avança pergunta
+    if (currentTeam === 1) {
+      currentQuestion++;
     }
 
-    function startQuiz() {
-      if (allQuestions.length < 5) return alert('Você precisa de pelo menos 5 perguntas.');
-      if (!teams[1].length || !teams[2].length) return alert('Cadastre pelo menos 1 membro em cada equipe.');
+    if (currentQuestion >= selectedQuestions.length) return endQuiz();
 
-      selectedQuestions = [...allQuestions].sort(() => Math.random() - 0.5).slice(0, 5);
-      currentQuestion = 0;
-      scores[1] = 0; scores[2] = 0;
-      currentTeam = 1;
+    showQuestion();
+  }
 
-      document.getElementById('quiz').classList.remove('hidden');
-      document.getElementById('finalResult').classList.add('hidden');
-      enableAnswerButtons(true);
-      showQuestion();
-    }
+  function endQuiz() {
+    document.getElementById('quiz').classList.add('hidden');
+    enableAnswerButtons(false);
 
-    function showQuestion() {
-      document.getElementById('question').innerText = selectedQuestions[currentQuestion];
-      const members = teams[currentTeam];
-      const name = members.length ? members[Math.floor(Math.random() * members.length)] : 'Sem membros';
-      document.getElementById('currentTeam').innerText = `${name} (Equipe ${currentTeam})`;
-      document.getElementById('questionIndex').innerText = currentQuestion + 1;
-      document.getElementById('score1').innerText = scores[1];
-      document.getElementById('score2').innerText = scores[2];
-    }
+    const result = scores[1] > scores[2]
+      ? 'Equipe 1 venceu!'
+      : scores[2] > scores[1]
+        ? 'Equipe 2 venceu!'
+        : 'Empate!';
 
-    function answer(correct) {
-      if (correct) scores[currentTeam]++;
-      currentTeam = currentTeam === 1 ? 2 : 1;
-      if (currentTeam === 1) currentQuestion++;
-      if (currentQuestion >= selectedQuestions.length) return endQuiz();
-      showQuestion();
-    }
+    document.getElementById('finalResult').innerText = `Placar final: ${scores[1]} x ${scores[2]} - ${result}`;
+    document.getElementById('finalResult').classList.remove('hidden');
+  }
 
-    function endQuiz() {
-      document.getElementById('quiz').classList.add('hidden');
-      enableAnswerButtons(false);
-      const result = scores[1] > scores[2] ? 'Equipe 1 venceu!' : scores[2] > scores[1] ? 'Equipe 2 venceu!' : 'Empate!';
-      document.getElementById('finalResult').innerText = `Placar final: ${scores[1]} x ${scores[2]} - ${result}`;
-      document.getElementById('finalResult').classList.remove('hidden');
-    }
-
-    function enableAnswerButtons(enable) {
-      document.getElementById('correctBtn').disabled = !enable;
-      document.getElementById('wrongBtn').disabled = !enable;
-    }
-  </script>
-</body>
-</html>
+  function enableAnswerButtons(enable) {
+    document.getElementById('correctBtn').disabled = !enable;
+    document.getElementById('wrongBtn').disabled = !enable;
+  }
+</script>
