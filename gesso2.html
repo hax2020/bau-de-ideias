@@ -1,218 +1,223 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Calculadora de Calcário e Gesso | V2</title>
-<style>
-    /* ESTILOS GERAIS */
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora de Gesso a partir do NC</title>
+  <style>
     :root {
-        --primary-color: #2c6b2f;
-        --secondary-color: #f0f0f0;
-        --background-color: #f4f7f6;
-        --text-color: #333;
-        --border-color: #ccc;
-        --error-color: #d9534f;
+      --primary-color: #3477b5;
+      --secondary-color: #f0f0f0;
+      --background-color: #f4f7f6;
+      --text-color: #333;
+      --border-color: #ccc;
+      --error-color: #d9534f;
     }
     body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-        background-color: var(--background-color);
-        color: var(--text-color);
-        margin: 0;
-        padding: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 20px;
     }
     .main-container {
-        max-width: 900px;
-        margin: 20px auto;
-        padding: 25px;
-        background-color: #fff;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      max-width: 900px;
+      margin: 20px auto;
+      padding: 25px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
     .calculator-layout {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 30px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 30px;
     }
-
-    /* FORMULÁRIO */
     .form-container {
-        flex: 1;
-        min-width: 300px;
+      flex: 1;
+      min-width: 300px;
     }
     .form-container h2 {
-        margin-top: 0;
-        color: var(--primary-color);
-        border-bottom: 2px solid var(--secondary-color);
-        padding-bottom: 10px;
+      margin-top: 0;
+      color: var(--primary-color);
+      border-bottom: 2px solid var(--secondary-color);
+      padding-bottom: 10px;
     }
     label {
-        display: block;
-        margin-bottom: 8px;
-        font-weight: bold;
-        font-size: 0.9em;
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+      font-size: 0.9em;
     }
-    input[type="text"], input[type="number"], select {
-        width: 100%;
-        padding: 10px;
-        margin-bottom: 20px;
-        border: 1px solid var(--border-color);
-        border-radius: 5px;
-        box-sizing: border-box; /* Garante que o padding não afete a largura total */
-        transition: border-color 0.3s ease;
+    input[type="number"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 20px;
+      border: 1px solid var(--border-color);
+      border-radius: 5px;
+      box-sizing: border-box;
+      transition: border-color 0.3s ease;
     }
-    input:focus, select:focus {
-        outline: none;
-        border-color: var(--primary-color);
+    input:focus {
+      outline: none;
+      border-color: var(--primary-color);
     }
-    .radio-group {
-        margin-bottom: 20px;
+
+    /* Fieldset ajustado para flex, alinhando as opções lado a lado */
+    fieldset {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 10px;
+      margin-bottom: 20px;
+      border: 1px solid var(--border-color);
+      border-radius: 5px;
+    }
+    legend {
+      padding: 0 5px;
+      font-weight: bold;
+      font-size: 0.9em;
+    }
+    input[type="radio"] {
+      margin-right: 5px;
     }
     input[type="submit"] {
-        background-color: var(--primary-color);
-        color: white;
-        padding: 12px 25px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 1em;
-        width: 100%;
-        transition: background-color 0.3s ease;
+      background-color: var(--primary-color);
+      color: white;
+      padding: 12px 25px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1em;
+      width: 100%;
+      transition: background-color 0.3s ease;
     }
     input[type="submit"]:hover {
-        background-color: #255a27; /* Tom mais escuro */
+      background-color: #2a6194;
     }
-
-    /* ÁREA DE RESULTADO */
     .result-container {
-        flex: 1;
-        min-width: 300px;
-        border: 1px dashed var(--border-color);
-        padding: 20px;
-        border-radius: 8px;
-        background-color: #fdfdfd;
+      flex: 1;
+      min-width: 300px;
+      border: 1px dashed var(--border-color);
+      padding: 20px;
+      border-radius: 8px;
+      background-color: #fdfdfd;
     }
     .result-container h3 {
-        margin-top: 0;
-        color: var(--primary-color);
+      margin-top: 0;
+      color: var(--primary-color);
     }
     .result-text p {
-        margin: 10px 0;
-        line-height: 1.6;
+      margin: 10px 0;
+      line-height: 1.6;
     }
     .result-text strong {
-        font-size: 1.1em;
+      font-size: 1.1em;
     }
     .result-summary {
-        font-style: italic;
-        color: #555;
-        font-size: 0.9em;
-        margin-top: 15px;
-        border-top: 1px solid var(--secondary-color);
-        padding-top: 10px;
+      font-style: italic;
+      color: #555;
+      font-size: 0.9em;
+      margin-top: 15px;
+      border-top: 1px solid var(--secondary-color);
+      padding-top: 10px;
     }
     .error-message {
-        color: var(--error-color);
-        font-weight: bold;
+      color: var(--error-color);
+      font-weight: bold;
     }
-
-</style>
+  </style>
 </head>
 <body>
 
-<div class="main-container">
+  <div class="main-container">
     <div class="calculator-layout">
-        <div class="form-container">
-            <h2>Calculadora de Calcário e Gesso</h2>
-            <form id="calcForm">
-                <label for="pH">Selecione o pH desejado:</label>
-                <select id="pH">
-                    <option value="6.5">pH 6.5</option>
-                    <option value="6.0">pH 6.0</option>
-                    <option value="5.5">pH 5.5</option>
-                </select>
 
-                <label for="smp">Informe o Índice SMP (use vírgula ou ponto):</label>
-                <input type="text" id="smp" inputmode="decimal" placeholder="Ex: 6,0" required>
+      <div class="form-container">
+        <h2>Calculadora a partir da Necessidade de Calcário (NC)</h2>
+        <form id="calcForm">
+          <label for="nc">NC (t/ha):</label>
+          <input type="number" id="nc" name="nc" step="0.1" min="0" placeholder="Ex: 2.5" required>
 
-                <label for="prnt">Informe o PRNT do calcário (%):</label>
-                <input type="number" id="prnt" min="0" max="150" placeholder="Ex: 85" required>
+          <label for="superficie">Superfície coberta (%):</label>
+          <input type="number" id="superficie" name="superficie" step="0.1" min="0" max="100" value="100" required>
 
-                <label for="superficie">Superfície coberta (%):</label>
-                <input type="number" id="superficie" min="0" max="100" value="100">
+          <fieldset>
+            <legend>Profundidade de aplicação:</legend>
+            <label>
+              <input type="radio" name="profundidade" value="20" checked>
+              20 cm
+            </label>
+            <label>
+              <input type="radio" name="profundidade" value="30">
+              30 cm
+            </label>
+          </fieldset>
 
-                <div class="radio-group">
-                    <label>Profundidade de aplicação:</label>
-                    <input type="radio" name="profundidade" id="prof20" value="20" checked>
-                    <label for="prof20" style="display: inline; font-weight: normal;">20 cm</label>
-                    <input type="radio" name="profundidade" id="prof30" value="30" style="margin-left: 15px;">
-                    <label for="prof30" style="display: inline; font-weight: normal;">30 cm</label>
-                </div>
+          <input type="submit" value="Calcular Doses Ajustadas">
+        </form>
+      </div>
 
-                <input type="submit" value="Calcular Necessidade">
-            </form>
+      <div class="result-container">
+        <h3>Resultados do Cálculo</h3>
+        <div id="result-text" class="result-text">
+          <p>Preencha os dados ao lado para ajustar as doses de calcário e gesso.</p>
         </div>
+      </div>
 
-        <div class="result-container" id="resultado">
-            <h3>Resultados do Cálculo</h3>
-            <div id="result-text" class="result-text">
-                <p>Preencha os dados ao lado e clique em calcular para ver os resultados.</p>
-            </div>
-        </div>
     </div>
-</div>
+  </div>
 
-<script>
-function calcValorBaseCalcario(phDesejado, smp) {
-    const mapa = {
-        "6.5": { 4.4: 29, 4.5: 24.0, 4.6: 20.0, 4.7: 17.5, 4.8: 15.7, 4.9: 14.2, 5.0: 13.3, 5.1: 12.3, 5.2: 11.3, 5.3: 10.4, 5.4: 9.5, 5.5: 8.6, 5.6: 7.8, 5.7: 7.0, 5.8: 6.3, 5.9: 5.6, 6.0: 4.9, 6.1: 4.3, 6.2: 3.7, 6.3: 3.1, 6.4: 2.6, 6.5: 2.1, 6.6: 1.6, 6.7: 1.2, 6.8: 0.8, 6.9: 0.5, 7.0: 0.2 },
-        "6.0": { 4.4: 21, 4.5: 17.3, 4.6: 15.1, 4.7: 13.3, 4.8: 11.9, 4.9: 10.7, 5.0: 9.9, 5.1: 9.1, 5.2: 8.3, 5.3: 7.5, 5.4: 6.8, 5.5: 6.1, 5.6: 5.4, 5.7: 4.8, 5.8: 4.2, 5.9: 3.7, 6.0: 3.2, 6.1: 2.7, 6.2: 2.2, 6.3: 1.8, 6.4: 1.4, 6.5: 1.1, 6.6: 0.8, 6.7: 0.5, 6.8: 0.3, 6.9: 0.2 },
-        "5.5": { 4.4: 15, 4.5: 12.5, 4.6: 10.9, 4.7: 9.6, 4.8: 8.8, 4.9: 7.7, 5.0: 6.6, 5.1: 6.0, 5.2: 5.3, 5.3: 4.8, 5.4: 4.2, 5.5: 3.7, 5.6: 3.2, 5.7: 2.8, 5.8: 2.3, 5.9: 2.0, 6.0: 1.6, 6.1: 1.3, 6.2: 1.0, 6.3: 0.8, 6.4: 0.6, 6.5: 0.4, 6.6: 0.2 }
-    };
-    const arredondado = Number(smp.toFixed(1));
-    return mapa[phDesejado]?.[arredondado] ?? 0;
-}
+  <script>
+    const form = document.getElementById("calcForm");
+    const resultDiv = document.getElementById("result-text");
 
-document.getElementById("calcForm").addEventListener("submit", function(event) {
-    event.preventDefault();
-
-    const pH = document.getElementById("pH").value;
-    const smpInput = document.getElementById("smp").value.replace(",", ".");
-    const smp = parseFloat(smpInput);
-    const prnt = parseFloat(document.getElementById("prnt").value);
-    const superficie = parseFloat(document.getElementById("superficie").value);
-    const profundidade = parseFloat(document.querySelector('input[name="profundidade"]:checked').value);
-    const resultadoDiv = document.getElementById("result-text");
-
-    if (isNaN(smp) || isNaN(prnt) || prnt <= 0 || isNaN(superficie)) {
-        resultadoDiv.innerHTML = `<p class="error-message">Por favor, preencha todos os campos com valores numéricos válidos.</p>`;
-        return;
+    function ajustarDose(nc, sc, prof) {
+      const fator = (sc / 100) * (prof / 20);
+      return {
+        calcario: nc * fator,
+        gesso: nc * 0.3 * fator
+      };
     }
 
-    const valorBase = calcValorBaseCalcario(pH, smp);
-    
-    // MELHORIA #2 - Validação do valor de SMP
-    if (valorBase === 0) {
-        resultadoDiv.innerHTML = `<p class="error-message">O Índice SMP (${smp}) está fora da faixa de cálculo da tabela. Por favor, insira um valor entre 4.4 e 7.0.</p>`;
-        return;
+    function formatNumber(value) {
+      return new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2 }).format(value);
     }
 
-    // BÔNUS - Correção da lógica de cálculo
-    const ncBase = valorBase * (100 / prnt); // NC para 20cm de profundidade @ 100% PRNT
-    const fatorAjuste = (superficie / 100) * (profundidade / 20);
+    function exibirErro(msg) {
+      resultDiv.innerHTML = `<p class="error-message">${msg}</p>`;
+    }
 
-    const calcarioAplicar = ncBase * fatorAjuste;
-    const gessoAplicar = (ncBase * 0.3) * fatorAjuste; // Gesso também ajustado
+    form.addEventListener("submit", event => {
+      event.preventDefault();
 
-    resultadoDiv.innerHTML =
-        `<p>Calcário a aplicar: <strong>${calcarioAplicar.toFixed(2)} t/ha</strong></p>` +
-        `<p>Gesso a aplicar: <strong>${gessoAplicar.toFixed(2)} t/ha</strong></p>` +
-        `<div class="result-summary">` +
-        `Cálculo ajustado para:<br>
-         - Superfície coberta: ${superficie}%<br>
-         - Profundidade: ${profundidade} cm` +
-        `</div>`;
-});
-</script>
+      const nc = parseFloat(form.nc.value);
+      const sc = parseFloat(form.superficie.value);
+      const prof = parseFloat(form.profundidade.value);
+
+      if (isNaN(nc) || nc < 0) {
+        return exibirErro("Informe um valor válido e positivo para NC.");
+      }
+      if (isNaN(sc) || sc < 0 || sc > 100) {
+        return exibirErro("Informe um percentual de 0 a 100 para superfície.");
+      }
+      if (![20, 30].includes(prof)) {
+        return exibirErro("Profundidade inválida.");
+      }
+
+      const { calcario, gesso } = ajustarDose(nc, sc, prof);
+
+      resultDiv.innerHTML = `
+        <p>Calcário (ajustado): <strong>${formatNumber(calcario)} t/ha</strong></p>
+        <p>Gesso (ajustado): <strong>${formatNumber(gesso)} t/ha</strong></p>
+        <div class="result-summary">
+          Ajustado para:<br>
+          • Superfície coberta: ${formatNumber(sc)}%<br>
+          • Profundidade: ${prof} cm
+        </div>
+      `;
+    });
+  </script>
+
 </body>
 </html>
