@@ -49,7 +49,7 @@
       font-weight: bold;
       font-size: 0.9em;
     }
-    input[type="number"], fieldset {
+    input[type="number"] {
       width: 100%;
       padding: 10px;
       margin-bottom: 20px;
@@ -58,13 +58,20 @@
       box-sizing: border-box;
       transition: border-color 0.3s ease;
     }
-    input:focus, fieldset:focus-within {
+    input:focus {
       outline: none;
       border-color: var(--primary-color);
     }
+
+    /* Fieldset ajustado para flex, alinhando as opções lado a lado */
     fieldset {
-      border: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: 20px;
       padding: 10px;
+      margin-bottom: 20px;
+      border: 1px solid var(--border-color);
+      border-radius: 5px;
     }
     legend {
       padding: 0 5px;
@@ -141,7 +148,7 @@
               <input type="radio" name="profundidade" value="20" checked>
               20 cm
             </label>
-            <label style="margin-left: 15px;">
+            <label>
               <input type="radio" name="profundidade" value="30">
               30 cm
             </label>
@@ -188,7 +195,6 @@
       const sc = parseFloat(form.superficie.value);
       const prof = parseFloat(form.profundidade.value);
 
-      // Validações
       if (isNaN(nc) || nc < 0) {
         return exibirErro("Informe um valor válido e positivo para NC.");
       }
@@ -199,10 +205,8 @@
         return exibirErro("Profundidade inválida.");
       }
 
-      // Cálculo
       const { calcario, gesso } = ajustarDose(nc, sc, prof);
 
-      // Exibição
       resultDiv.innerHTML = `
         <p>Calcário (ajustado): <strong>${formatNumber(calcario)} t/ha</strong></p>
         <p>Gesso (ajustado): <strong>${formatNumber(gesso)} t/ha</strong></p>
@@ -217,3 +221,4 @@
 
 </body>
 </html>
+
