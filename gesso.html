@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de Calcário e Gesso</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+    }
+    .container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+    .form-container {
+        flex: 1;
+        min-width: 300px;
+        max-width: 500px;
+    }
+    .result-container {
+        flex: 1;
+        min-width: 200px;
+        border: 1px solid #ccc;
+        padding: 10px;
+        border-radius: 5px;
+        background-color: #f9f9f9;
+    }
+    .info-text {
+        margin-top: 20px;
+        padding: 15px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: #fdfdfd;
+        font-size: 0.9em;
+        line-height: 1.5;
+    }
+    label {
+        display: block;
+        margin-bottom: 10px;
+    }
+    input[type="text"], input[type="number"], select {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+    }
+    input[type="submit"] {
+        background-color: #4CAF50;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+    }
+    input[type="submit"]:hover {
+        background-color: #45a049;
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="form-container">
+        <h2>Calculadora de Calcário e Gesso</h2>
+        <form id="calcForm">
+            <label for="pH">Selecione o pH desejado:</label>
+            <select id="pH">
+                <option value="6.5">pH 6.5</option>
+                <option value="6.0">pH 6.0</option>
+                <option value="5.5">pH 5.5</option>
+            </select>
+            <label for="smp">Índice SMP (0.0 a 14.0):</label>
+            <input type="number" id="smp" step="0.1" min="0" max="14" required>
+            <label for="prnt">PRNT do calcário (0 a 100):</label>
+            <input type="number" id="prnt" min="0" max="100" required>
+            <label for="superficie">Superfície Coberta (%):</label>
+            <input type="number" id="superficie" min="0" max="100" required>
+            <label for="profundidade">Profundidade (cm):</label>
+            <input type="number" id="profundidade" min="0" required>
+            <input type="submit" value="Calcular">
+        </form>
+    </div>
+    <div class="result-container" id="resultado">
+        <strong>Resultado:</strong><br>
+        Os resultados aparecerão aqui.
+    </div>
+</div>
+
+<script>
+    function calcValorBaseCalcario(phDesejado, smp) {
+        smp = parseFloat(smp.toFixed(1));
+        const tabela = {
+            6.5: {4.4: 29, 4.5: 24.0, 4.6: 20.0, 4.7: 17.5, 4.8: 15.7, 4.9: 14.2, 5.0: 13.3, 5.1: 12.3, 5.2: 11.3, 5.3: 10.4, 5.4: 9.5, 5.5: 8.6, 5.6: 7.8, 5.7: 7.0, 5.8: 6.3, 5.9: 5.6, 6.0: 4.9, 6.1: 4.3, 6.2: 3.7, 6.3: 3.1, 6.4: 2.6, 6.5: 2.1, 6.6: 1.6, 6.7: 1.2, 6.8: 0.8, 6.9: 0.5, 7.0: 0.2},
+            6.0: {4.4: 21, 4.5: 17.3, 4.6: 15.1, 4.7: 13.3, 4.8: 11.9, 4.9: 10.7, 5.0: 9.9, 5.1: 9.1, 5.2: 8.3, 5.3: 7.5, 5.4: 6.8, 5.5: 6.1, 5.6: 5.4, 5.7: 4.8, 5.8: 4.2, 5.9: 3.7, 6.0: 3.2, 6.1: 2.7, 6.2: 2.2, 6.3: 1.8, 6.4: 1.4, 6.5: 1.1, 6.6: 0.8, 6.7: 0.5, 6.8: 0.3, 6.9: 0.2},
+            5.5: {4.4: 15, 4.5: 12.5, 4.6: 10.9, 4.7: 9.6, 4.8: 8.8, 4.9: 7.7, 5.0: 6.6, 5.1: 6.0, 5.2: 5.3, 5.3: 4.8, 5.4: 4.2, 5.5: 3.7, 5.6: 3.2, 5.7: 2.8, 5.8: 2.3, 5.9: 2.0, 6.0: 1.6, 6.1: 1.3, 6.2: 1.0, 6.3: 0.8, 6.4: 0.6, 6.5: 0.4, 6.6: 0.2}
+        };
+        const map = tabela[phDesejado];
+        return map[smp] ?? 0;
+    }
+
+    document.getElementById("calcForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+
+        const pH = parseFloat(document.getElementById("pH").value);
+        const smp = parseFloat(document.getElementById("smp").value);
+        const prnt = parseFloat(document.getElementById("prnt").value);
+        const superficie = parseFloat(document.getElementById("superficie").value);
+        const profundidade = parseFloat(document.getElementById("profundidade").value);
+
+        if (isNaN(pH) || isNaN(smp) || isNaN(prnt) || isNaN(superficie) || isNaN(profundidade) || prnt <= 0) {
+            document.getElementById("resultado").innerHTML =
+                "<strong>Resultado:</strong><br>Por favor, preencha todos os campos corretamente.";
+            return;
+        }
+
+        const valorBase = calcValorBaseCalcario(pH, smp);
+        const necessidadeCalcario = valorBase * (100 / prnt);
+        const necessidadeGesso = necessidadeCalcario * 0.3;
+        const quantidadeGesso = necessidadeGesso * (superficie / 100) * (profundidade / 20);
+
+        document.getElementById("resultado").innerHTML =
+            "<strong>Resultado:</strong><br>" +
+            "Necessidade de Calcário: " + necessidadeCalcario.toFixed(2) + " t/ha<br>" +
+            "Necessidade de Gesso (NG): " + necessidadeGesso.toFixed(2) + " t/ha<br>" +
+            "Quantidade de Gesso a aplicar: " + quantidadeGesso.toFixed(2) + " t/ha";
+    });
+</script>
+</body>
+</html>
