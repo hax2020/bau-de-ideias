@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Educacional | Carregado do Google Planilhas</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            background-color: #4CAF50;
+            color: white;
+            padding: 20px;
+            margin: 0;
+        }
+        .setupBox, #questionBox, #scoreBox {
+            font-size: 16px;
+            border: 1px solid #000;
+            padding: 20px;
+            width: 80%;
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+        select, button {
+            display: block;
+            margin: 15px auto;
+            padding: 12px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 80%;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .teamBox {
+            width: 80%;
+            max-width: 600px;
+            margin: 20px auto;
+            display: flex;
+            justify-content: space-around;
+        }
+        .teamColumn {
+            text-align: center;
+            display: none;
+            padding: 15px;
+            border: 1px dashed #ccc;
+            border-radius: 8px;
+            width: 45%;
+        }
+        .teamName {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        .competitorName {
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: #555;
+            font-style: italic;
+        }
+        #loadingMessage {
+            font-size: 18px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <h1>Quiz Educacional</h1>
+
+    <div class="setupBox" id="setupBox">
+        <h2>Configuração do Quiz</h2>
+        <p>Selecione as duas equipes que irão competir.</p>
+        <label for="team1Select">Selecione a Equipe 1:</label>
+        <select id="team1Select">
+            <option value="Cooperativas">Cooperativas</option>
+            <option value="Sindicatos">Sindicatos</option>
+            <option value="Associações">Associações</option>
+        </select>
+
+        <label for="team2Select">Selecione a Equipe 2:</label>
+        <select id="team2Select">
+            <option value="Sindicatos">Sindicatos</option>
+            <option value="Cooperativas">Cooperativas</option>
+            <option value="Associações">Associações</option>
+        </select>
+        
+        <button id="startQuizButton">Carregar Dados e Iniciar Quiz</button>
+        <p id="loadingMessage" style="display:none;">Carregando dados da planilha...</p>
+    </div>
+
+    <h2 id="themeDisplay" style="display:none;"></h2>
+    <div id="questionBox" style="display:none;" aria-live="polite">Clique em "Próxima Pergunta" para iniciar</div>
+
+    <div id="scoreBox" aria-live="polite" style="display:none;">
+        <p id="team1Score"><span id="team1Name">Equipe 1</span>: <span id="team1CorrectCount">0</span> Certas, <span id="team1WrongCount">0</span> Erradas</p>
+        <p id="team2Score"><span id="team2Name">Equipe 2</span>: <span id="team2CorrectCount">0</span> Certas, <span id="team2WrongCount">0</span> Erradas</p>
+    </div>
+
+    <div class="teamBox">
+        <div class="teamColumn" id="team1Column">
+            <div class="teamName" id="team1DisplayName"></div>
+            <div class="competitorName" id="team1CompetitorName"></div>
+            <button id="rightButton">Resposta Certa</button>
+            <button id="wrongButton">Resposta Errada</button>
+        </div>
+        <div class="teamColumn" id="team2Column">
+            <div class="teamName" id="team2DisplayName"></div>
+            <div class="competitorName" id="team2CompetitorName"></div>
+            <button id="rightButton2">Resposta Certa</button>
+            <button id="wrongButton2">Resposta Errada</button>
+        </div>
+    </div>
+
+    <button id="nextQuestionButton" style="display:none;">Próxima Pergunta</button>
+    <button id="resetButton" style="display:none;">Recomeçar</button>
+
+    <script>
+        const DRAW_COUNT = 10; // Total de 10 perguntas sorteadas (5 para cada equipe)
+        const SPREADSHEET_ID = '1LBx1fBVFGeRDTU2YFeDvWetyxAUxTbEfxBco4xGHg9I';
+
+        let allQuestions = [];
+        let drawnQuestions = [];
+
+        let team1Comps = [];
+        let team2Comps = [];
+        let pool1 = [];
+        let pool2 = [];
+
+        let currentTeam = 0; // 1 ou 2, para alternância
+        let team1Correct = 0, team1Wrong = 0;
+        let team2Correct = 0, team2Wrong = 0;
+
+        const startBtn = document.getElementById('startQuizButton');
+        const nextBtn = document.getElementById('nextQuestionButton');
+        const resetBtn = document.getElementById('resetButton');
+        const loadingMsg = document.getElementById('loadingMessage');
+        const setupBox = document.getElementById('setupBox');
+        
+        /**
+         * Busca dados de uma aba específica da planilha do Google.
+         * @param {string} sheetName O nome da aba (ex: "Cooperativas").
+         * @returns {Promise<{competitors: string[], questions: string[]}>}
+         */
+        async function fetchSheetData(sheetName) {
+            const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`Erro ao buscar dados da aba "${sheetName}". Verifique se a planilha está publicada na web.`);
+                }
+                const csvText = await response.text();
+                const rows = csvText.trim().split('\n').slice(1); // Ignora a primeira linha (cabeçalho)
+
+                const competitors = [];
+                const questions = [];
+
+                rows.forEach(row => {
+                    // Lida com o formato CSV onde os campos são delimitados por ","
+                    const columns = row.split('","').map(item => item.replace(/"/g, ''));
+
+                    const competitor = columns[0] ? columns[0].trim() : null; // Coluna A
+                    const question = columns[3] ? columns[3].trim() : null; // Coluna D
+
+                    if (competitor) {
+                        competitors.push(competitor);
+                    }
+                    if (question) {
+                        questions.push(question);
+                    }
+                });
+                
+                return { competitors, questions };
+
+            } catch (error) {
+                console.error(error);
+                alert(error.message);
+                return { competitors: [], questions: [] };
+            }
+        }
+
+        startBtn.addEventListener('click', async () => {
+            const team1SheetName = document.getElementById('team1Select').value;
+            const team2SheetName = document.getElementById('team2Select').value;
+
+            if (team1SheetName === team2SheetName) {
+                alert('Por favor, selecione equipes diferentes.');
+                return;
+            }
+
+            loadingMsg.style.display = 'block';
+            startBtn.disabled = true;
+
+            // Busca os dados das duas planilhas em paralelo
+            const [data1, data2] = await Promise.all([
+                fetchSheetData(team1SheetName),
+                fetchSheetData(team2SheetName)
+            ]);
+
+            loadingMsg.style.display = 'none';
+
+            team1Comps = data1.competitors;
+            team2Comps = data2.competitors;
+            allQuestions = [...data1.questions, ...data2.questions];
+
+            if (team1Comps.length === 0 || team2Comps.length === 0 || allQuestions.length < DRAW_COUNT) {
+                alert(`Não foi possível carregar dados suficientes.\nVerifique se as abas "${team1SheetName}" e "${team2SheetName}" têm integrantes e pelo menos ${DRAW_COUNT} perguntas no total.`);
+                startBtn.disabled = false;
+                return;
+            }
+            
+            // Inicia o jogo com os dados carregados
+            startGame(team1SheetName, team2SheetName);
+        });
+
+        function startGame(t1Name, t2Name) {
+            pool1 = [...team1Comps];
+            pool2 = [...team2Comps];
+            let questionPool = [...allQuestions];
+            
+            drawnQuestions = [];
+            while (drawnQuestions.length < DRAW_COUNT && questionPool.length > 0) {
+                const idx = Math.floor(Math.random() * questionPool.length);
+                drawnQuestions.push(questionPool.splice(idx, 1)[0]);
+            }
+
+            setupBox.style.display = 'none';
+            document.getElementById('themeDisplay').innerText = `Quiz: ${t1Name} vs ${t2Name}`;
+            document.getElementById('themeDisplay').style.display = 'block';
+            
+            document.getElementById('team1Name').innerText = t1Name;
+            document.getElementById('team2Name').innerText = t2Name;
+            document.getElementById('scoreBox').style.display = 'block';
+            document.getElementById('questionBox').style.display = 'block';
+            
+            nextBtn.style.display = 'block';
+            resetBtn.style.display = 'block';
+            
+            currentTeam = 2; // para iniciar com equipe 1
+            nextBtn.disabled = true; // Desabilita o botão para a primeira rodada
+            drawQuestion();
+        }
+
+        function drawQuestion() {
+            if (drawnQuestions.length === 0) {
+                document.getElementById('questionBox').innerText = 'PERGUNTAS FINALIZADAS!';
+                nextBtn.style.display = 'none';
+                document.getElementById('team1Column').style.display = 'none';
+                document.getElementById('team2Column').style.display = 'none';
+                return;
+            }
+            
+            currentTeam = currentTeam === 1 ? 2 : 1;
+            const question = drawnQuestions.pop();
+            document.getElementById('questionBox').innerText = question;
+            
+            let comp;
+            if (currentTeam === 1) {
+                if (pool1.length === 0) pool1 = [...team1Comps];
+                const idx = Math.floor(Math.random() * pool1.length);
+                comp = pool1.splice(idx, 1)[0];
+                showColumn(1, comp);
+            } else {
+                if (pool2.length === 0) pool2 = [...team2Comps];
+                const idx = Math.floor(Math.random() * pool2.length);
+                comp = pool2.splice(idx, 1)[0];
+                showColumn(2, comp);
+            }
+        }
+
+        function showColumn(team, comp) {
+            document.getElementById('team1Column').style.display = 'none';
+            document.getElementById('team2Column').style.display = 'none';
+            const col = document.getElementById(`team${team}Column`);
+            col.style.display = 'block';
+            document.getElementById(`team${team}DisplayName`).innerText = document.getElementById(`team${team}Name`).innerText;
+            document.getElementById(`team${team}CompetitorName`).innerText = `Competidor: ${comp}`;
+        }
+
+        document.getElementById('rightButton').addEventListener('click', () => answer(1, true));
+        document.getElementById('wrongButton').addEventListener('click', () => answer(1, false));
+        document.getElementById('rightButton2').addEventListener('click', () => answer(2, true));
+        document.getElementById('wrongButton2').addEventListener('click', () => answer(2, false));
+
+        function answer(team, correct) {
+            const rightBtn = document.getElementById(team === 1 ? 'rightButton' : 'rightButton2');
+            const wrongBtn = document.getElementById(team === 1 ? 'wrongButton' : 'wrongButton2');
+            
+            if (team === 1) {
+                correct ? team1Correct++ : team1Wrong++;
+                document.getElementById('team1CorrectCount').innerText = team1Correct;
+                document.getElementById('team1WrongCount').innerText = team1Wrong;
+            } else {
+                correct ? team2Correct++ : team2Wrong++;
+                document.getElementById('team2CorrectCount').innerText = team2Correct;
+                document.getElementById('team2WrongCount').innerText = team2Wrong;
+            }
+            rightBtn.disabled = true;
+            wrongBtn.disabled = true;
+            nextBtn.disabled = false; // Habilita o botão para ir para a próxima pergunta
+        }
+
+        nextBtn.addEventListener('click', () => {
+            document.getElementById('rightButton').disabled = false;
+            document.getElementById('wrongButton').disabled = false;
+            document.getElementById('rightButton2').disabled = false;
+            document.getElementById('wrongButton2').disabled = false;
+            nextBtn.disabled = true; // Desabilita até a resposta ser computada
+            drawQuestion();
+        });
+
+        resetBtn.addEventListener('click', () => window.location.reload());
+    </script>
+</body>
+</html>
