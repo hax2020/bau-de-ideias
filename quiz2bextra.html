@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Educacional | Versão Atualizada</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            background-color: #4CAF50;
+            color: white;
+            padding: 20px;
+            margin: 0;
+        }
+        .setupBox, #questionContainer, #scoreBox {
+            font-size: 16px;
+            border: 1px solid #ddd;
+            padding: 20px;
+            width: 90%;
+            max-width: 700px;
+            margin: 20px auto;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+        select, button {
+            display: block;
+            margin: 15px auto;
+            padding: 12px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 80%;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            transition: background-color 0.3s;
+        }
+        button.passButton {
+             background-color: #f39c12; /* Cor laranja para o botão Passar */
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        .teamBox {
+            width: 90%;
+            max-width: 700px;
+            margin: 20px auto;
+            display: flex;
+            justify-content: space-around;
+            gap: 20px;
+        }
+        .teamColumn {
+            text-align: center;
+            display: none;
+            padding: 15px;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            width: 48%;
+        }
+        .teamName {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        .competitorName {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: #555;
+            font-style: italic;
+        }
+        #loadingMessage {
+            font-size: 18px;
+            color: #555;
+        }
+        #questionTheme {
+            font-size: 14px;
+            font-style: italic;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        #questionBox {
+            font-size: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Quiz Educacional</h1>
+
+    <div class="setupBox" id="setupBox">
+        <h2>Configuração do Quiz</h2>
+        <p>Selecione as duas equipes que irão competir.</p>
+        <label for="team1Select">Selecione a Equipe 1:</label>
+        <select id="team1Select">
+            <option value="Cooperativas">Cooperativas</option>
+            <option value="Sindicatos">Sindicatos</option>
+            <option value="Associações">Associações</option>
+        </select>
+
+        <label for="team2Select">Selecione a Equipe 2:</label>
+        <select id="team2Select">
+            <option value="Sindicatos">Sindicatos</option>
+            <option value="Cooperativas">Cooperativas</option>
+            <option value="Associações">Associações</option>
+        </select>
+        
+        <button id="startQuizButton">Carregar Dados e Iniciar Quiz</button>
+        <p id="loadingMessage" style="display:none;">Carregando dados da planilha...</p>
+    </div>
+
+    <div id="questionContainer" style="display:none;" aria-live="polite">
+        <div id="questionTheme"></div>
+        <div id="questionBox">Clique em "Próxima Pergunta" para iniciar</div>
+    </div>
+
+    <div id="scoreBox" aria-live="polite" style="display:none;">
+        <p id="team1Score"><span id="team1Name">Equipe 1</span>: <span id="team1CorrectCount">0</span> Certas, <span id="team1WrongCount">0</span> Erradas</p>
+        <p id="team2Score"><span id="team2Name">Equipe 2</span>: <span id="team2CorrectCount">0</span> Certas, <span id="team2WrongCount">0</span> Erradas</p>
+    </div>
+
+    <div class="teamBox">
+        <div class="teamColumn" id="team1Column">
+            <div class="teamName" id="team1DisplayName"></div>
+            <div class="competitorName" id="team1CompetitorName"></div>
+            <button class="answerButton" id="rightButton">Resposta Certa</button>
+            <button class="answerButton" id="wrongButton">Resposta Errada</button>
+            <button class="passButton" id="passButton1">Passar a Vez</button>
+        </div>
+        <div class="teamColumn" id="team2Column">
+            <div class="teamName" id="team2DisplayName"></div>
+            <div class="competitorName" id="team2CompetitorName"></div>
+            <button class="answerButton" id="rightButton2">Resposta Certa</button>
+            <button class="answerButton" id="wrongButton2">Resposta Errada</button>
+            <button class="passButton" id="passButton2">Passar a Vez</button>
+        </div>
+    </div>
+
+    <button id="nextQuestionButton" style="display:none;">Próxima Pergunta</button>
+    <button id="resetButton" style="display:none;">Recomeçar</button>
+
+    <script>
+        const DRAW_COUNT = 10;
+        const SPREADSHEET_ID = '1LBx1fBVFGeRDTU2YFeDvWetyxAUxTbEfxBco4xGHg9I';
+        const ALL_THEMES = ['Cooperativas', 'Sindicatos', 'Associações'];
+
+        let allQuestions = [];
+        let drawnQuestions = [];
+        let currentQuestion = null;
+        
+        let team1Comps = [], team2Comps = [];
+        let pool1 = [], pool2 = [];
+
+        let currentTeam = 1;
+        let team1Correct = 0, team1Wrong = 0;
+        let team2Correct = 0, team2Wrong = 0;
+        let isPassedQuestion = false;
+
+        const startBtn = document.getElementById('startQuizButton');
+        const nextBtn = document.getElementById('nextQuestionButton');
+        const resetBtn = document.getElementById('resetButton');
+        const loadingMsg = document.getElementById('loadingMessage');
+        const setupBox = document.getElementById('setupBox');
+        
+        async function fetchSheetData(sheetName) {
+            const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`Erro ao buscar dados da aba "${sheetName}".`);
+                const csvText = await response.text();
+                const rows = csvText.trim().split('\n').slice(1);
+
+                const competitors = [];
+                const questions = [];
+
+                rows.forEach(row => {
+                    const columns = row.split('","').map(item => item.replace(/"/g, ''));
+                    if (columns[0] && columns[0].trim()) competitors.push(columns[0].trim());
+                    if (columns[3] && columns[3].trim()) questions.push(columns[3].trim());
+                });
+                
+                // Adiciona o tema a cada objeto de pergunta
+                const themedQuestions = questions.map(q => ({ text: q, theme: sheetName }));
+                return { competitors, questions: themedQuestions };
+
+            } catch (error) {
+                console.error(error);
+                alert(error.message + " Verifique se a planilha está publicada na web como .csv.");
+                return { competitors: [], questions: [] };
+            }
+        }
+
+        startBtn.addEventListener('click', async () => {
+            const team1SheetName = document.getElementById('team1Select').value;
+            const team2SheetName = document.getElementById('team2Select').value;
+
+            if (team1SheetName === team2SheetName) {
+                alert('Por favor, selecione equipes diferentes.');
+                return;
+            }
+
+            // Determina o tema das perguntas (o que NÃO foi selecionado)
+            const questionTheme = ALL_THEMES.find(t => t !== team1SheetName && t !== team2SheetName);
+
+            loadingMsg.style.display = 'block';
+            startBtn.disabled = true;
+
+            const [data1, data2, questionData] = await Promise.all([
+                fetchSheetData(team1SheetName),
+                fetchSheetData(team2SheetName),
+                fetchSheetData(questionTheme)
+            ]);
+
+            loadingMsg.style.display = 'none';
+
+            team1Comps = data1.competitors;
+            team2Comps = data2.competitors;
+            allQuestions = questionData.questions;
+
+            if (team1Comps.length === 0 || team2Comps.length === 0 || allQuestions.length < DRAW_COUNT) {
+                alert(`Não foi possível carregar dados suficientes. Verifique o conteúdo das abas e se o total de perguntas em "${questionTheme}" é pelo menos ${DRAW_COUNT}.`);
+                startBtn.disabled = false;
+                return;
+            }
+            
+            startGame(team1SheetName, team2SheetName, questionTheme);
+        });
+        
+        function startGame(t1Name, t2Name, qTheme) {
+            pool1 = [...team1Comps];
+            pool2 = [...team2Comps];
+            let questionPool = [...allQuestions];
+            
+            drawnQuestions = [];
+            while (drawnQuestions.length < DRAW_COUNT && questionPool.length > 0) {
+                const idx = Math.floor(Math.random() * questionPool.length);
+                drawnQuestions.push(questionPool.splice(idx, 1)[0]);
+            }
+
+            setupBox.style.display = 'none';
+            document.getElementById('questionContainer').style.display = 'block';
+            
+            document.getElementById('team1Name').innerText = t1Name;
+            document.getElementById('team2Name').innerText = t2Name;
+            document.getElementById('scoreBox').style.display = 'block';
+            
+            nextBtn.style.display = 'block';
+            resetBtn.style.display = 'block';
+            
+            currentTeam = 2; // Inicia com 2 para que o primeiro draw seja para a equipe 1
+            nextBtn.click(); // Inicia o jogo com a primeira pergunta
+        }
+
+        function drawQuestion() {
+            isPassedQuestion = false; // Reseta o estado de "passada" para cada nova pergunta
+
+            if (drawnQuestions.length === 0) {
+                document.getElementById('questionBox').innerText = 'PERGUNTAS FINALIZADAS!';
+                document.getElementById('questionTheme').style.display = 'none';
+                nextBtn.style.display = 'none';
+                document.getElementById('team1Column').style.display = 'none';
+                document.getElementById('team2Column').style.display = 'none';
+                return;
+            }
+            
+            currentQuestion = drawnQuestions.pop();
+            document.getElementById('questionBox').innerText = currentQuestion.text;
+            document.getElementById('questionTheme').innerText = `Tema da Pergunta: ${currentQuestion.theme}`;
+            document.getElementById('questionTheme').style.display = 'block';
+            
+            let comp;
+            if (currentTeam === 1) {
+                if (pool1.length === 0) pool1 = [...team1Comps];
+                comp = pool1.splice(Math.floor(Math.random() * pool1.length), 1)[0];
+            } else {
+                if (pool2.length === 0) pool2 = [...team2Comps];
+                comp = pool2.splice(Math.floor(Math.random() * pool2.length), 1)[0];
+            }
+            showColumn(currentTeam, comp);
+        }
+
+        function showColumn(team, comp) {
+            ['1', '2'].forEach(t => {
+                const column = document.getElementById(`team${t}Column`);
+                const passButton = document.getElementById(`passButton${t}`);
+                column.style.display = (t == team) ? 'block' : 'none';
+                
+                // O botão de passar só aparece se a pergunta não foi passada
+                passButton.style.display = isPassedQuestion ? 'none' : 'block';
+            });
+            
+            document.getElementById(`team${team}DisplayName`).innerText = document.getElementById(`team${team}Name`).innerText;
+            document.getElementById(`team${team}CompetitorName`).innerText = `Competidor: ${comp}`;
+        }
+        
+        function passQuestion() {
+            isPassedQuestion = true;
+            // Desabilita os botões da equipe que passou
+            toggleTeamButtons(currentTeam, true);
+            
+            // Troca a equipe
+            currentTeam = currentTeam === 1 ? 2 : 1;
+
+            // Sorteia um novo competidor para a equipe que recebeu a pergunta
+            let comp;
+            if (currentTeam === 1) {
+                if (pool1.length === 0) pool1 = [...team1Comps];
+                comp = pool1.splice(Math.floor(Math.random() * pool1.length), 1)[0];
+            } else {
+                if (pool2.length === 0) pool2 = [...team2Comps];
+                comp = pool2.splice(Math.floor(Math.random() * pool2.length), 1)[0];
+            }
+
+            // Mostra a coluna da nova equipe
+            showColumn(currentTeam, comp);
+        }
+
+        function answer(team, correct) {
+            if (team === 1) {
+                correct ? team1Correct++ : team1Wrong++;
+                document.getElementById('team1CorrectCount').innerText = team1Correct;
+                document.getElementById('team1WrongCount').innerText = team1Wrong;
+            } else {
+                correct ? team2Correct++ : team2Wrong++;
+                document.getElementById('team2CorrectCount').innerText = team2Correct;
+                document.getElementById('team2WrongCount').innerText = team2Wrong;
+            }
+            toggleTeamButtons(team, true); // Desabilita botões da equipe que respondeu
+            nextBtn.disabled = false;
+        }
+
+        function toggleTeamButtons(team, disabled) {
+            document.getElementById(`rightButton${team}`).disabled = disabled;
+            document.getElementById(`wrongButton${team}`).disabled = disabled;
+            document.getElementById(`passButton${team}`).disabled = disabled;
+        }
+        
+        nextBtn.addEventListener('click', () => {
+            if (!isPassedQuestion) {
+                // Se a pergunta não foi passada, alterna a equipe para a próxima rodada
+                currentTeam = currentTeam === 1 ? 2 : 1;
+            }
+            // Se foi passada, a equipe que respondeu (currentTeam) começa a próxima rodada
+            
+            toggleTeamButtons(1, false);
+            toggleTeamButtons(2, false);
+            nextBtn.disabled = true;
+            drawQuestion();
+        });
+
+        document.getElementById('rightButton').addEventListener('click', () => answer(1, true));
+        document.getElementById('wrongButton').addEventListener('click', () => answer(1, false));
+        document.getElementById('passButton1').addEventListener('click', passQuestion);
+        
+        document.getElementById('rightButton2').addEventListener('click', () => answer(2, true));
+        document.getElementById('wrongButton2').addEventListener('click', () => answer(2, false));
+        document.getElementById('passButton2').addEventListener('click', passQuestion);
+
+        resetBtn.addEventListener('click', () => window.location.reload());
+    </script>
+</body>
+</html>
