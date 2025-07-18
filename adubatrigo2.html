@@ -240,24 +240,6 @@ document.getElementById("calcBtn").addEventListener("click", ()=>{
     document.getElementById("pdfBtn").style.display="inline-block";
 });
 
-/* ======  GERAÇÃO DE PDF  ====== */
-document.getElementById("pdfBtn").addEventListener("click", ()=>{
-    // Acessa a classe jsPDF diretamente do objeto global window
-    const { jsPDF } = window.jspdf; // Certifica-se de que a variável jsPDF está disponível
-    const pdf = new jsPDF({orientation:"portrait", unit:"mm", format:"a4"}); // Instancia o jsPDF
-    const resultadoElement = document.querySelector("#resultado");
-
-    // Adiciona a opção 'scale' para melhorar a qualidade da imagem no PDF
-    html2canvas(resultadoElement, { scale: 2 }).then(canvas=>{
-        const imgData = canvas.toDataURL("image/png");
-        const pageWidth = pdf.internal.pageSize.getWidth();
-        const imgProps = pdf.getImageProperties(imgData);
-        const pdfHeight = (imgProps.height * pageWidth) / imgProps.width;
-        // Ajusta a posição vertical da imagem (o '15' move para baixo)
-        pdf.addImage(imgData, "PNG", 0, 15, pageWidth, pdfHeight);
-        pdf.save("recomendacao_adubacao.pdf");
-    });
-});
 </script>
 </body>
 </html>
