@@ -6,70 +6,26 @@
 <title>Calculadora de Adubação</title>
 
 <style>
-    :root{
-        --blue:#004A99;
-        --gray:#f5f5f5;
-    }
-    body{
-        font-family:Arial,Helvetica,sans-serif;
-        margin:0;
-        padding:0 1rem 4rem;
-        background:var(--gray);
-    }
-    h1{
-        text-align:center;
-        color:#fff;
-        background:var(--blue);
-        padding:1rem 0;
-        margin:0 -1rem 2rem;
-    }
-    .card{
-        background:#fff;
-        border-radius:8px;
-        box-shadow:0 2px 6px rgba(0,0,0,.1);
-        padding:1.5rem;
-        max-width:960px;
-        margin:0 auto 2rem;
-    }
-    .flex{display:flex;gap:1rem;flex-wrap:wrap}
-    label{display:block;font-weight:bold;margin-bottom:.25rem}
-    select{
-        padding:.4rem;
-        border:1px solid #ccc;
-        border-radius:4px;
-        width:100%;
-        min-width:150px;
-    }
-    button{
-        cursor:pointer;
-        background:var(--blue);
-        border:none;
-        color:#fff;
-        padding:.6rem 1.2rem;
-        border-radius:4px;
-        font-size:1rem;
-        transition:.2s;
-    }
-    button:hover{filter:brightness(1.15)}
-    table{
-        width:100%;
-        border-collapse:collapse;
-        margin-top:1rem;
-    }
-    th,td{
-        padding:.5rem;
-        border:1px solid #ddd;
-        text-align:center;
-    }
-    th{background:var(--blue);color:#fff}
-    .no-adub{color:#999;font-style:italic}
-    #pdfBtn{margin-top:1rem}
+    :root{ --blue:#004A99; --gray:#f5f5f5; }
+    body{ font-family:Arial,Helvetica,sans-serif; margin:0; padding:0 1rem 4rem; background:var(--gray); }
+    h1{ text-align:center; color:#fff; background:var(--blue); padding:1rem 0; margin:0 -1rem 2rem; }
+    .card{ background:#fff; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,.1); padding:1.5rem; max-width:960px; margin:0 auto 2rem; }
+    .flex{ display:flex; gap:1rem; flex-wrap:wrap }
+    label{ display:block; font-weight:bold; margin-bottom:.25rem }
+    select{ padding:.4rem; border:1px solid #ccc; border-radius:4px; width:100%; min-width:150px; }
+    button{ cursor:pointer; background:var(--blue); border:none; color:#fff; padding:.6rem 1.2rem; border-radius:4px; font-size:1rem; transition:.2s; }
+    button:hover{ filter:brightness(1.15) }
+    table{ width:100%; border-collapse:collapse; margin-top:1rem; }
+    th,td{ padding:.5rem; border:1px solid #ddd; text-align:center; }
+    th{ background:var(--blue); color:#fff }
+    .no-adub{ color:#999; font-style:italic }
 </style>
 </head>
 <body>
 <h1>Calculadora de Adubação – Versão Demo</h1>
 
 <div class="card">
+    <!-- 1. Níveis de fertilidade -->
     <h2>1 — Informar Níveis de Fertilidade</h2>
     <div class="flex">
         <div>
@@ -102,6 +58,7 @@
         </div>
     </div>
 
+    <!-- 2. Fontes de adubo -->
     <h2 style="margin-top:2rem">2 — Escolher Adubo</h2>
     <div class="flex">
         <div>
@@ -120,126 +77,102 @@
 
     <button id="calcBtn" style="margin-top:1.5rem">Calcular Recomendações</button>
 
+    <!-- 3. Resultado -->
     <div id="resultado"></div>
-    <button id="pdfBtn" style="display:none">Salvar recomendação em PDF</button>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"
-        integrity="sha512-BNa5mxOwyyY1KN6lo5UGXN38wJGlNWaHKL+k6n7P7IXBPddAMHLpI9Vi4i7OPN84v1zvjWmbc9ujMP+BiED4Pw=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
-        integrity="sha512-Jd71DYo1zEBj29M4e+OVcv5sKcBGSwGzhP2rb4+uqImf1tCBtw2DHbRXh0XgWqVBnJhIaY9HldxEnsHC5wOIPQ=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
 <script>
-/* ======  DADOS DOS ADUBOS  ====== */
+/* ======== DADOS DOS ADUBOS ======== */
 const nitroFert = [
-    {nome:"Ureia",           formula:"45-00-00", n:45},
-    {nome:"Nitrato de amônio",  formula:"32-00-00", n:32},
-    {nome:"Sulfato de amônio",  formula:"20-00-00", n:20},
-    {nome:"Nitrato de cálcio",  formula:"14-00-00", n:14},
-    {nome:"MAP",             formula:"09-48-00", n:9},
-    {nome:"DAP",             formula:"17-45-00", n:17}
+  {nome:"Ureia",               formula:"45-00-00", n:45},
+  {nome:"Nitrato de amônio",   formula:"32-00-00", n:32},
+  {nome:"Sulfato de amônio",   formula:"20-00-00", n:20},
+  {nome:"Nitrato de cálcio",   formula:"14-00-00", n:14},
+  {nome:"MAP",                 formula:"09-48-00", n:9},
+  {nome:"DAP",                 formula:"17-45-00", n:17}
 ];
 const fosfoFert = [
-    {nome:"Superfosfato simples", formula:"00-18-00", p:18},
-    {nome:"Superfosfato triplo",   formula:"00-41-00", p:41},
-    {nome:"MAP",                  formula:"09-48-00", p:48},
-    {nome:"DAP",                  formula:"17-45-00", p:45},
-    {nome:"Termofosfato Magnesiano", formula:"00-18-00", p:18},
-    {nome:"Fosfato natural farelado", formula:"00-27-00", p:27},
-    {nome:"Farinha de ossos",      formula:"00-16-00", p:16}
+  {nome:"Superfosfato simples",        formula:"00-18-00", p:18},
+  {nome:"Superfosfato triplo",         formula:"00-41-00", p:41},
+  {nome:"MAP",                         formula:"09-48-00", p:48},
+  {nome:"DAP",                         formula:"17-45-00", p:45},
+  {nome:"Termofosfato Magnesiano",     formula:"00-18-00", p:18},
+  {nome:"Fosfato natural farelado",    formula:"00-27-00", p:27},
+  {nome:"Farinha de ossos",            formula:"00-16-00", p:16}
 ];
 const potassFert = [
-    {nome:"Cloreto de potássio", formula:"00-00-58", k:58},
-    {nome:"Sulfato de potássio", formula:"00-00-48", k:48},
-    {nome:"Nitrato de potássio", formula:"12-00-45", k:45},
-    {nome:"K-Mag",                  formula:"00-00-21", k:21},
-    {nome:"Termopotássio",          formula:"00-00-05", k:5},
-    {nome:"Silicato de potássio",formula:"00-00-10", k:10}
+  {nome:"Cloreto de potássio", formula:"00-00-58", k:58},
+  {nome:"Sulfato de potássio", formula:"00-00-48", k:48},
+  {nome:"Nitrato de potássio", formula:"12-00-45", k:45},
+  {nome:"K-Mag",               formula:"00-00-21", k:21},
+  {nome:"Termopotássio",       formula:"00-00-05", k:5},
+  {nome:"Silicato de potássio",formula:"00-00-10", k:10}
 ];
 
-/* ======  METAS POR NÍVEL (kg nutriente ha-¹)  ====== */
-const metasN = {baixo:100, medio:60, alto:20};
-const metasPK = {      //  para P2O5 e K2O
-    muito_baixo:120,
-    baixo:90,
-    medio:60,
-    alto:30,
-    muito_alto:0
-};
+/* ======== METAS (kg nutriente ha⁻¹) ======== */
+const metasN  = {baixo:100, medio:60, alto:20};
+const metasPK = {muito_baixo:120, baixo:90, medio:60, alto:30, muito_alto:0};
 
-/* ======  PREENCHE COMBOS DE FERTILIZANTES  ====== */
-function populaSelect(arr, sel){
-    arr.forEach((f,i)=>{
-        const opt=document.createElement("option");
-        opt.value=i;
-        opt.textContent=f.nome+" ("+f.formula+")";
-        sel.appendChild(opt);
-    });
+/* ======== PREENCHE COMBOS ======== */
+function popular(arr, sel){
+  arr.forEach((f,i)=>{
+      const o=document.createElement("option");
+      o.value=i;
+      o.textContent=`${f.nome} (${f.formula})`;
+      sel.appendChild(o);
+  });
 }
-populaSelect(nitroFert, document.getElementById("nFert"));
-populaSelect(fosfoFert, document.getElementById("pFert"));
-populaSelect(potassFert, document.getElementById("kFert"));
+popular(nitroFert , document.getElementById("nFert"));
+popular(fosfoFert , document.getElementById("pFert"));
+popular(potassFert, document.getElementById("kFert"));
 
-/* ======  CÁLCULO PRINCIPAL  ====== */
+/* ======== CÁLCULO ======== */
 document.getElementById("calcBtn").addEventListener("click", ()=>{
-    // 1. colher níveis
-    const nNivel=document.getElementById("nNivel").value;
-    const pNivel=document.getElementById("pNivel").value;
-    const kNivel=document.getElementById("kNivel").value;
+  const nNivel=document.getElementById("nNivel").value;
+  const pNivel=document.getElementById("pNivel").value;
+  const kNivel=document.getElementById("kNivel").value;
 
-    // 2. metas
-    const metaN=metasN[nNivel];
-    const metaP=metasPK[pNivel];
-    const metaK=metasPK[kNivel];
+  const metaN = metasN[nNivel];
+  const metaP = metasPK[pNivel];
+  const metaK = metasPK[kNivel];
 
-    // 3. adubos escolhidos
-    const nF=nitroFert[document.getElementById("nFert").value];
-    const pF=fosfoFert[document.getElementById("pFert").value];
-    const kF=potassFert[document.getElementById("kFert").value];
+  const nF = nitroFert [+document.getElementById("nFert").value];
+  const pF = fosfoFert [+document.getElementById("pFert").value];
+  const kF = potassFert[+document.getElementById("kFert").value];
 
-    // 4. doses (kg adubo = kg nutriente ÷ %/100)
-    const doseN = metaN>0 ? (metaN/(nF.n/100)).toFixed(1) : 0;
-    const doseP = metaP>0 ? (metaP/(pF.p/100)).toFixed(1) : 0;
-    const doseK = metaK>0 ? (metaK/(kF.k/100)).toFixed(1) : 0;
+  const doseN = metaN  ? (metaN /(nF.n/100)).toFixed(1) : 0;
+  const doseP = metaP  ? (metaP /(pF.p/100)).toFixed(1) : 0;
+  const doseK = metaK  ? (metaK /(kF.k/100)).toFixed(1) : 0;
 
-    // 5. exibir resultado
-    const div=document.getElementById("resultado");
-    div.innerHTML=`
-        <h2 id="tituloRes">3 — Recomendações</h2>
-        <table>
-            <thead><tr>
-                <th>Nutriente</th><th>Nível Solo</th>
-                <th>Meta (kg/ha)</th><th>Adubo</th>
-                <th>Fórmula</th><th>Dose (kg/ha)</th>
-            </tr></thead>
-            <tbody>
-            <tr>
-                <td>N</td><td>${nNivel.replace('_',' ')}</td>
-                <td>${metaN}</td><td>${nF.nome}</td><td>${nF.formula}</td>
-                <td>${metaN===0?'<span class="no-adub">—</span>':doseN}</td>
-            </tr>
-            <tr>
-                <td>P₂O₅</td><td>${pNivel.replace('_',' ')}</td>
-                <td>${metaP}</td><td>${pF.nome}</td><td>${pF.formula}</td>
-                <td>${metaP===0?'<span class="no-adub">—</span>':doseP}</td>
-            </tr>
-            <tr>
-                <td>K₂O</td><td>${kNivel.replace('_',' ')}</td>
-                <td>${metaK}</td><td>${kF.nome}</td><td>${kF.formula}</td>
-                <td>${metaK===0?'<span class="no-adub">—</span>':doseK}</td>
-            </tr>
-            </tbody>
-        </table>
-        <p style="margin-top:.8rem;font-size:.85rem;color:#666">
-            *Valores ilustrativos; valide com engenheiro(a) agrônomo(a) responsável e
-            dados de análise de solo.
-        </p>
-    `;
-    document.getElementById("pdfBtn").style.display="inline-block";
+  document.getElementById("resultado").innerHTML = `
+    <h2>3 — Recomendações</h2>
+    <table>
+      <thead><tr>
+        <th>Nutriente</th><th>Nível Solo</th><th>Meta (kg/ha)</th>
+        <th>Adubo</th><th>Fórmula</th><th>Dose (kg/ha)</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td>N</td><td>${nNivel}</td><td>${metaN}</td>
+          <td>${nF.nome}</td><td>${nF.formula}</td>
+          <td>${metaN?doseN:'<span class="no-adub">—</span>'}</td>
+        </tr>
+        <tr>
+          <td>P₂O₅</td><td>${pNivel.replace('_',' ')}</td><td>${metaP}</td>
+          <td>${pF.nome}</td><td>${pF.formula}</td>
+          <td>${metaP?doseP:'<span class="no-adub">—</span>'}</td>
+        </tr>
+        <tr>
+          <td>K₂O</td><td>${kNivel.replace('_',' ')}</td><td>${metaK}</td>
+          <td>${kF.nome}</td><td>${kF.formula}</td>
+          <td>${metaK?doseK:'<span class="no-adub">—</span>'}</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="margin-top:.8rem;font-size:.85rem;color:#666">
+      *Valores ilustrativos; confirme com análise de solo e recomendação oficial.
+    </p>`;
 });
-
 </script>
 </body>
 </html>
