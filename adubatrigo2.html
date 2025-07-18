@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Calculadora de Adubação</title>
 
-<!-- ====== ESTILO BÁSICO ====== -->
 <style>
     :root{
         --blue:#004A99;
@@ -71,7 +70,6 @@
 <h1>Calculadora de Adubação – Versão Demo</h1>
 
 <div class="card">
-    <!-- ====== FORMULÁRIO ====== -->
     <h2>1 — Informar Níveis de Fertilidade</h2>
     <div class="flex">
         <div>
@@ -122,12 +120,10 @@
 
     <button id="calcBtn" style="margin-top:1.5rem">Calcular Recomendações</button>
 
-    <!-- ====== RESULTADOS ====== -->
     <div id="resultado"></div>
     <button id="pdfBtn" style="display:none">Salvar recomendação em PDF</button>
 </div>
 
-<!-- ====== JS LIBS (PDF) ====== -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"
         integrity="sha512-BNa5mxOwyyY1KN6lo5UGXN38wJGlNWaHKL+k6n7P7IXBPddAMHLpI9Vi4i7OPN84v1zvjWmbc9ujMP+BiED4Pw=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -138,34 +134,34 @@
 <script>
 /* ======  DADOS DOS ADUBOS  ====== */
 const nitroFert = [
-    {nome:"Ureia",          formula:"45-00-00", n:45},
+    {nome:"Ureia",           formula:"45-00-00", n:45},
     {nome:"Nitrato de amônio",  formula:"32-00-00", n:32},
     {nome:"Sulfato de amônio",  formula:"20-00-00", n:20},
     {nome:"Nitrato de cálcio",  formula:"14-00-00", n:14},
-    {nome:"MAP",            formula:"09-48-00", n:9},
-    {nome:"DAP",            formula:"17-45-00", n:17}
+    {nome:"MAP",             formula:"09-48-00", n:9},
+    {nome:"DAP",             formula:"17-45-00", n:17}
 ];
 const fosfoFert = [
     {nome:"Superfosfato simples", formula:"00-18-00", p:18},
-    {nome:"Superfosfato triplo",  formula:"00-41-00", p:41},
+    {nome:"Superfosfato triplo",   formula:"00-41-00", p:41},
     {nome:"MAP",                  formula:"09-48-00", p:48},
     {nome:"DAP",                  formula:"17-45-00", p:45},
     {nome:"Termofosfato Magnesiano", formula:"00-18-00", p:18},
     {nome:"Fosfato natural farelado", formula:"00-27-00", p:27},
-    {nome:"Farinha de ossos",     formula:"00-16-00", p:16}
+    {nome:"Farinha de ossos",      formula:"00-16-00", p:16}
 ];
 const potassFert = [
     {nome:"Cloreto de potássio", formula:"00-00-58", k:58},
     {nome:"Sulfato de potássio", formula:"00-00-48", k:48},
     {nome:"Nitrato de potássio", formula:"12-00-45", k:45},
-    {nome:"K-Mag",               formula:"00-00-21", k:21},
-    {nome:"Termopotássio",       formula:"00-00-05", k:5},
+    {nome:"K-Mag",                  formula:"00-00-21", k:21},
+    {nome:"Termopotássio",          formula:"00-00-05", k:5},
     {nome:"Silicato de potássio",formula:"00-00-10", k:10}
 ];
 
 /* ======  METAS POR NÍVEL (kg nutriente ha-¹)  ====== */
 const metasN = {baixo:100, medio:60, alto:20};
-const metasPK = {          //  para P2O5 e K2O
+const metasPK = {      //  para P2O5 e K2O
     muito_baixo:120,
     baixo:90,
     medio:60,
@@ -246,13 +242,18 @@ document.getElementById("calcBtn").addEventListener("click", ()=>{
 
 /* ======  GERAÇÃO DE PDF  ====== */
 document.getElementById("pdfBtn").addEventListener("click", ()=>{
-    const { jsPDF } = window.jspdf;
-    html2canvas(document.querySelector("#resultado")).then(canvas=>{
+    // Acessa a classe jsPDF diretamente do objeto global window
+    const { jsPDF } = window.jspdf; // Certifica-se de que a variável jsPDF está disponível
+    const pdf = new jsPDF({orientation:"portrait", unit:"mm", format:"a4"}); // Instancia o jsPDF
+    const resultadoElement = document.querySelector("#resultado");
+
+    // Adiciona a opção 'scale' para melhorar a qualidade da imagem no PDF
+    html2canvas(resultadoElement, { scale: 2 }).then(canvas=>{
         const imgData = canvas.toDataURL("image/png");
-        const pdf = new jsPDF({orientation:"portrait", unit:"mm", format:"a4"});
         const pageWidth = pdf.internal.pageSize.getWidth();
         const imgProps = pdf.getImageProperties(imgData);
         const pdfHeight = (imgProps.height * pageWidth) / imgProps.width;
+        // Ajusta a posição vertical da imagem (o '15' move para baixo)
         pdf.addImage(imgData, "PNG", 0, 15, pageWidth, pdfHeight);
         pdf.save("recomendacao_adubacao.pdf");
     });
