@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Show do Milhão — Nutrição de Plantas (versão “Milhos” + Timer)</title>
+<style>
+:root{
+  --bg:#0b1020; --panel:#121939; --ink:#eaf0ff; --muted:#a9b3d5; --accent:#00e1ff; --accent-2:#8b5cf6; --danger:#ff5b5b; --success:#22c55e; --gold:#f9c846;
+}
+
+*{ box-sizing:border-box }
+html, body { height: 100%; }
+
+body{
+  margin:0;
+  font-family: Inter, system-ui, Segoe UI, Roboto, Arial, Helvetica, sans-serif;
+  color:var(--ink);
+  background:
+    radial-gradient(1200px 600px at 10% -10%, #1c2560 0%, #0b1020 55%),
+    radial-gradient(1200px 800px at 120% 120%, #2a1040 0%, #0b1020 60%);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+  min-height:100%;
+  padding:16px;
+  box-sizing:border-box;
+}
+
+/* ===== Caixa principal ===== */
+.app{
+  width:min(1100px, 100%);
+  background:rgba(18,25,57,0.85);
+  border:2px solid var(--accent);
+  border-radius:20px;
+  padding:20px;
+  box-shadow:0 10px 30px rgba(0,0,0,.4);
+  display:flex;
+  flex-direction:column;
+  gap:20px;
+}
+
+/* ===== Cabeçalho ===== */
+header{
+  background:linear-gradient(90deg, rgba(0,225,255,.15), transparent 30%, rgba(139,92,246,.15) 70%, transparent);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:14px; padding:18px; 
+  display:flex; flex-direction:column; gap:6px;
+}
+header .logo{font-weight:900; font-size:clamp(18px,2.4vw,20px); display:flex; align-items:center; gap:10px}
+header .logo .medal{font-size:22px; color:var(--gold)}
+header .sub{color:var(--muted); font-size:13px}
+
+/* ===== Layout principal ===== */
+.layout{
+  display:grid; grid-template-columns: 1.2fr .8fr; gap:14px;
+}
+@media (max-width: 880px){
+  .layout{grid-template-columns:1fr;}
+}
+
+/* ===== Cartões ===== */
+.card{
+  background:var(--panel);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:16px;
+  box-shadow:0 6px 20px rgba(0,0,0,.35);
+}
+
+/* ===== Área de jogo ===== */
+.play{padding:18px}
+.status{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px}
+
+/* ===== Timer ===== */
+.timer{
+  width:100%;
+  background:#0f1533;
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:999px;
+  overflow:hidden;
+  height:14px;
+  position:relative;
+}
+.timer .fill{
+  height:100%;
+  width:100%;
+  background:linear-gradient(90deg, var(--accent), var(--accent-2));
+  transition: width .1s linear;
+}
+.timer .clock{
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  font-size:11px; color:#cfe3ff; font-weight:800; text-shadow:0 1px 0 rgba(0,0,0,.6);
+}
+
+/* ===== Botões de ajuda ===== */
+.lifelines{display:flex; gap:8px; flex-wrap:wrap}
+.lifelines button{
+  background:#0f1533; color:var(--ink);
+  border:1px solid rgba(255,255,255,.1);
+  padding:10px 12px; border-radius:12px; cursor:pointer; font-weight:600; font-size:14px;
+  display:flex; align-items:center; gap:8px;
+  transition:.2s transform, .2s background;
+}
+.lifelines button:hover{transform:translateY(-1px); background:#111a44}
+.lifelines button:disabled{opacity:.45; cursor:not-allowed; transform:none}
+
+/* ===== Pergunta ===== */
+.question{
+  background:linear-gradient(180deg,#0f1a4d,#0c1333);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:14px; padding:16px; font-size:clamp(16px, 2.2vw, 20px); font-weight:700; line-height:1.35;
+  white-space:pre-wrap;
+}
+.meta{margin-top:8px; color:var(--muted); font-size:12px}
+
+/* ===== Respostas ===== */
+.answers{
+  display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:14px;
+}
+@media (max-width:560px){
+  .answers{grid-template-columns:1fr}
+}
+.answers button{
+  text-align:left; padding:14px 16px; border-radius:12px;
+  background:#0e1430; color:var(--ink);
+  border:1px solid rgba(255,255,255,.1); cursor:pointer; font-size:clamp(14px, 2vw, 15px); font-weight:600;
+  display:flex; gap:10px; align-items:flex-start;
+  transition:.2s transform, .2s background;
+}
+.answers button .badge{
+  background:#141c4d; color:#b8c3ff; border:1px solid rgba(255,255,255,.12);
+  border-radius:8px; padding:3px 8px; font-size:13px; font-weight:800;
+}
+.answers button:hover{transform:translateY(-1px); background:#121a40}
+.answers button.correct{background:rgba(34,197,94,.12); border-color:rgba(34,197,94,.5)}
+.answers button.wrong{background:rgba(255,91,91,.12); border-color:rgba(255,91,91,.5)}
+.answers button:disabled{opacity:.95; cursor:not-allowed}
+.answers button.correct::after{ content:" ✓"; font-weight:900; margin-left:6px;}
+.answers button.wrong::after{ content:" ✕"; font-weight:900; margin-left:6px;}
+
+/* ===== Gráfico da plateia ===== */
+.audience{margin-top:10px; display:none}
+.bar{height:26px; display:flex; align-items:center; gap:8px; margin:6px 0}
+.bar .label{width:28px; text-align:center; font-weight:800; color:var(--muted)}
+.bar .track{flex:1; background:#0f1533; border:1px solid rgba(255,255,255,.08); border-radius:999px; overflow:hidden}
+.bar .fill{height:100%; background:linear-gradient(90deg, var(--accent), var(--accent-2)); width:0%}
+.bar .pct{width:42px; text-align:right; color:var(--muted); font-weight:700}
+
+/* ===== Escada de prêmios (milhos) ===== */
+.ladder{padding:18px}
+.ladder h3{margin:0 0 10px 0; font-size:14px; text-transform:uppercase; letter-spacing:.12em; color:#b3c2ff}
+.steps{list-style:none; padding:0; margin:0; display:grid; gap:6px}
+.step{display:flex; justify-content:space-between; background:#0f1533; border:1px solid rgba(255,255,255,.06); border-radius:10px; padding:8px 10px; color:var(--muted); font-weight:700}
+.step.active{background:linear-gradient(90deg, rgba(249,200,70,.18), #0f1533); color:var(--ink); border-color:rgba(249,200,70,.5)}
+.step.safe{outline:1px dashed rgba(249,200,70,.6)}
+
+/* ===== Placar fixo abaixo ===== */
+.scoreboard{
+  background:#0f1533;
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:14px;
+  padding:10px;
+  font-weight:800;
+  color:var(--gold);
+  text-align:center;
+  font-size:16px;
+  max-width:min(1100px, 100%);
+  width:100%;
+}
+.scoreboard #payout{ display:inline-block; min-width:12ch; text-align:right; }
+
+/* ===== Footer ===== */
+footer{opacity:.9; font-size:12px; color:var(--muted); text-align:center}
+a{color:var(--accent)}
+
+/* ===== Acessibilidade (foco visível) ===== */
+.lifelines button:focus-visible,
+.answers button:focus-visible,
+#restart:focus-visible{
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ===== Redução de movimento ===== */
+@media (prefers-reduced-motion: reduce){
+  *{ transition:none !important; animation:none !important; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="card" role="banner">
+    <div class="logo"><span class="medal">🌽</span>Show do Milhão — Nutrição de Plantas</div>
+    <div class="sub">Responda 15 questões sobre nutrição de plantas. Use as ajudas com sabedoria! Agora com timer ⏳</div>
+  </header>
+
+  <main class="layout" role="main">
+    <section class="play card" aria-live="polite">
+      <div class="status">
+        <div class="lifelines">
+          <button id="fifty" aria-disabled="false">🪄 Eliminar Metade</button>
+          <button id="skip" aria-disabled="false">⏭️ Pular</button>
+          <button id="ask" aria-disabled="false">🎓 Pergunte ao Especialista</button>
+        </div>
+        <div class="meta"><span id="qpos">Pergunta 1/15</span></div>
+      </div>
+
+      <!-- Timer -->
+      <div class="timer" aria-label="Tempo restante">
+        <div class="fill" id="tfill"></div>
+        <div class="clock" id="tclock">30s</div>
+      </div>
+
+      <div id="question" class="question" role="heading" aria-level="2">Carregando…</div>
+      <div id="answers" class="answers" role="group" aria-label="Alternativas de resposta"></div>
+
+      <div id="audience" class="audience" aria-hidden="true">
+        <div class="bar"><div class="label">A</div><div class="track"><div class="fill" id="barA"></div></div><div class="pct" id="pctA">0%</div></div>
+        <div class="bar"><div class="label">B</div><div class="track"><div class="fill" id="barB"></div></div><div class="pct" id="pctB">0%</div></div>
+        <div class="bar"><div class="label">C</div><div class="track"><div class="fill" id="barC"></div></div><div class="pct" id="pctC">0%</div></div>
+        <div class="bar"><div class="label">D</div><div class="track"><div class="fill" id="barD"></div></div><div class="pct" id="pctD">0%</div></div>
+      </div>
+    </section>
+
+    <aside class="ladder card">
+      <h3>Tabela de prêmios (milhos)</h3>
+      <ol id="ladder" class="steps"></ol>
+    </aside>
+  </main>
+
+  <!-- Placar -->
+  <div class="scoreboard">
+    Prêmio atual: <span id="payout">0 milhos</span>
+    <button id="restart" style="margin-left:10px;">🔄 Recomeçar</button>
+  </div>
+
+  <footer>Professor Fernando Hax.</footer>
+</div>
+
+<script>
+// ======= Base de dados =======
+const DATA = [
+  {name:"Nitrogênio (N)", symbol:"N", tipo:"Macronutriente", categoria:"Não Metal", metalidade:"Não Metal", 
+   sintoma:"Amarelecimento das folhas inferiores (mais velhas).",
+   funcao:"Composição da clorofila, aminoácidos, proteínas, hormônios, DNA e RNA.",
+   causas:["Excesso de água","Baixa atividade biológica","pH baixo","Pouca matéria orgânica","Seca prolongada"],
+   mobilidade:"Móvel"},
+  {name:"Fósforo (P)", symbol:"P", tipo:"Macronutriente", categoria:"Não Metal", metalidade:"Não Metal",
+   sintoma:"Folhas inferiores (mais velhas) ficam verde-azuladas ou escuras, depois roxas e, por fim, amarelas ou pardas.",
+   funcao:"Essencial na transferência de energia e componente de DNA e RNA.",
+   causas:["Toxidez de alumínio","Seca","Baixa temperatura","pH baixo","Compactação","Baixo teor natural no solo"],
+   mobilidade:"Móvel"},
+  {name:"Potássio (K)", symbol:"K", tipo:"Macronutriente", categoria:"Metal", metalidade:"Metal",
+   sintoma:"Folhas inferiores (mais velhas) amarelecem e secam nas pontas e margens.",
+   funcao:"Mantém o nível de água nas células e participa de reações enzimáticas.",
+   causas:["Solos pobres e ácidos","Excesso de nitrogênio","Calagem excessiva"],
+   mobilidade:"Móvel"},
+  {name:"Cálcio (Ca)", symbol:"Ca", tipo:"Macronutriente", categoria:"Metal", metalidade:"Metal",
+   sintoma:"Necrose e deformação das folhas novas, murchamento e morte das gemas apicais.",
+   funcao:"Componente da parede celular e co-fator em reações enzimáticas.",
+   causas:["Baixa matéria orgânica","Excesso de P ou K","Solos pobres"],
+   mobilidade:"Imóvel"},
+  {name:"Magnésio (Mg)", symbol:"Mg", tipo:"Macronutriente", categoria:"Metal", metalidade:"Metal",
+   sintoma:"Clorose entre nervuras em folhas inferiores (mais velhas).",
+   funcao:"Átomo central da clorofila e participa de muitas reações enzimáticas.",
+   causas:["Solos ácidos e arenosos","Baixa CTC","Solos argilosos com alta relação Ca","Alta dose de calcário calcítico","Adubação potássica pesada"],
+   mobilidade:"Móvel"},
+  {name:"Enxofre (S)", symbol:"S", tipo:"Macronutriente", categoria:"Não Metal", metalidade:"Não Metal",
+   sintoma:"Folhas superiores (mais novas) verde‑amareladas e pequenas, com necrose nas bordas.",
+   funcao:"Componente de alguns aminoácidos e enzimas.",
+   causas:["Pouca matéria orgânica","Acidez e lixiviação","Estiagens prolongadas","Cultivos intensivos sem adubos com enxofre"],
+   mobilidade:"Pouco Móvel"},
+  {name:"Ferro (Fe)", symbol:"Fe", tipo:"Micronutriente", categoria:"Metal", metalidade:"Metal",
+   sintoma:"Amarelecimento das folhas superiores (mais novas) com nervuras verdes.",
+   funcao:"Auxilia na produção de clorofila e participa de inúmeras reações enzimáticas.",
+   causas:["Excesso de calcário e fósforo","Solo alagado ou compactado","Baixo teor de matéria orgânica","Aplicação de lixo compostado"],
+   mobilidade:"Pouco Móvel"},
+  {name:"Zinco (Zn)", symbol:"Zn", tipo:"Micronutriente", categoria:"Metal", metalidade:"Metal",
+   sintoma:"Folhas superiores (mais novas) pequenas, com clorose internerval e distorção (roseta).",
+   funcao:"Constituinte ou ativador de muitas enzimas.",
+   causas:["Solos alcalinos ou ácidos arenosos/siltosos com baixo Zn","Excesso de calcário","Excesso de fósforo"],
+   mobilidade:"Pouco Móvel"},
+  {name:"Boro (B)", symbol:"B", tipo:"Micronutriente", categoria:"Não Metal", metalidade:"Não Metal",
+   sintoma:"Enrolamento/murcha de folhas superiores (mais novas) e má formação de brotos e flores.",
+   funcao:"Formação de tecidos jovens, transporte de açúcares, síntese de RNA e desenvolvimento de membranas e paredes celulares.",
+   causas:["Solos pobres e arenosos","Solos ácidos com altas doses de calcário","Pouca matéria orgânica"],
+   mobilidade:"Imóvel"},
+  {name:"Manganês (Mn)", symbol:"Mn", tipo:"Micronutriente", categoria:"Metal", metalidade:"Metal",
+   sintoma:"Clorose internerval com manchas amareladas entre nervuras das folhas superiores (mais novas).",
+   funcao:"Ativador de muitas enzimas; participa da fotossíntese.",
+   causas:["pH alcalino","Altas doses de calcário","Seca em solos com baixo Mn","Doses altas de húmus com estiagem"],
+   mobilidade:"Pouco Móvel"},
+  {name:"Cobre (Cu)", symbol:"Cu", tipo:"Micronutriente", categoria:"Metal", metalidade:"Metal",
+   sintoma:"Folhas superiores (mais novas) murcham, enrolam e ficam quebradiças; pecíolos inclinados.",
+   funcao:"Participa em reações enzimáticas e compõe a proteína plastocianina.",
+   causas:["Teor alto de matéria orgânica","Altas doses de calcário, P ou K quando o Cu for baixo"],
+   mobilidade:"Pouco Móvel"}
+];
+
+// ======= Utilidades =======
+const shuffle = arr => arr.map(v=>[Math.random(),v]).sort((a,b)=>a[0]-b[0]).map(v=>v[1]);
+const sample = (arr,n) => shuffle(arr).slice(0,n);
+const fmtMilhos = n => `${n.toLocaleString('pt-BR')} milhos`;
+
+// ======= Configuração do jogo =======
+// 15 perguntas. Último prêmio = 1.000.000 milhos
+const PRIZES = [1000, 2000, 5000, 10000, 20000, 30000, 50000, 100000, 200000, 300000, 400000, 500000, 600000, 800000, 1000000];
+const SAFE_STOPS = [5,10];
+const TOTAL_Q = 15;
+
+// Timer
+const TIME_PER_Q = 30_000; // 30s por pergunta
+let tStart = 0, tRemain = TIME_PER_Q, tTick = null, isTiming = false;
+
+let state;
+
+function initState(){
+  state = {
+    qIndex: 0,
+    prizeIndex: -1,
+    lastSafe: -1,
+    used:{ fifty:false, skip:false, ask:false },
+    current:null,
+    finished:false
+  };
+  stopTimer(true);
+  tRemain = TIME_PER_Q;
+}
+
+// ======= Geração de questões =======
+const MOB_OPTS = ["Móvel","Imóvel","Pouco Móvel","Moderadamente móvel"];
+const TYPE_OPTS = ["Macronutriente","Micronutriente","Apenas traço","Nutriente benéfico"];
+const CAT_OPTS = ["Metal","Não Metal","Metaloide","Gás nobre"];
+
+function makeQuestion(){
+  const types = ["SYM_TO_EL", "EL_TO_SYM", "FUNC_TO_EL", "EL_TO_FUNC", "EL_TO_MOB", "EL_TO_TYPE", "EL_TO_CAT", "CAUSE_TO_EL"]; 
+  const qType = types[Math.floor(Math.random()*types.length)];
+  const el = DATA[Math.floor(Math.random()*DATA.length)];
+
+  let prompt, options, correctIndex, meta;
+
+  if(qType === "SYM_TO_EL"){
+    prompt = `O sintoma abaixo indica deficiência de qual nutriente?\n“${el.sintoma}”`;
+    options = sample(DATA.filter(d=>d!==el).map(d=>d.name),3).concat([el.name]);
+    options = shuffle(options);
+    correctIndex = options.indexOf(el.name);
+    meta = `${el.tipo} • ${el.categoria}`;
+  } else if(qType === "EL_TO_SYM"){
+    prompt = `A deficiência de ${el.name} costuma causar:`;
+    const wrong = sample(DATA.filter(d=>d!==el).map(d=>d.sintoma),3);
+    options = shuffle([el.sintoma, ...wrong]);
+    correctIndex = options.indexOf(el.sintoma);
+    meta = `${el.tipo} • ${el.categoria}`;
+  } else if(qType === "FUNC_TO_EL"){
+    prompt = `Qual nutriente está associado à função: “${el.funcao}”`;
+    options = sample(DATA.filter(d=>d!==el).map(d=>d.name),3).concat([el.name]);
+    options = shuffle(options);
+    correctIndex = options.indexOf(el.name);
+    meta = `${el.tipo} • ${el.categoria}`;
+  } else if(qType === "EL_TO_FUNC"){
+    prompt = `Qual é a principal função de ${el.name}?`;
+    const wrong = sample(DATA.filter(d=>d!==el).map(d=>d.funcao),3);
+    options = shuffle([el.funcao, ...wrong]);
+    correctIndex = options.indexOf(el.funcao);
+    meta = `${el.tipo} • ${el.categoria}`;
+  } else if(qType === "EL_TO_MOB"){
+    prompt = `A mobilidade de ${el.name} no tecido vegetal é:`;
+    const wrong = sample(MOB_OPTS.filter(m=>m!==el.mobilidade),3);
+    options = shuffle([el.mobilidade, ...wrong]);
+    correctIndex = options.indexOf(el.mobilidade);
+    meta = `Mobilidade • ${el.tipo}`;
+  } else if(qType === "EL_TO_TYPE"){
+    prompt = `${el.name} é classificado como:`;
+    const wrong = sample(TYPE_OPTS.filter(t=>t!==el.tipo),3);
+    options = shuffle([el.tipo, ...wrong]);
+    correctIndex = options.indexOf(el.tipo);
+    meta = `Tipo (macro x micro)`;
+  } else if(qType === "EL_TO_CAT"){
+    prompt = `A categoria química de ${el.name} é:`;
+    const wrong = sample(CAT_OPTS.filter(c=>c!==el.categoria),3);
+    options = shuffle([el.categoria, ...wrong]);
+    correctIndex = options.indexOf(el.categoria);
+    meta = `Metal x Não Metal`;
+  } else if(qType === "CAUSE_TO_EL"){
+    const c = el.causas[Math.floor(Math.random()*el.causas.length)];
+    prompt = `Qual deficiência pode ser favorecida por: “${c}”?`;
+    options = sample(DATA.filter(d=>d!==el).map(d=>d.name),3).concat([el.name]);
+    options = shuffle(options);
+    correctIndex = options.indexOf(el.name);
+    meta = `Causas de deficiência`;
+  }
+
+  return { prompt, options, correctIndex, meta };
+}
+
+// ======= Renderização =======
+const qEl = document.getElementById('question');
+const aWrap = document.getElementById('answers');
+const qPos = document.getElementById('qpos');
+const payoutEl = document.getElementById('payout');
+const ladderEl = document.getElementById('ladder');
+const tfill = document.getElementById('tfill');
+const tclock = document.getElementById('tclock');
+
+function buildLadder(){
+  ladderEl.innerHTML = '';
+  for(let i=PRIZES.length-1; i>=0; i--){
+    const li = document.createElement('li');
+    li.className = 'step';
+    li.dataset.index = i;
+    const stepNo = (i+1).toString().padStart(2,'0');
+
+    // No topo (15ª), mostra “1.000.000” e um milho
+    const label = i === PRIZES.length-1
+      ? `<span class="q">${stepNo}</span><span>🌽 1.000.000</span>`
+      : `<span class="q">${stepNo}</span><span>${PRIZES[i].toLocaleString('pt-BR')}</span>`;
+
+    li.innerHTML = label;
+    if(SAFE_STOPS.includes(i+1)) li.classList.add('safe');
+    ladderEl.appendChild(li);
+  }
+}
+
+function highlightLadder(){
+  const items = ladderEl.querySelectorAll('.step');
+  items.forEach(el=>el.classList.remove('active'));
+  const current = ladderEl.querySelector(`.step[data-index="${state.prizeIndex}"]`);
+  if(current) current.classList.add('active');
+}
+
+function renderQuestion(){
+  state.current = makeQuestion();
+  const {prompt, options, meta} = state.current;
+
+  // pergunta e meta
+  qEl.textContent = prompt;
+  const metaDiv = document.createElement('div');
+  metaDiv.className = 'meta';
+  metaDiv.textContent = meta;
+  qEl.appendChild(metaDiv);
+
+  // respostas
+  aWrap.innerHTML = '';
+  const letters = ['A','B','C','D'];
+  options.forEach((opt,idx)=>{
+    const btn = document.createElement('button');
+    btn.type = "button";
+    btn.innerHTML = `<span class="badge">${letters[idx]}</span> <span>${opt}</span>`;
+    btn.addEventListener('click', ()=>selectAnswer(idx, btn));
+    aWrap.appendChild(btn);
+  });
+
+  // reset audiência
+  document.getElementById('audience').style.display = 'none';
+  ['A','B','C','D'].forEach(L=>{
+    document.getElementById('bar'+L).style.width = '0%';
+    document.getElementById('pct'+L).textContent = '0%';
+  });
+
+  qPos.textContent = `Pergunta ${state.qIndex+1}/${TOTAL_Q}`;
+
+  // Timer
+  resetTimer();
+  startTimer();
+}
+
+function selectAnswer(idx, btn){
+  if(state.finished) return;
+  stopTimer();
+
+  const buttons = Array.from(aWrap.querySelectorAll('button'));
+  buttons.forEach(b=>b.disabled = true);
+
+  const isCorrect = idx === state.current.correctIndex;
+  if(isCorrect){
+    btn.classList.add('correct');
+    state.qIndex++;
+    state.prizeIndex++;
+    highlightLadder();
+    payoutEl.textContent = fmtMilhos(PRIZES[Math.max(0, state.prizeIndex)] || 0);
+    if(SAFE_STOPS.includes(state.qIndex)) state.lastSafe = state.prizeIndex;
+
+    setTimeout(()=>{
+      if(state.qIndex >= TOTAL_Q){
+        endGame(true);
+      }else{
+        renderQuestion();
+      }
+    }, 800);
+  } else {
+    btn.classList.add('wrong');
+    const correctBtn = buttons[state.current.correctIndex];
+    if(correctBtn) correctBtn.classList.add('correct');
+    setTimeout(()=>endGame(false), 900);
+  }
+}
+
+function endGame(won){
+  state.finished = true;
+  aWrap.querySelectorAll('button').forEach(b=>b.disabled = true);
+  stopTimer();
+
+  const earned = won ? PRIZES[PRIZES.length-1] : (state.lastSafe>=0 ? PRIZES[state.lastSafe] : 0);
+
+  if(won){
+    qEl.innerHTML = `
+      🎉 <strong>Parabéns!</strong> Você venceu o Show do Milhão! 
+      <div class="meta">Prêmio final: 1.000.000 milhos</div>
+      <div style="margin-top:16px;display:flex;justify-content:center;">
+        ${bigCornSVG()}
+      </div>
+    `;
+    payoutEl.textContent = "🌽 1.000.000 milhos";
+  }else{
+    qEl.innerHTML = `💡 <strong>Fim de jogo.</strong> Você leva: ${fmtMilhos(earned)} <div class="meta">Tente novamente para alcançar o milhão!</div>`;
+  }
+}
+
+// ======= Timer =======
+function resetTimer(){
+  tRemain = TIME_PER_Q;
+  updateTimerUI(1, Math.ceil(tRemain/1000));
+}
+function startTimer(){
+  if(isTiming) return;
+  isTiming = true;
+  tStart = performance.now();
+  const tick = (now) => {
+    if(!isTiming) return;
+    const elapsed = now - tStart;
+    const left = Math.max(0, tRemain - elapsed);
+    const pct = left / TIME_PER_Q;
+    updateTimerUI(pct, Math.ceil(left/1000));
+    if(left <= 0){
+      stopTimer();
+      timeOutLose();
+    }else{
+      tTick = requestAnimationFrame(tick);
+    }
+  };
+  tTick = requestAnimationFrame(tick);
+}
+function stopTimer(reset=false){
+  if(tTick) cancelAnimationFrame(tTick);
+  if(isTiming){
+    const now = performance.now();
+    const elapsed = now - tStart;
+    tRemain = Math.max(0, tRemain - elapsed);
+  }
+  isTiming = false;
+  if(reset){ tRemain = TIME_PER_Q; updateTimerUI(1, Math.ceil(tRemain/1000)); }
+}
+function updateTimerUI(pct, secs){
+  tfill.style.width = `${Math.max(0,Math.min(1,pct))*100}%`;
+  tclock.textContent = `${secs}s`;
+  // cor de alerta nos 5s finais
+  if(secs <= 5){
+    tfill.style.background = `linear-gradient(90deg, ${getComputedStyle(document.documentElement).getPropertyValue('--danger')}, #ff9d5b)`;
+  }else{
+    tfill.style.background = `linear-gradient(90deg, var(--accent), var(--accent-2))`;
+  }
+}
+function timeOutLose(){
+  // marca correta e encerra
+  const buttons = Array.from(aWrap.querySelectorAll('button'));
+  buttons.forEach(b=>b.disabled = true);
+  const correctBtn = buttons[state.current.correctIndex];
+  if(correctBtn) correctBtn.classList.add('correct');
+  setTimeout(()=>endGame(false), 800);
+}
+
+// ======= Ajudas =======
+const btn50 = document.getElementById('fifty');
+const btnSkip = document.getElementById('skip');
+const btnAsk = document.getElementById('ask');
+
+btn50.addEventListener('click', ()=>{
+  if(state.used.fifty || !state.current || state.finished) return;
+  state.used.fifty = true; btn50.disabled = true; btn50.setAttribute('aria-disabled','true');
+  const buttons = Array.from(aWrap.querySelectorAll('button'));
+  const wrongIdx = [0,1,2,3].filter(i=>i!==state.current.correctIndex);
+  shuffle(wrongIdx).slice(0,2).forEach(i=>{
+    buttons[i].disabled = true;
+    buttons[i].style.opacity = .5;
+  });
+});
+
+btnSkip.addEventListener('click', ()=>{
+  if(state.used.skip || !state.current || state.finished) return;
+  state.used.skip = true; btnSkip.disabled = true; btnSkip.setAttribute('aria-disabled','true');
+  stopTimer(true); // reseta e pausa antes de nova render
+  renderQuestion();
+});
+
+btnAsk.addEventListener('click', ()=>{
+  if(state.used.ask || !state.current || state.finished) return;
+  state.used.ask = true; btnAsk.disabled = true; btnAsk.setAttribute('aria-disabled','true');
+  const base = [0,0,0,0];
+  const correct = state.current.correctIndex;
+  let remaining = 100;
+  const correctPct = 45 + Math.floor(Math.random()*26);
+  base[correct] = correctPct; remaining -= correctPct;
+  const others = shuffle([0,1,2,3].filter(i=>i!==correct));
+  base[others[0]] = Math.floor(remaining * (30+Math.random()*20)/100);
+  remaining -= base[others[0]];
+  base[others[1]] = Math.floor(remaining * (50+Math.random()*30)/100);
+  remaining -= base[others[1]];
+  base[others[2]] = remaining;
+
+  const audience = document.getElementById('audience');
+  audience.style.display = 'block';
+  audience.setAttribute('aria-hidden','false');
+  const letters = ['A','B','C','D'];
+  letters.forEach((L,i)=>{
+    const w = base[i];
+    document.getElementById('bar'+L).style.width = w+'%';
+    document.getElementById('pct'+L).textContent = w+'%';
+  });
+});
+
+// ======= Reiniciar =======
+const btnRestart = document.getElementById('restart');
+btnRestart.addEventListener('click', startGame);
+
+function startGame(){
+  state = null;
+  initState();
+  buildLadder();
+  highlightLadder();
+  payoutEl.textContent = "0 milhos";
+  [btn50, btnSkip, btnAsk].forEach(b=>{ b.disabled=false; b.setAttribute('aria-disabled','false'); });
+  renderQuestion();
+}
+
+function bigCornSVG(){
+  return `
+<svg width="180" height="220" viewBox="0 0 180 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Milho gigante">
+  <defs>
+    <linearGradient id="g1" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%" stop-color="#ffe066"/>
+      <stop offset="100%" stop-color="#f9c846"/>
+    </linearGradient>
+    <linearGradient id="g2" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%" stop-color="#7bc96f"/>
+      <stop offset="100%" stop-color="#2ca25f"/>
+    </linearGradient>
+  </defs>
+  <!-- espiga -->
+  <ellipse cx="95" cy="105" rx="45" ry="85" fill="url(#g1)" stroke="#d4a927" stroke-width="4"/>
+  <!-- grãos -->
+  ${Array.from({length:10}).map((_,r)=>{
+      return Array.from({length:6}).map((__,c)=>{
+        const x = 70 + c*12 + (r%2)*6;
+        const y = 40 + r*14;
+        return `<circle cx="${x}" cy="${y}" r="5.5" fill="#ffd34d" stroke="#d4a927" stroke-width="1"/>`;
+      }).join('');
+    }).join('')}
+  <!-- palha -->
+  <path d="M55 150 C 10 150, 15 210, 60 200" fill="url(#g2)"/>
+  <path d="M135 150 C 170 150, 165 210, 120 200" fill="url(#g2)"/>
+  <path d="M55 150 C 40 120, 55 90, 70 80" fill="url(#g2)"/>
+  <path d="M135 150 C 150 120, 135 90, 120 80" fill="url(#g2)"/>
+</svg>`;
+}
+
+// start
+startGame();
+</script>
+</body>
+</html>
