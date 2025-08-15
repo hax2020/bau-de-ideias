@@ -1,140 +1,199 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Show do Milhão — Nutrição de Plantas</title>
-  <style>
-    :root{
-      --bg:#0b1020; --panel:#121939; --ink:#eaf0ff; --muted:#a9b3d5; --accent:#00e1ff; --accent-2:#8b5cf6; --danger:#ff5b5b; --success:#22c55e; --gold:#f9c846;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Arial,Helvetica,sans-serif; color:var(--ink); background:radial-gradient(1200px 600px at 10% -10%, #1c2560 0%, #0b1020 55%), radial-gradient(1200px 800px at 120% 120%, #2a1040 0%, #0b1020 60%);
-      display:flex; align-items:center; justify-content:center; padding:16px;
-    }
-    .app{width:min(1100px, 100%);}
-    header{
-      background:linear-gradient(90deg, rgba(0,225,255,.2), transparent 30%, rgba(139,92,246,.2) 70%, transparent);
-      border:1px solid rgba(255,255,255,.06); border-radius:16px; padding:18px 20px; margin-bottom:14px;
-      display:flex; align-items:center; gap:14px; backdrop-filter: blur(6px);
-    }
-    header .logo{font-weight:900; letter-spacing:.4px; font-size:20px; display:flex; align-items:center; gap:10px}
-    header .logo .medal{font-size:22px; color:var(--gold)}
-    header .sub{color:var(--muted); font-size:13px}
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Show do Milhão — Nutrição de Plantas</title>
+<style>
+:root{
+  --bg:#0b1020; --panel:#121939; --ink:#eaf0ff; --muted:#a9b3d5; --accent:#00e1ff; --accent-2:#8b5cf6; --danger:#ff5b5b; --success:#22c55e; --gold:#f9c846;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Arial,Helvetica,sans-serif; color:var(--ink);
+  background:radial-gradient(1200px 600px at 10% -10%, #1c2560 0%, #0b1020 55%), radial-gradient(1200px 800px at 120% 120%, #2a1040 0%, #0b1020 60%);
+  display:flex; align-items:center; justify-content:center; padding:16px;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
 
-    .layout{display:grid; grid-template-columns: 1.2fr .8fr; gap:14px}
-    @media (max-width: 880px){.layout{grid-template-columns:1fr;}}
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start; /* ou center se quiser centralizar verticalmente */
+    align-items: center;
+    padding-top: 20px; /* garante espaço no topo */
+    box-sizing: border-box;
+}
 
-    .card{background:var(--panel); border:1px solid rgba(255,255,255,.06); border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,.35)}
+    
+}
 
-    .play{padding:18px}
-    .status{display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:10px}
-    .status .lifelines{display:flex; gap:8px}
-    .lifelines button{
-      background:#0f1533; color:var(--ink); border:1px solid rgba(255,255,255,.08); padding:10px 12px; border-radius:12px; cursor:pointer; font-weight:600; font-size:14px;
-      display:flex; align-items:center; gap:8px; transition:.2s transform, .2s background;
-    }
-    .lifelines button:hover{transform:translateY(-1px); background:#111a44}
-    .lifelines button:disabled{opacity:.45; cursor:not-allowed; transform:none}
+/* ===== Caixa principal com borda ===== */
+.app{
+  width:min(1100px, 100%);
+  background:rgba(18,25,57,0.85);
+  border:2px solid var(--accent);
+  border-radius:20px;
+  padding:20px;
+  box-shadow:0 10px 30px rgba(0,0,0,.4);
+  display:flex;
+  flex-direction:column;
+  gap:20px;
+}
 
-    .question{background:linear-gradient(180deg,#0f1a4d,#0c1333); border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:16px; font-size:20px; font-weight:700; line-height:1.35;}
-    .meta{margin-top:8px; color:var(--muted); font-size:12px}
+/* ===== Cabeçalho ===== */
+header{
+  background:linear-gradient(90deg, rgba(0,225,255,.15), transparent 30%, rgba(139,92,246,.15) 70%, transparent);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:14px; padding:18px; 
+  display:flex; flex-direction:column; gap:6px;
+}
+header .logo{font-weight:900; font-size:20px; display:flex; align-items:center; gap:10px}
+header .logo .medal{font-size:22px; color:var(--gold)}
+header .sub{color:var(--muted); font-size:13px}
 
-    .answers{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:14px}
-    @media (max-width:560px){.answers{grid-template-columns:1fr}}
-    .answers button{
-      text-align:left; padding:14px 16px; border-radius:12px; background:#0e1430; color:var(--ink); border:1px solid rgba(255,255,255,.08); cursor:pointer; font-size:15px; font-weight:600;
-      display:flex; gap:10px; align-items:flex-start; transition:.2s transform, .2s background;
-    }
-    .answers button .badge{background:#141c4d; color:#b8c3ff; border:1px solid rgba(255,255,255,.12); border-radius:8px; padding:3px 8px; font-size:13px; font-weight:800;}
-    .answers button:hover{transform:translateY(-1px); background:#121a40}
-    .answers button.correct{background:rgba(34,197,94,.12); border-color:rgba(34,197,94,.5)}
-    .answers button.wrong{background:rgba(255,91,91,.12); border-color:rgba(255,91,91,.5)}
-    .answers button:disabled{opacity:.95; cursor:not-allowed}
+/* ===== Layout principal ===== */
+.layout{
+  display:grid; grid-template-columns: 1.2fr .8fr; gap:14px;
+}
+@media (max-width: 880px){
+  .layout{grid-template-columns:1fr;}
+}
 
-    .audience{margin-top:10px; display:none}
-    .bar{height:26px; display:flex; align-items:center; gap:8px; margin:6px 0}
-    .bar .label{width:28px; text-align:center; font-weight:800; color:var(--muted)}
-    .bar .track{flex:1; background:#0f1533; border:1px solid rgba(255,255,255,.08); border-radius:999px; overflow:hidden}
-    .bar .fill{height:100%; background:linear-gradient(90deg, var(--accent), var(--accent-2)); width:0%}
-    .bar .pct{width:42px; text-align:right; color:var(--muted); font-weight:700}
+/* ===== Cartões ===== */
+.card{
+  background:var(--panel);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:16px;
+  box-shadow:0 6px 20px rgba(0,0,0,.35);
+}
 
-    .ladder{padding:18px}
-    .ladder h3{margin:0 0 10px 0; font-size:14px; text-transform:uppercase; letter-spacing:.12em; color:#b3c2ff}
-    .steps{list-style:none; padding:0; margin:0; display:grid; gap:6px}
-    .step{display:flex; justify-content:space-between; background:#0f1533; border:1px solid rgba(255,255,255,.06); border-radius:10px; padding:8px 10px; color:var(--muted); font-weight:700}
-    .step .q{opacity:.8}
-    .step.active{background:linear-gradient(90deg, rgba(249,200,70,.18), #0f1533); color:var(--ink); border-color:rgba(249,200,70,.5)}
-    .step.safe{outline:1px dashed rgba(249,200,70,.6)}
+/* ===== Área de jogo ===== */
+.play{padding:18px}
+.status{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px}
 
-    .controls{display:flex; align-items:center; justify-content:space-between; margin-top:14px}
-    .controls .payout{font-weight:800; color:var(--gold)}
-    .controls button{background:#0f1533; color:var(--ink); border:1px solid rgba(255,255,255,.08); padding:10px 14px; border-radius:12px; cursor:pointer; font-weight:700}
+/* ===== Botões de ajuda ===== */
+.lifelines{display:flex; gap:8px; flex-wrap:wrap}
+.lifelines button{
+  background:#0f1533; color:var(--ink);
+  border:1px solid rgba(255,255,255,.1);
+  padding:10px 12px; border-radius:12px; cursor:pointer; font-weight:600; font-size:14px;
+  display:flex; align-items:center; gap:8px;
+  transition:.2s transform, .2s background;
+}
+.lifelines button:hover{transform:translateY(-1px); background:#111a44}
+.lifelines button:disabled{opacity:.45; cursor:not-allowed; transform:none}
 
-    details{margin-top:8px; color:var(--muted)}
-    summary{cursor:pointer; font-weight:700}
-    footer{opacity:.9; font-size:12px; color:var(--muted); margin-top:8px; text-align:center}
-    a{color:var(--accent)}
-  </style>
+/* ===== Pergunta ===== */
+.question{
+  background:linear-gradient(180deg,#0f1a4d,#0c1333);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:14px; padding:16px; font-size:20px; font-weight:700; line-height:1.35;
+}
+.meta{margin-top:8px; color:var(--muted); font-size:12px}
+
+/* ===== Respostas ===== */
+.answers{
+  display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:14px;
+}
+@media (max-width:560px){
+  .answers{grid-template-columns:1fr}
+}
+.answers button{
+  text-align:left; padding:14px 16px; border-radius:12px;
+  background:#0e1430; color:var(--ink);
+  border:1px solid rgba(255,255,255,.1); cursor:pointer; font-size:15px; font-weight:600;
+  display:flex; gap:10px; align-items:flex-start;
+  transition:.2s transform, .2s background;
+}
+.answers button .badge{
+  background:#141c4d; color:#b8c3ff; border:1px solid rgba(255,255,255,.12);
+  border-radius:8px; padding:3px 8px; font-size:13px; font-weight:800;
+}
+.answers button:hover{transform:translateY(-1px); background:#121a40}
+.answers button.correct{background:rgba(34,197,94,.12); border-color:rgba(34,197,94,.5)}
+.answers button.wrong{background:rgba(255,91,91,.12); border-color:rgba(255,91,91,.5)}
+.answers button:disabled{opacity:.95; cursor:not-allowed}
+
+/* ===== Gráfico da plateia ===== */
+.audience{margin-top:10px; display:none}
+.bar{height:26px; display:flex; align-items:center; gap:8px; margin:6px 0}
+.bar .label{width:28px; text-align:center; font-weight:800; color:var(--muted)}
+.bar .track{flex:1; background:#0f1533; border:1px solid rgba(255,255,255,.08); border-radius:999px; overflow:hidden}
+.bar .fill{height:100%; background:linear-gradient(90deg, var(--accent), var(--accent-2)); width:0%}
+.bar .pct{width:42px; text-align:right; color:var(--muted); font-weight:700}
+
+/* ===== Escada de prêmios ===== */
+.ladder{padding:18px}
+.ladder h3{margin:0 0 10px 0; font-size:14px; text-transform:uppercase; letter-spacing:.12em; color:#b3c2ff}
+.steps{list-style:none; padding:0; margin:0; display:grid; gap:6px}
+.step{display:flex; justify-content:space-between; background:#0f1533; border:1px solid rgba(255,255,255,.06); border-radius:10px; padding:8px 10px; color:var(--muted); font-weight:700}
+.step.active{background:linear-gradient(90deg, rgba(249,200,70,.18), #0f1533); color:var(--ink); border-color:rgba(249,200,70,.5)}
+.step.safe{outline:1px dashed rgba(249,200,70,.6)}
+
+/* ===== Placar fixo abaixo ===== */
+.scoreboard{
+  background:#0f1533;
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:14px;
+  padding:10px;
+  font-weight:800;
+  color:var(--gold);
+  text-align:center;
+  font-size:16px;
+}
+
+/* ===== Footer ===== */
+footer{opacity:.9; font-size:12px; color:var(--muted); text-align:center}
+a{color:var(--accent)}
+</style>
 </head>
 <body>
-  <div class="app">
-    <header class="card">
-      <div class="logo"><span class="medal">🏅</span>Show do Milhão — Nutrição de Plantas</div>
-      <div class="sub">Responda 15 questões sobre sintomas, funções, tipos e mobilidade dos nutrientes nas plantas. Use as ajudas com sabedoria!</div>
-    </header>
+<div class="app">
+  <header class="card">
+    <div class="logo"><span class="medal">🌽</span>Show do Milhão — Nutrição de Plantas</div>
+    <div class="sub">Responda 15 questões sobre nutrição de plantas. Use as ajudas com sabedoria!</div>
+  </header>
 
-    <div class="layout">
-      <section class="play card" aria-live="polite">
-        <div class="status">
-          <div class="lifelines">
-            <button id="fifty" aria-label="Usar 50:50">🪄 50:50</button>
-            <button id="skip" aria-label="Pular questão">⏭️ Pular</button>
-            <button id="ask" aria-label="Perguntar aos Universitários">🎓 Universitários</button>
-          </div>
-          <div class="meta"><span id="qpos">Pergunta 1/15</span> • Parada segura em <strong>5</strong> e <strong>10</strong></div>
+  <div class="layout">
+    <section class="play card" aria-live="polite">
+      <div class="status">
+        <div class="lifelines">
+          <button id="fifty">🪄 Eliminar Metade</button>
+          <button id="skip">⏭️ Pular</button>
+          <button id="ask">🎓 Pergunte ao Especialista</button>
         </div>
+        <div class="meta"><span id="qpos">Pergunta 1/15</span></div>
+      </div>
 
-        <div id="question" class="question">Carregando…</div>
-        <div id="answers" class="answers"></div>
+      <div id="question" class="question">Carregando…</div>
+      <div id="answers" class="answers"></div>
 
-        <div id="audience" class="audience">
-          <div class="bar"><div class="label">A</div><div class="track"><div class="fill" id="barA"></div></div><div class="pct" id="pctA">0%</div></div>
-          <div class="bar"><div class="label">B</div><div class="track"><div class="fill" id="barB"></div></div><div class="pct" id="pctB">0%</div></div>
-          <div class="bar"><div class="label">C</div><div class="track"><div class="fill" id="barC"></div></div><div class="pct" id="pctC">0%</div></div>
-          <div class="bar"><div class="label">D</div><div class="track"><div class="fill" id="barD"></div></div><div class="pct" id="pctD">0%</div></div>
-        </div>
+      <div id="audience" class="audience">
+        <div class="bar"><div class="label">A</div><div class="track"><div class="fill" id="barA"></div></div><div class="pct" id="pctA">0%</div></div>
+        <div class="bar"><div class="label">B</div><div class="track"><div class="fill" id="barB"></div></div><div class="pct" id="pctB">0%</div></div>
+        <div class="bar"><div class="label">C</div><div class="track"><div class="fill" id="barC"></div></div><div class="pct" id="pctC">0%</div></div>
+        <div class="bar"><div class="label">D</div><div class="track"><div class="fill" id="barD"></div></div><div class="pct" id="pctD">0%</div></div>
+      </div>
+    </section>
 
-        <div class="controls">
-          <div class="payout">Prêmio atual: <span id="payout">R$ 0</span></div>
-          <div>
-            <button id="restart" title="Reiniciar o jogo">🔄 Recomeçar</button>
-          </div>
-        </div>
-
-        <details>
-          <summary>Regras e créditos</summary>
-          <div style="margin-top:8px; line-height:1.6">
-            • 15 perguntas aleatórias, 4 alternativas cada. <br/>
-            • Ajudas: <strong>50:50</strong> (remove 2 erradas, 1x), <strong>Pular</strong> (troca a questão, 1x), <strong>Universitários</strong> (votos simulados, 1x).<br/>
-            • Paradas seguras ao acertar as perguntas <strong>5</strong> e <strong>10</strong>.<br/>
-            • Conteúdo baseado na tabela enviada pelo professor (nutrição mineral de plantas).<br/>
-          </div>
-        </details>
-      </section>
-
-      <aside class="ladder card">
-        <h3>Tabela de prêmios</h3>
-        <ol id="ladder" class="steps"></ol>
-      </aside>
-    </div>
-
-    <footer>
-      Feito com ❤️ para aulas de Ciências Agrárias. 
-    </footer>
+    <aside class="ladder card">
+      <h3>Tabela de prêmios</h3>
+      <ol id="ladder" class="steps"></ol>
+    </aside>
   </div>
+
+  <!-- Placar movido para baixo -->
+  <div class="scoreboard">
+    Prêmio atual: <span id="payout">R$ 0</span>
+    <button id="restart" style="margin-left:10px;">🔄 Recomeçar</button>
+  </div>
+
+  <footer>Professor Fernando Hax.</footer>
+</div>
 
 <script>
 // ======= Base de dados (extraída da tabela enviada) =======
@@ -437,5 +496,3 @@ startGame();
 </script>
 </body>
 </html>
-
-
