@@ -1,117 +1,310 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Baú de Ideias - Hax2020</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Baú de Ideias — Hax2020</title>
+  <meta name="color-scheme" content="dark light" />
   <style>
-    /* Estilo global */
+    /* ========= Reset básico e variáveis ========= */
+    :root{
+      --bg: #0b0e14;
+      --bg-2: #121827;
+      --card: rgba(255,255,255,0.06);
+      --card-hover: rgba(255,255,255,0.10);
+      --ink: #e8eefc;
+      --muted: #a7b0c3;
+      --accent: #5ee7ff;
+      --accent-2: #8b5cf6;
+      --brand: #f9c846; /* dourado */
+      --ring: #00d0ff;
+      --shadow: 0 10px 30px rgba(0,0,0,.45);
+      --radius-xl: 18px;
+      --radius-lg: 14px;
+      --radius-md: 10px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
     body {
-      background-color: #1e1e1e;
-      color: #ffffff;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       margin: 0;
-      padding: 0;
+      color: var(--ink);
+      font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, "Helvetica Neue", "Noto Sans", Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background:
+        radial-gradient(1200px 800px at 10% -10%, #15314d 0%, transparent 50%),
+        radial-gradient(1200px 800px at 110% 30%, #2a1f55 0%, transparent 55%),
+        linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
+      display: grid;
+      place-items: start center;
+      padding: 48px 18px 72px;
+    }
+
+    /* ========= Container ========= */
+    .shell {
+      width: min(100%, 980px);
+    }
+
+    header.site {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+    .brand {
+      display: inline-grid;
+      place-items: center;
+      gap: 6px;
+    }
+    .brand-logo {
+      width: 64px; height: 64px;
+      display: grid; place-items: center;
+      border-radius: 20px;
+      background: linear-gradient(135deg, var(--brand), #ffef9a);
+      color: #1b1400;
+      box-shadow: var(--shadow);
+      font-weight: 900;
+      letter-spacing: .5px;
+    }
+    .brand h1 {
+      margin: 6px 0 0;
+      font-size: clamp(1.6rem, 1.1rem + 2vw, 2.4rem);
+      line-height: 1.2;
+      text-wrap: balance;
+      text-shadow: 0 2px 14px rgba(0,0,0,.35);
+    }
+    .brand h1 .em { color: var(--brand); }
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: clamp(0.95rem, 0.8rem + .3vw, 1.05rem);
+    }
+
+    /* ========= Grid de cards ========= */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      margin-top: 22px;
+    }
+
+    .card {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 10px;
+      padding: 18px;
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      transition: transform .25s ease, background .25s ease, border-color .25s ease;
+      text-decoration: none;
+      color: inherit;
+      position: relative;
+      overflow: clip;
+      isolation: isolate;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      background: var(--card-hover);
+      border-color: rgba(255,255,255,0.16);
+    }
+    .card:focus-visible {
+      outline: 0;
+      box-shadow:
+        0 0 0 3px color-mix(in oklab, var(--ring), transparent 60%),
+        0 0 0 6px color-mix(in oklab, var(--ring), transparent 85%);
+      transform: translateY(-1px);
+    }
+
+    .card .icon {
+      width: 44px; height: 44px;
+      display: grid; place-items: center;
+      border-radius: 12px;
+      background: linear-gradient(135deg, color-mix(in oklab, var(--accent) 70%, white 30%), color-mix(in oklab, var(--accent-2) 60%, white 40%));
+      color: #0a0f1a;
+      box-shadow: 0 6px 18px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.35);
+    }
+
+    .card h3 {
+      margin: 10px 0 4px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      text-wrap: balance;
+    }
+    .card p {
+      margin: 0 0 8px;
+      color: var(--muted);
+      font-size: .98rem;
+      text-wrap: pretty;
+    }
+    .card .cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 4px;
+      font-weight: 700;
+      font-size: .95rem;
+      color: var(--ink);
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.12);
+      padding: 8px 12px;
+      border-radius: var(--radius-md);
+      transition: background .25s ease, transform .25s ease;
+      width: fit-content;
+    }
+    .card:hover .cta { background: rgba(255,255,255,.12); transform: translateX(2px); }
+
+    /* ========= Barra de utilidades ========= */
+    .actions {
       display: flex;
       justify-content: center;
-      align-items: flex-start;
-      min-height: 100vh;
+      gap: 10px;
+      margin: 10px 0 26px;
+      flex-wrap: wrap;
+    }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 999px;
+      padding: 8px 12px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.12);
+      color: var(--muted);
+      font-size: .92rem;
     }
 
-    /* Contêiner */
-    .container {
-      background: linear-gradient(to bottom right, #3f3f3f, #2c2c2c);
-      padding: 40px;
-      border-radius: 16px;
-      margin-top: 50px;
-      max-width: 650px;
-      width: 90%;
-      box-shadow: 0 0 25px rgba(0, 0, 0, 0.6);
-      transition: transform 0.3s ease;
-    }
-
-    .container:hover {
-      transform: scale(1.01);
-    }
-
-    /* Título */
-    h1 {
-      color: #FFCC00;
-      text-align: center;
-      font-size: 2.8em;
-      margin-bottom: 20px;
-      text-shadow: 2px 2px 5px rgba(0,0,0,0.4);
-    }
-
-    /* Subtítulo */
-    p.intro {
-      text-align: center;
-      font-size: 1.1em;
-      color: #cccccc;
-      margin-bottom: 30px;
-    }
-
-    /* Lista de links */
-    ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-
-    li {
-      margin: 20px 0;
+    /* ========= Footer ========= */
+    footer {
+      margin-top: 26px;
+      color: var(--muted);
+      font-size: .9rem;
       text-align: center;
     }
 
-    /* Botões */
-    a {
-      display: inline-block;
-      background-color: #00bfff;
-      color: #1e1e1e;
-      padding: 12px 24px;
-      border-radius: 8px;
-      font-weight: bold;
-      font-size: 1em;
-      transition: all 0.3s ease;
-      text-decoration: none;
-      box-shadow: 0 4px 10px rgba(0,191,255,0.3);
+    /* ========= Acessibilidade e preferências ========= */
+    @media (prefers-reduced-motion: reduce) {
+      .card, .card .cta { transition: none; }
     }
-
-    a:hover {
-      background-color: #009acd;
-      color: #ffffff;
-      box-shadow: 0 6px 15px rgba(0,191,255,0.5);
-      transform: scale(1.05);
-    }
-
-    @media (max-width: 500px) {
-      .container {
-        padding: 20px;
-      }
-
-      h1 {
-        font-size: 2em;
-      }
-
-      a {
-        padding: 10px 16px;
-        font-size: 0.95em;
-      }
+    @media (max-width: 520px) {
+      body { padding-top: 32px; }
+      .brand-logo { width: 56px; height: 56px; border-radius: 16px; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Baú de Ideias - Hax2020</h1>
-    <p class="intro">Ferramentas e recursos interativos para estudantes e profissionais</p>
-    <ul>
-      <li><a href="https://hax2020.github.io/bau-de-ideias/quiznovo.html" target="_blank">Quiz Online</a></li>
-      <li><a href="https://hax2020.github.io/bau-de-ideias/adubatrigo.html"_blank">Calculadora de Adubação de Trigo</a></li>
-      <li><a href="https://hax2020.github.io/bau-de-ideias/calcario2.html" target="_blank">Calculadora de Calcário</a></li>
-       <li><a href="https://hax2020.github.io/bau-de-ideias/gesso2.html"_blank">Calculadora de Calcário e Gesso</a></li>
-      <li><a href="https://hax2020.github.io/bau-de-ideias/nutrientes.html" target="_blank">Nutrientes Essenciais</a></li>
-      <li><a href="https://hax2020.github.io/bau-de-ideias/showdomilho.html">Show do Milhão — Nutrição de Plantas</a></li>
-    </ul>
-  </div>
+  <main class="shell" aria-labelledby="title">
+    <header class="site">
+      <div class="brand" role="img" aria-label="Baú de Ideias — Hax2020">
+        <div class="brand-logo">H</div>
+        <h1 id="title">Baú de Ideias <span class="em">Hax2020</span></h1>
+      </div>
+      <p class="subtitle">Ferramentas e recursos interativos para estudantes e profissionais</p>
+
+      <div class="actions" aria-hidden="true">
+        <span class="chip">
+          <!-- calendar icon -->
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 2v3m10-3v3M3 9h18M5 6h14a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+          Atualizado regularmente
+        </span>
+        <span class="chip">
+          <!-- sparkles icon -->
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3l1.2 3.6L17 8l-3.8 1.4L12 13l-1.2-3.6L7 8l3.8-1.4L12 3Zm7 9l.9 2.7 2.6.9-2.6.9L19 20l-.9-2.7-2.6-.9 2.6-.9.9-2.5ZM4 13l.8 2.3L7 16l-2.2.7L4 19l-.8-2.3L1 16l2.2-.7L4 13Z" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linejoin="round"/></svg>
+          Interface limpa e responsiva
+        </span>
+      </div>
+    </header>
+
+    <nav class="grid" aria-label="Ferramentas">
+      <!-- Quiz -->
+      <a class="card" href="https://hax2020.github.io/bau-de-ideias/quiznovo.html" target="_blank" rel="noopener">
+        <div class="icon" aria-hidden="true">
+          <!-- quiz icon -->
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 17h.01M7 7a5 5 0 1 1 8.66 3.54C14.64 11.6 14 12.38 14 14m-8 7h12a2 2 0 0 0 2-2V9.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <h3>Quiz Online</h3>
+        <p>Questões dinâmicas para estudar e revisar conteúdos.</p>
+        <span class="cta">Abrir
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17l10-10M9 7h8v8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+      </a>
+
+      <!-- Adubação de Trigo -->
+      <a class="card" href="https://hax2020.github.io/bau-de-ideias/adubatrigo.html" target="_blank" rel="noopener">
+        <div class="icon" aria-hidden="true">
+          <!-- flask icon -->
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M10 2v4l-5 8a5 5 0 0 0 4 8h6a5 5 0 0 0 4-8l-5-8V2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M9 6h6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        </div>
+        <h3>Calculadora de Adubação de Trigo</h3>
+        <p>Estime doses com base em parâmetros de fertilidade e metas.</p>
+        <span class="cta">Calcular
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17l10-10M9 7h8v8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+      </a>
+
+      <!-- Calcário -->
+      <a class="card" href="https://hax2020.github.io/bau-de-ideias/calcario2.html" target="_blank" rel="noopener">
+        <div class="icon" aria-hidden="true">
+          <!-- layers icon -->
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 3l9 5-9 5-9-5 9-5Zm-7.5 9L12 17l7.5-5M4.5 18L12 22l7.5-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <h3>Calculadora de Calcário</h3>
+        <p>Correção de acidez por saturação de bases e PRNT.</p>
+        <span class="cta">Calcular
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17l10-10M9 7h8v8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+      </a>
+
+      <!-- Calcário e Gesso -->
+      <a class="card" href="https://hax2020.github.io/bau-de-ideias/gesso2.html" target="_blank" rel="noopener">
+        <div class="icon" aria-hidden="true">
+          <!-- cube icon -->
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 2l9 5v10l-9 5-9-5V7l9-5Z" stroke="currentColor" stroke-width="1.7"/><path d="M12 12l9-5M12 12l-9-5M12 12v10" stroke="currentColor" stroke-width="1.7"/></svg>
+        </div>
+        <h3>Calcário e Gesso</h3>
+        <p>Dimensione as duas correções em conjunto de modo prático.</p>
+        <span class="cta">Abrir
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17l10-10M9 7h8v8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+      </a>
+
+      <!-- Nutrientes -->
+      <a class="card" href="https://hax2020.github.io/bau-de-ideias/nutrientes.html" target="_blank" rel="noopener">
+        <div class="icon" aria-hidden="true">
+          <!-- leaf icon -->
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 13c4-8 12-9 16-9-1 12-8 16-14 16a5 5 0 0 1-2-7Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 18c4-3 7-7 10-12" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        </div>
+        <h3>Nutrientes Essenciais</h3>
+        <p>Referências rápidas de macro e micronutrientes vegetais.</p>
+        <span class="cta">Consultar
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17l10-10M9 7h8v8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+      </a>
+
+      <!-- Show do Milhão -->
+      <a class="card" href="https://hax2020.github.io/bau-de-ideias/jogo.html" target="_blank" rel="noopener">
+        <div class="icon" aria-hidden="true">
+          <!-- trophy icon -->
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M17 3H7v2a5 5 0 1 1-3 4.58V6a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v3.58A5 5 0 1 1 17 5V3Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M9 19h6m-6 2h6M12 14v5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        </div>
+        <h3>Show do Milhão — Nutrição de Plantas</h3>
+        <p>Jogo de perguntas e respostas para reforçar conteúdo.</p>
+        <span class="cta">Jogar
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 17l10-10M9 7h8v8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+      </a>
+    </nav>
+
+    <footer>
+      © <span id="year"></span> Hax2020 — Baú de Ideias. Feito com ♥ para a comunidade.
+    </footer>
+  </main>
+
+  <script>
+    // Atualiza ano automaticamente
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
 </body>
 </html>
