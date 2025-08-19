@@ -1,167 +1,208 @@
-<!DOCTYPE html>  <html lang="en">  
-<head>  
-  <meta charset="UTF-8" />  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>  
-  <title>Login/Register UI</title>  
-  <link rel="stylesheet" href="style.css"/>  
-</head>  
-<body>  
-  <div class="container">  
-    <div class="tabs">  
-      <button id="loginTab" class="active">Login</button>  
-      <button id="registerTab">Register</button>  
-    </div>  <!-- Login Form -->  
-<form id="loginForm" class="form active">  
-  <input type="email" placeholder="Email" required value="annaschawdhary157@gmail.com"/>  
-  <input type="password" placeholder="Password" required />  
-  <button type="submit" class="btn"><i class="fa fa-sign-in-alt"></i> Login</button>  
-  <p class="or">Or continue with</p>  
-  <div class="socials">  
-    <button class="social">G</button>  
-    <button class="social">f</button>  
-    <button class="social">t</button>  
-  </div>  
-</form>  
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login / Registro</title>
 
-<!-- Register Form -->  
-<form id="registerForm" class="form">  
-  <input type="text" placeholder="Full Name" required />  
-  <input type="email" placeholder="Email" required />  
-  <input type="password" placeholder="Password" required />  
-  <input type="password" placeholder="Confirm Password" required />  
-  <button type="submit" class="btn"><i class="fa fa-user-plus"></i> Register</button>  
-  <p class="or">Or sign up with</p>  
-  <div class="socials">  
-    <button class="social">G</button>  
-    <button class="social">f</button>  
-    <button class="social">t</button>  
-  </div>  
-</form>
+  <!-- Font Awesome (ícones) -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkfS7hC8Z8S8J+3V0G8JbQ2lMpg9Cwz8v3t3F3yZ2b9fQ0o0t9QxZbK7g=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  />
 
-  </div>    <script src="script.js"></script>  </body>  
-</html>  CSS :
-body {
-margin: 0;
-padding: 0;
-font-family: 'Segoe UI', sans-serif;
-background: #e0e5ec;
-display: flex;
-justify-content: center;
-align-items: center;
-height: 100vh;
-}
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="container" aria-labelledby="auth-title">
+    <h1 id="auth-title" class="sr-only">Autenticação</h1>
 
-.container {
-background: #e0e5ec;
-padding: 30px;
-border-radius: 20px;
-box-shadow: 10px 10px 30px #c2c8d0, -10px -10px 30px #ffffff;
-width: 300px;
-}
+    <!-- Tabs -->
+    <div class="tabs" role="tablist" aria-label="Escolher formulário">
+      <button
+        id="loginTab"
+        class="tab active"
+        role="tab"
+        aria-selected="true"
+        aria-controls="loginPanel"
+        tabindex="0"
+      >
+        <i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i>
+        <span>Login</span>
+      </button>
+      <button
+        id="registerTab"
+        class="tab"
+        role="tab"
+        aria-selected="false"
+        aria-controls="registerPanel"
+        tabindex="-1"
+      >
+        <i class="fa-solid fa-user-plus" aria-hidden="true"></i>
+        <span>Registrar</span>
+      </button>
+    </div>
 
-.tabs {
-display: flex;
-justify-content: space-between;
-margin-bottom: 20px;
-}
+    <!-- Painéis -->
+    <section
+      id="loginPanel"
+      class="panel active"
+      role="tabpanel"
+      aria-labelledby="loginTab"
+    >
+      <form id="loginForm" class="form" novalidate>
+        <div class="field">
+          <label for="loginEmail">Email</label>
+          <input
+            id="loginEmail"
+            name="email"
+            type="email"
+            placeholder="seuemail@exemplo.com"
+            autocomplete="username"
+            inputmode="email"
+            required
+          />
+        </div>
 
-.tabs button {
-flex: 1;
-padding: 10px;
-border: none;
-background: none;
-font-weight: bold;
-cursor: pointer;
-border-radius: 10px;
-transition: 0.3s;
-}
+        <div class="field has-toggle">
+          <label for="loginPassword">Senha</label>
+          <input
+            id="loginPassword"
+            name="password"
+            type="password"
+            placeholder="Sua senha"
+            autocomplete="current-password"
+            minlength="6"
+            required
+          />
+          <button
+            class="pw-toggle"
+            type="button"
+            aria-label="Mostrar/ocultar senha"
+          >
+            <i class="fa-regular fa-eye"></i>
+          </button>
+        </div>
 
-.tabs button.active {
-background: #d1d9e6;
-box-shadow: inset 2px 2px 5px #bec4cb, inset -2px -2px 5px #f0f5fa;
-}
+        <button type="submit" class="btn">
+          <i class="fa-solid fa-right-to-bracket"></i>
+          <span>Entrar</span>
+        </button>
 
-.form {
-display: none;
-flex-direction: column;
-}
+        <p class="or" aria-hidden="true">ou continue com</p>
+        <div class="socials" aria-label="Login social (demo)">
+          <button class="social" type="button" title="Google (demo)">
+            <i class="fa-brands fa-google"></i>
+          </button>
+          <button class="social" type="button" title="Facebook (demo)">
+            <i class="fa-brands fa-facebook-f"></i>
+          </button>
+          <button class="social" type="button" title="X/Twitter (demo)">
+            <i class="fa-brands fa-x-twitter"></i>
+          </button>
+        </div>
+      </form>
+    </section>
 
-.form.active {
-display: flex;
-}
+    <section
+      id="registerPanel"
+      class="panel"
+      role="tabpanel"
+      aria-labelledby="registerTab"
+      hidden
+    >
+      <form id="registerForm" class="form" novalidate>
+        <div class="field">
+          <label for="regName">Nome completo</label>
+          <input
+            id="regName"
+            name="full_name"
+            type="text"
+            placeholder="Seu nome"
+            autocomplete="name"
+            required
+          />
+        </div>
 
-input {
-margin: 10px 0;
-padding: 12px;
-border-radius: 10px;
-border: none;
-background: #e0e5ec;
-box-shadow: inset 4px 4px 6px #c8ccd1, inset -4px -4px 6px #f0f5fa;
-}
+        <div class="field">
+          <label for="regEmail">Email</label>
+          <input
+            id="regEmail"
+            name="email"
+            type="email"
+            placeholder="seuemail@exemplo.com"
+            autocomplete="email"
+            inputmode="email"
+            required
+          />
+        </div>
 
-.btn {
-margin-top: 10px;
-padding: 12px;
-background: #e0e5ec;
-border: none;
-border-radius: 10px;
-cursor: pointer;
-font-weight: bold;
-box-shadow: 6px 6px 10px #c2c8d0, -6px -6px 10px #ffffff;
-transition: 0.3s;
-}
+        <div class="field has-toggle">
+          <label for="regPassword">Senha</label>
+          <input
+            id="regPassword"
+            name="password"
+            type="password"
+            placeholder="Crie uma senha"
+            autocomplete="new-password"
+            minlength="6"
+            required
+          />
+          <button
+            class="pw-toggle"
+            type="button"
+            aria-label="Mostrar/ocultar senha"
+          >
+            <i class="fa-regular fa-eye"></i>
+          </button>
+        </div>
 
-.btn:hover {
-background: #d6dce4;
-}
+        <div class="field has-toggle">
+          <label for="regPassword2">Confirmar senha</label>
+          <input
+            id="regPassword2"
+            name="password_confirm"
+            type="password"
+            placeholder="Repita a senha"
+            autocomplete="new-password"
+            minlength="6"
+            required
+          />
+          <button
+            class="pw-toggle"
+            type="button"
+            aria-label="Mostrar/ocultar senha"
+          >
+            <i class="fa-regular fa-eye"></i>
+          </button>
+        </div>
 
-.or {
-text-align: center;
-margin: 15px 0 10px;
-font-size: 0.85em;
-color: #666;
-}
+        <button type="submit" class="btn">
+          <i class="fa-solid fa-user-plus"></i>
+          <span>Registrar</span>
+        </button>
 
-.socials {
-display: flex;
-justify-content: space-around;
-}
+        <p class="or" aria-hidden="true">ou cadastre-se com</p>
+        <div class="socials" aria-label="Cadastro social (demo)">
+          <button class="social" type="button" title="Google (demo)">
+            <i class="fa-brands fa-google"></i>
+          </button>
+          <button class="social" type="button" title="Facebook (demo)">
+            <i class="fa-brands fa-facebook-f"></i>
+          </button>
+          <button class="social" type="button" title="X/Twitter (demo)">
+            <i class="fa-brands fa-x-twitter"></i>
+          </button>
+        </div>
+      </form>
+    </section>
 
-.social {
-width: 40px;
-height: 40px;
-border-radius: 50%;
-border: none;
-background: #e0e5ec;
-box-shadow: 6px 6px 10px #c2c8d0, -6px -6px 10px #ffffff;
-font-size: 1.2em;
-cursor: pointer;
-}
+    <p class="helper" role="status" aria-live="polite" id="formStatus"></p>
+  </main>
 
-JAVASCRIPT:
-const loginTab = document.getElementById("loginTab");
-const registerTab = document.getElementById("registerTab");
-const loginForm = document.getElementById("loginForm");
-const registerForm = document.getElementById("registerForm");
-
-loginTab.addEventListener("click", () => {
-loginTab.classList.add("active");
-registerTab.classList.remove("active");
-loginForm.classList.add("active");
-registerForm.classList.remove("active");
-});
-
-registerTab.addEventListener("click", () => {
-registerTab.classList.add("active");
-loginTab.classList.remove("active");
-registerForm.classList.add("active");
-loginForm.classList.remove("active");
-});
-
-Create three separate files in the same folder:
-
-index.html
-
-style.css
-
-script.js
+  <script src="script.js"></script>
+</body>
+</html>
