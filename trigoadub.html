@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b6bff" />
+  <title>Calculadora de Adubos para Trigo</title>
+  <style>
+    :root{
+      --bg:#f6f7fb; --card:#ffffff; --ink:#1b2430; --muted:#6b7587;
+      --brand:#0b6bff; --brand-600:#0a59d6; --ok:#0f9d58; --warn:#f9c846; --border:#e5e8ef;
+      --radius:14px; --shadow:0 10px 25px rgba(10,25,41,.08);
+    }
+    @media (prefers-color-scheme: dark){
+      :root{
+        --bg:#0f1420; --card:#151b2b; --ink:#e9eef9; --muted:#aab3c5;
+        --brand:#3da3ff; --brand-600:#2b7fd6; --ok:#34d399; --warn:#eab308; --border:#23304a;
+        --shadow:0 8px 24px rgba(0,0,0,.35);
+      }
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      background:var(--bg); color:var(--ink); line-height:1.45;
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+      display:flex; align-items:flex-start; justify-content:center;
+    }
+    .wrap{width:min(100%,1100px); padding:20px 16px 64px}
+    header{display:flex; align-items:center; justify-content:space-between; gap:12px; margin:12px 0 18px}
+    h1{font-size:clamp(1.4rem,2.5vw,1.9rem); margin:0; letter-spacing:.2px}
+    .badge{font-size:.78rem; color:var(--muted); background:transparent; border:1px solid var(--border); padding:.35rem .6rem; border-radius:999px}
+    .cards{display:grid; gap:16px}
+    @media (min-width:900px){ .cards{grid-template-columns: 1.1fr .9fr} }
+
+    .card{
+      background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+      box-shadow:var(--shadow); padding:16px;
+    }
+    .card h2{font-size:1.05rem; margin:.25rem 0 .75rem}
+    .helper{font-size:.9rem; color:var(--muted); margin:-2px 0 10px}
+
+    form{display:grid; gap:14px}
+    .grid{display:grid; gap:12px}
+    .grid.two{grid-template-columns:1fr}
+    @media (min-width:640px){ .grid.two{grid-template-columns:1fr 1fr} }
+
+    label{font-weight:600; font-size:.94rem; display:block; margin-bottom:6px}
+    .field{position:relative}
+    .unit{
+      position:absolute; right:10px; top:50%; translate:0 -50%;
+      font-size:.9rem; color:var(--muted); pointer-events:none;
+      background:transparent; padding-left:6px;
+    }
+    input[type="number"], select{
+      width:100%; padding:12px 36px 12px 12px; border:1px solid var(--border);
+      border-radius:10px; background:transparent; color:inherit; font-size:1rem;
+      outline:none; transition:border-color .15s ease, box-shadow .15s ease;
+    }
+    select{padding-right:40px}
+    input:focus, select:focus{
+      border-color:var(--brand); box-shadow:0 0 0 3px color-mix(in srgb, var(--brand) 20%, transparent);
+    }
+
+    .row-actions{display:flex; gap:12px; flex-wrap:wrap; margin-top:6px}
+    .btn{
+      appearance:none; border:0; border-radius:12px; padding:12px 16px; cursor:pointer;
+      font-weight:700; letter-spacing:.2px; transition:transform .04s ease, background .2s ease, filter .2s ease;
+    }
+    .btn:active{transform:translateY(1px)}
+    .btn.primary{background:var(--brand); color:white}
+    .btn.primary:hover{background:var(--brand-600)}
+    .btn.ghost{background:transparent; color:var(--brand); border:1px solid var(--brand)}
+    .btn.muted{background:transparent; color:var(--muted); border:1px dashed var(--border)}
+    .note{font-size:.9rem; color:var(--muted)}
+
+    #result[hidden]{display:none}
+    #result .pill{
+      display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px; font-weight:700; font-size:.9rem;
+    }
+    .pill.ok{background:color-mix(in srgb, var(--ok) 16%, transparent); color:var(--ok); border:1px solid color-mix(in srgb, var(--ok) 40%, transparent)}
+    .pill.warn{background:color-mix(in srgb, var(--warn) 20%, transparent); color:#8a6d00; border:1px solid color-mix(in srgb, var(--warn) 45%, transparent)}
+    .results-grid{display:grid; gap:12px; margin-top:10px}
+    @media (min-width:560px){ .results-grid{grid-template-columns:repeat(2,1fr)} }
+    .res{
+      border:1px dashed var(--border); border-radius:12px; padding:12px;
+    }
+    .res h3{margin:.2rem 0 .4rem; font-size:1rem}
+    .res .big{font-weight:800; font-size:1.3rem}
+    .res .sub{color:var(--muted); font-size:.9rem}
+    .table{
+      width:100%; border-collapse:collapse; margin-top:8px; font-size:.95rem; overflow:auto;
+    }
+    .table th, .table td{
+      border-bottom:1px solid var(--border); padding:8px 6px; text-align:left; white-space:nowrap;
+    }
+    .table th{color:var(--muted); font-weight:700}
+    footer{margin-top:18px; text-align:center; color:var(--muted); font-size:.88rem}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Calculadora de Adubos — Trigo</h1>
+      <span class="badge">Responsiva • Mobile‑first</span>
+    </header>
+
+    <div class="cards">
+      <!-- FORM CARD -->
+      <section class="card" aria-labelledby="form-title">
+        <h2 id="form-title">Parâmetros do Solo e Manejo</h2>
+        <p class="helper">Preencha os campos. Os valores de recomendação podem ser ajustados conforme sua referência técnica.</p>
+        <form id="analysisForm" novalidate>
+          <div class="grid two">
+            <div class="field">
+              <label for="organicMatter">Matéria orgânica do solo</label>
+              <input type="number" id="organicMatter" name="organicMatter" step="0.01" min="0" placeholder="ex.: 3,0" inputmode="decimal" required />
+              <span class="unit">%</span>
+            </div>
+            <div class="field">
+              <label for="classTextural">Classe textural</label>
+              <select id="classTextural" name="classTextural" required>
+                <option value="" disabled selected>Selecione…</option>
+                <option value="1">Classe Textural 1</option>
+                <option value="2">Classe Textural 2</option>
+                <option value="3">Classe Textural 3</option>
+                <option value="4">Classe Textural 4</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid two">
+            <div class="field">
+              <label for="phosphorus">Fósforo (P) no solo</label>
+              <input type="number" id="phosphorus" name="phosphorus" step="0.01" min="0" placeholder="mg/dm³" inputmode="decimal" required />
+              <span class="unit">mg/dm³</span>
+            </div>
+            <div class="field">
+              <label for="ctc">CTC pH 7,0</label>
+              <input type="number" id="ctc" name="ctc" step="0.01" min="0" placeholder="cmol₍c₎/dm³" inputmode="decimal" required />
+              <span class="unit">cmol/dm³</span>
+            </div>
+          </div>
+
+          <div class="grid two">
+            <div class="field">
+              <label for="potassium">Potássio (K) no solo</label>
+              <input type="number" id="potassium" name="potassium" step="0.01" min="0" placeholder="mg/dm³" inputmode="decimal" required />
+              <span class="unit">mg/dm³</span>
+            </div>
+            <div class="field">
+              <label for="previousCrop">Cultura anterior</label>
+              <select id="previousCrop" name="previousCrop" required>
+                <option value="" disabled selected>Selecione…</option>
+                <option value="graminea">Gramínea</option>
+                <option value="leguminosa">Leguminosa</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid two">
+            <div class="field">
+              <label for="cultivation">Cultivo</label>
+              <select id="cultivation" name="cultivation" required>
+                <option value="" disabled selected>Selecione…</option>
+                <option value="1">1º Cultivo</option>
+                <option value="2">2º Cultivo</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="nitrogenFertilizer">Fonte de Nitrogênio</label>
+              <select id="nitrogenFertilizer" name="nitrogenFertilizer" required>
+                <option value="" disabled selected>Selecione…</option>
+                <option value="ureia">Ureia (45% N)</option>
+                <option value="nitrato_calcio">Nitrato de Cálcio (14% N)</option>
+                <option value="nitrato_amonio">Nitrato de Amônio (32% N)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid two">
+            <div class="field">
+              <label for="phosphateFertilizer">Fonte de Fósforo</label>
+              <select id="phosphateFertilizer" name="phosphateFertilizer" required>
+                <option value="" disabled selected>Selecione…</option>
+                <option value="super_triplo">Superfosfato Triplo (41% P)</option>
+                <option value="super_simples">Superfosfato Simples (18% P)</option>
+                <option value="fosfato_natural">Fosfato Natural (27% P)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="potassiumFertilizer">Fonte de Potássio</label>
+              <select id="potassiumFertilizer" name="potassiumFertilizer" required>
+                <option value="" disabled selected>Selecione…</option>
+                <option value="cloreto_potassio">Cloreto de Potássio (58% K)</option>
+                <option value="sulfato_potassio">Sulfato de Potássio (48% K)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row-actions">
+            <button type="button" class="btn primary" id="calcBtn">Calcular adubação</button>
+            <button type="reset" class="btn ghost" id="clearBtn">Limpar</button>
+            <span class="note">Os coeficientes de P e K estão como valores-guia “hipotéticos”.</span>
+          </div>
+        </form>
+      </section>
+
+      <!-- RESULTS CARD -->
+      <section class="card" aria-live="polite" id="result" hidden>
+        <h2>Resultado</h2>
+        <div id="status"></div>
+        <div class="results-grid">
+          <div class="res">
+            <h3>Nitrogênio (N)</h3>
+            <div class="big" id="n-plantio">—</div>
+            <div class="sub">no plantio (kg de produto/ha)</div>
+            <div class="big" id="n-cobertura" style="margin-top:6px">—</div>
+            <div class="sub">em cobertura (kg de produto/ha)</div>
+            <table class="table" aria-label="Detalhes do N">
+              <thead><tr><th>Fonte</th><th>N total (kg)</th><th>%N</th></tr></thead>
+              <tbody id="n-table"></tbody>
+            </table>
+          </div>
+
+          <div class="res">
+            <h3>Fósforo (P)</h3>
+            <div class="big" id="p-total">—</div>
+            <div class="sub">no plantio (kg de produto/ha)</div>
+            <table class="table" aria-label="Detalhes do P">
+              <thead><tr><th>Fonte</th><th>P (kg)</th><th>%P</th></tr></thead>
+              <tbody id="p-table"></tbody>
+            </table>
+          </div>
+
+          <div class="res">
+            <h3>Potássio (K)</h3>
+            <div class="big" id="k-total">—</div>
+            <div class="sub">no plantio (kg de produto/ha)</div>
+            <table class="table" aria-label="Detalhes do K">
+              <thead><tr><th>Fonte</th><th>K (kg)</th><th>%K</th></tr></thead>
+              <tbody id="k-table"></tbody>
+            </table>
+          </div>
+
+          <div class="res">
+            <h3>Resumo</h3>
+            <table class="table" aria-label="Resumo final">
+              <thead><tr><th>Elemento</th><th>Produto (kg/ha)</th><th>Observação</th></tr></thead>
+              <tbody id="resume-table"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <footer>© <span id="year"></span> Calculadora de Adubos • Layout responsivo • Ajuste os coeficientes conforme sua recomendação técnica.</footer>
+  </div>
+
+  <script>
+    // Helpers
+    const fmt = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2, minimumFractionDigits: 0 });
+    const $ = (id)=>document.getElementById(id);
+
+    const N_SOURCES = {
+      ureia: { label: "Ureia", pct: 0.45 },
+      nitrato_calcio: { label: "Nitrato de Cálcio", pct: 0.14 },
+      nitrato_amonio: { label: "Nitrato de Amônio", pct: 0.32 }
+    };
+    const P_SOURCES = {
+      super_triplo: { label: "Superfosfato Triplo", pct: 0.41 },
+      super_simples: { label: "Superfosfato Simples", pct: 0.18 },
+      fosfato_natural: { label: "Fosfato Natural", pct: 0.27 }
+    };
+    const K_SOURCES = {
+      cloreto_potassio: { label: "Cloreto de Potássio", pct: 0.58 },
+      sulfato_potassio: { label: "Sulfato de Potássio", pct: 0.48 }
+    };
+
+    // Lógica mantida da sua versão (com possibilidade de ajuste)
+    function computeNitrogen(organicMatter, previousCrop){
+      // gramínea: 80 / 60 / 20 ; leguminosa: 60 / 50 / 20
+      if(previousCrop === 'graminea'){
+        if(organicMatter <= 2.5) return 80;
+        if(organicMatter >= 5)   return 20;
+        return 60;
+      }else{ // leguminosa
+        if(organicMatter <= 2.5) return 60;
+        if(organicMatter >= 5)   return 20;
+        return 50;
+      }
+    }
+
+    function validateForm(form){
+      // usa a validação nativa + foco no primeiro inválido
+      if(!form.checkValidity()){
+        const firstInvalid = form.querySelector(':invalid');
+        firstInvalid?.focus();
+        form.reportValidity();
+        return false;
+      }
+      return true;
+    }
+
+    function calculateFertilizer(){
+      const form = $('analysisForm');
+      if(!validateForm(form)) return;
+
+      const organicMatter = parseFloat($('organicMatter').value);
+      const phosphorus = parseFloat($('phosphorus').value); // disponível se desejar usar no futuro
+      const potassium  = parseFloat($('potassium').value);  // idem
+      const previousCrop = $('previousCrop').value;
+      const cultivation = $('cultivation').value;
+      const nSrc = $('nitrogenFertilizer').value;
+      const pSrc = $('phosphateFertilizer').value;
+      const kSrc = $('potassiumFertilizer').value;
+
+      // N
+      const nNeeded = computeNitrogen(organicMatter, previousCrop);
+      const nPlanting = 20; // N no plantio
+      const nCover = Math.max(nNeeded - nPlanting, 0);
+      const nPct = N_SOURCES[nSrc].pct;
+      const nProdPlant = nPlanting / nPct;
+      const nProdCover = nCover / nPct;
+
+      // P (valores-guia hipotéticos; ajuste conforme sua fonte)
+      const pNeeded = cultivation === '1' ? 85 : 45;
+      const pPct = P_SOURCES[pSrc].pct;
+      const pProd = pNeeded / pPct;
+
+      // K (valores-guia hipotéticos)
+      const kNeeded = cultivation === '1' ? 60 : 30;
+      const kPct = K_SOURCES[kSrc].pct;
+      const kProd = kNeeded / kPct;
+
+      // Render
+      $('result').hidden = false;
+      $('n-plantio').textContent = fmt.format(nProdPlant) + ' kg/ha';
+      $('n-cobertura').textContent = fmt.format(nProdCover) + ' kg/ha';
+      $('p-total').textContent = fmt.format(pProd) + ' kg/ha';
+      $('k-total').textContent = fmt.format(kProd) + ' kg/ha';
+
+      $('n-table').innerHTML =
+        `<tr><td>${N_SOURCES[nSrc].label}</td><td>${fmt.format(nNeeded)}</td><td>${fmt.format(nPct*100)}%</td></tr>`;
+      $('p-table').innerHTML =
+        `<tr><td>${P_SOURCES[pSrc].label}</td><td>${fmt.format(pNeeded)}</td><td>${fmt.format(pPct*100)}%</td></tr>`;
+      $('k-table').innerHTML =
+        `<tr><td>${K_SOURCES[kSrc].label}</td><td>${fmt.format(kNeeded)}</td><td>${fmt.format(kPct*100)}%</td></tr>`;
+
+      $('resume-table').innerHTML = `
+        <tr><td>N</td><td>${fmt.format(nProdPlant + nProdCover)} kg/ha</td><td>Plantio: ${fmt.format(nProdPlant)} • Cobertura: ${fmt.format(nProdCover)}</td></tr>
+        <tr><td>P</td><td>${fmt.format(pProd)} kg/ha</td><td>Aplicar no plantio</td></tr>
+        <tr><td>K</td><td>${fmt.format(kProd)} kg/ha</td><td>Aplicar no plantio</td></tr>
+      `;
+
+      const info = (nCover>0) ? `<span class="pill warn">Cobertura necessária</span>` : `<span class="pill ok">Somente plantio</span>`;
+      $('status').innerHTML = info;
+    }
+
+    // Eventos
+    $('calcBtn').addEventListener('click', calculateFertilizer);
+    $('clearBtn').addEventListener('click', () => {
+      $('result').hidden = true;
+    });
+    // Enter para calcular
+    $('analysisForm').addEventListener('keydown', (e)=>{
+      if(e.key === 'Enter'){ e.preventDefault(); calculateFertilizer(); }
+    });
+
+    $('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
