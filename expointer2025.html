@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Buscar PNG por Nome — Google Drive API</title>
+<style>
+  :root{
+    --bg:#0b1020; --panel:#121939; --ink:#eaf0ff; --muted:#a9b3d5; --accent:#00e1ff; --danger:#ff6b6b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial; background:linear-gradient(180deg,#0b1020,#0f1430 60%,#11163a); color:var(--ink); min-height:100vh;}
+  .wrap{max-width:900px; margin:0 auto; padding:32px 20px;}
+  h1{margin:0 0 18px; font-weight:700; letter-spacing:.2px}
+  p.hint{color:var(--muted); margin:0 0 24px}
+  .card{background:var(--panel); padding:18px; border-radius:16px; box-shadow:0 8px 40px rgba(0,0,0,.35)}
+  .row{display:flex; gap:12px; flex-wrap:wrap; align-items:center}
+  input[type="text"]{flex:1 1 360px; padding:14px 14px; border-radius:12px; border:1px solid #223; background:#0f1530; color:var(--ink); outline:none}
+  input::placeholder{color:#8290c7}
+  button{padding:14px 18px; border-radius:12px; border:0; background:linear-gradient(90deg,#15d1ff,#7a5cff); color:#001; font-weight:700; cursor:pointer}
+  button:disabled{opacity:.6; cursor:not-allowed}
+  .meta{font-size:.9rem; color:var(--muted); margin-top:10px}
+  .result{margin-top:20px; display:grid; gap:16px}
+  .imgbox{background:#0b1130; border:1px solid #1f295c; border-radius:14px; padding:14px; display:flex; justify-content:center; align-items:center; min-height:220px}
+  .imgbox img{max-width:100%; height:auto; border-radius:10px}
+  .err{color:var(--danger); font-weight:600}
+  .ok{color:#60ffa6; font-weight:600}
+  .tip{font-size:.9rem; color:var(--muted)}
+  .foot{margin-top:28px; color:#98a4d9; font-size:.9rem}
+  code{background:#0c1230; color:#aee2ff; padding:2px 6px; border-radius:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Buscar imagem PNG por nome (Google Drive)</h1>
+  <p class="hint">Digite o <strong>nome completo</strong> exatamente como está no arquivo <code>.png</code> dentro da pasta no Drive e clique em Buscar.</p>
+
+  <div class="card">
+    <div class="row">
+      <input id="nome" type="text" placeholder="Ex.: Maria Oliveira" autocomplete="name" />
+      <button id="btnBuscar">Buscar</button>
+    </div>
+    <div class="meta">Pasta alvo: <code>1w9zADrtxwfkUpWb3b3FBozEY6MMw8XPy</code> (precisa estar pública como “Qualquer pessoa com o link → Leitor”)</div>
+
+    <div class="result" id="resultado"></div>
+  </div>
+
+  <div class="foot">
+    Dica: o URL exibido usa o formato público do Drive <code>https://drive.google.com/uc?export=view&id=FILE_ID</code>.
+  </div>
+</div>
+
+<script>
+/**
+ * CONFIGURAÇÃO
+ *  - Substitua pela sua chave de API do Google Cloud (Drive API habilitada).
+ *  - Restrinja a chave a referrers do seu domínio e à Drive API.
+ */
+const API_KEY   = "YOUR_API_KEY_HERE";
+const FOLDER_ID = "1w9zADrtxwfkUpWb3b3FBozEY6MMw8XPy";
+
+/**
+ * Utilitários
+ */
+const $ = (sel) => document.querySelector(sel);
+
+function showMessage(html, cls="") {
+  $("#resultado").innerHTML = `<div class="${cls}">${html}</div>`;
+}
+
+function showImage(id, name, mimeType) {
+  const viewUrl = `https://drive.google.com/uc?export=view&id=${id}`;
+  const fileUrl = `https://drive.google.com/file/d/${id}/view`;
+  $("#resultado").innerHTML = `
+    <div class="ok">Encontrado: <strong>${name}</strong> <span class="tip">(${mimeType})</span></div>
+    <div class="imgbox">
+      <img src="${viewUrl}" alt="${name}" onerror="this.onerror=null; this.src=''; document.getElementById('resultado').insertAdjacentHTML('beforeend','<div class=err>Não foi possível exibir a imagem. Verifique se o arquivo está público.</div>');" />
+    </div>
+    <div class="tip">Abrir no Drive: <a href="${fileUrl}" target="_blank" rel="noopener">link do arquivo</a></div>
+  `;
+}
+
+/**
+ * Busca no Drive:
+ * Estratégia:
+ *   1) Tenta "nome exato + .png" (case sensitive do Drive).
+ *   2) Se não achar, lista todos .png da pasta e tenta casar por lower/trim no cliente.
+ */
+async function searchPngByNameExact(folderId, name) {
+  // Consulta por nome EXATO com sufixo .png
+  const exact = `${name}.png`;
+  // Importante: usar escape de aspas simples na query
+  const escaped = exact.replace(/'/g, "\\'");
+  const q = `'${folderId}' in parents and trashed=false and mimeType='image/png' and name='${escaped}'`;
+  const url = new URL("https://www.googleapis.com/drive/v3/files");
+  url.searchParams.set("key", API_KEY);
+  url.searchParams.set("q", q);
+  url.searchParams.set("fields", "files(id,name,mimeType)");
+  url.searchParams.set("pageSize", "10");
+  const res = await fetch(url.toString());
+  if (!res.ok) throw new Error(`Drive API falhou (exact): ${res.status}`);
+  const data = await res.json();
+  if (data.files && data.files.length > 0) {
+    return data.files[0];
+  }
+  return null;
+}
+
+async function listAllPngInFolder(folderId) {
+  // Paginação para até ~1000 itens (ajuste se sua pasta for maior)
+  let pageToken = null;
+  const results = [];
+  do {
+    const url = new URL("https://www.googleapis.com/drive/v3/files");
+    url.searchParams.set("key", API_KEY);
+    url.searchParams.set("q", `'${folderId}' in parents and trashed=false and mimeType='image/png'`);
+    url.searchParams.set("fields", "nextPageToken, files(id,name,mimeType)");
+    url.searchParams.set("pageSize", "1000");
+    if (pageToken) url.searchParams.set("pageToken", pageToken);
+    const res = await fetch(url.toString());
+    if (!res.ok) throw new Error(`Drive API falhou (list): ${res.status}`);
+    const data = await res.json();
+    if (data.files) results.push(...data.files);
+    pageToken = data.nextPageToken || null;
+  } while (pageToken);
+  return results;
+}
+
+function normalizeName(s) {
+  return s.trim().toLowerCase()
+    .replace(/\s+/g, " ")
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, ''); // remove acentos
+}
+
+async function buscar() {
+  const btn = $("#btnBuscar");
+  const nome = $("#nome").value;
+  $("#resultado").innerHTML = "";
+  if (!nome.trim()) {
+    showMessage("Digite um nome.", "err");
+    return;
+  }
+  btn.disabled = true; btn.textContent = "Buscando…";
+  try {
+    // 1) Tenta nome exato
+    const exact = await searchPngByNameExact(FOLDER_ID, nome);
+    if (exact) {
+      showImage(exact.id, exact.name, exact.mimeType);
+      return;
+    }
+    // 2) Lista todos PNGs e tenta casar por normalização
+    const all = await listAllPngInFolder(FOLDER_ID);
+    const targetNorm = normalizeName(`${nome}.png`);
+    const found = all.find(f => normalizeName(f.name) === targetNorm);
+    if (found) {
+      showImage(found.id, found.name, found.mimeType);
+      return;
+    }
+    // 3) Sugestões (mesmo início)
+    const prefix = normalizeName(nome);
+    const suggestions = all
+      .filter(f => normalizeName(f.name).startsWith(prefix))
+      .slice(0, 6)
+      .map(f => `• ${f.name}`)
+      .join("<br>");
+    showMessage(`Imagem não encontrada para <strong>"${nome}"</strong>.<br><br>` +
+      (suggestions ? `<div class="tip">Sugestões próximas:<br>${suggestions}</div>` : `<div class="tip">Verifique o nome do arquivo (ex.: <code>${nome}.png</code>) e se está nesta pasta.</div>`),
+      "err");
+  } catch (e) {
+    console.error(e);
+    showMessage(`Erro na busca: ${e.message}<br><span class="tip">Possíveis causas: a pasta/arquivos não estão públicos, a chave de API está incorreta/restrita, ou a Drive API não foi habilitada.</span>`, "err");
+  } finally {
+    btn.disabled = false; btn.textContent = "Buscar";
+  }
+}
+
+$("#btnBuscar").addEventListener("click", buscar);
+$("#nome").addEventListener("keydown", (ev)=>{ if(ev.key==="Enter"){ buscar(); }});
+</script>
+</body>
+</html>
