@@ -1,229 +1,181 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Consulta de CPF → QR Code (imagem na célula)</title>
-  <meta name="description" content="Site estático que consulta CPF em uma planilha pública do Google Sheets e exibe o QR Code inserido como imagem na célula." />
-
-  <style>
-    :root{
-      --bg:#0b1020; --panel:#121939; --ink:#eaf0ff; --muted:#a9b3d5; --accent:#00e1ff; --danger:#ff5b5b; --success:#22c55e;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial;
-      background:radial-gradient(1200px 600px at 50% -10%, #12204b 0%, #0b1020 60%, #080c1a 100%);
-      color:var(--ink); min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;
-    }
-    .card{
-      width:100%; max-width:680px; background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
-      border:1px solid rgba(255,255,255,.08); border-radius:16px; padding:24px; backdrop-filter: blur(8px);
-      box-shadow:0 10px 30px rgba(0,0,0,.35);
-    }
-    h1{margin:0 0 8px; font-weight:700; letter-spacing:.2px}
-    p.desc{margin:0 0 20px; color:var(--muted); font-size:0.95rem}
-    form{display:flex; gap:12px; flex-wrap:wrap; align-items:center}
-    input[type="text"]{
-      flex:1 1 260px; background:#0f1633; border:1px solid rgba(255,255,255,.12); color:var(--ink);
-      padding:12px 14px; border-radius:10px; outline:none; font-size:1rem;
-    }
-    button{
-      background:linear-gradient(135deg, var(--accent), #4fd1ff);
-      color:#06101a; font-weight:700; padding:12px 16px; border:none; border-radius:10px; cursor:pointer;
-      transition:transform .05s ease, filter .2s ease;
-    }
-    button:hover{filter:brightness(1.05)}
-    button:active{transform:scale(.98)}
-    .hint{font-size:.85rem; color:var(--muted); margin-top:6px}
-    .result{
-      margin-top:20px; padding:16px; border-radius:12px; background:#0e1530; border:1px solid rgba(255,255,255,.08);
-    }
-    .row{display:flex; gap:16px; flex-wrap:wrap; align-items:flex-start}
-    .qrbox{
-      min-width:180px; min-height:180px; display:grid; place-items:center; background:#0b132b; border:1px dashed rgba(255,255,255,.12);
-      border-radius:12px; padding:12px;
-    }
-    .meta{flex:1 1 260px}
-    .ok{color:var(--success); font-weight:600}
-    .err{color:var(--danger); font-weight:600}
-    .footer-note{margin-top:16px; font-size:.8rem; color:var(--muted)}
-    img.qr{max-width:100%; height:auto; image-rendering: pixelated;}
-    .small{font-size:.85rem; color:var(--muted)}
-    .spinner{width:18px;height:18px;border:3px solid rgba(255,255,255,.25);border-top-color:var(--accent);border-radius:50%;display:inline-block;animation:spin 1s linear infinite;vertical-align:middle}
-    @keyframes spin{to{transform:rotate(360deg)}}
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Buscar PNG por Nome — Google Drive API</title>
+<style>
+  :root{
+    --bg:#0b1020; --panel:#121939; --ink:#eaf0ff; --muted:#a9b3d5; --accent:#00e1ff; --danger:#ff6b6b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial; background:linear-gradient(180deg,#0b1020,#0f1430 60%,#11163a); color:var(--ink); min-height:100vh;}
+  .wrap{max-width:900px; margin:0 auto; padding:32px 20px;}
+  h1{margin:0 0 18px; font-weight:700; letter-spacing:.2px}
+  p.hint{color:var(--muted); margin:0 0 24px}
+  .card{background:var(--panel); padding:18px; border-radius:16px; box-shadow:0 8px 40px rgba(0,0,0,.35)}
+  .row{display:flex; gap:12px; flex-wrap:wrap; align-items:center}
+  input[type="text"]{flex:1 1 360px; padding:14px 14px; border-radius:12px; border:1px solid #223; background:#0f1530; color:var(--ink); outline:none}
+  input::placeholder{color:#8290c7}
+  button{padding:14px 18px; border-radius:12px; border:0; background:linear-gradient(90deg,#15d1ff,#7a5cff); color:#001; font-weight:700; cursor:pointer}
+  button:disabled{opacity:.6; cursor:not-allowed}
+  .meta{font-size:.9rem; color:var(--muted); margin-top:10px}
+  .result{margin-top:20px; display:grid; gap:16px}
+  .imgbox{background:#0b1130; border:1px solid #1f295c; border-radius:14px; padding:14px; display:flex; justify-content:center; align-items:center; min-height:220px}
+  .imgbox img{max-width:100%; height:auto; border-radius:10px}
+  .err{color:var(--danger); font-weight:600}
+  .ok{color:#60ffa6; font-weight:600}
+  .tip{font-size:.9rem; color:var(--muted)}
+  .foot{margin-top:28px; color:#98a4d9; font-size:.9rem}
+  code{background:#0c1230; color:#aee2ff; padding:2px 6px; border-radius:6px}
+</style>
 </head>
 <body>
+<div class="wrap">
+  <h1>Buscar imagem PNG por nome (Google Drive)</h1>
+  <p class="hint">Digite o <strong>nome completo</strong> exatamente como está no arquivo <code>.png</code> dentro da pasta no Drive e clique em Buscar.</p>
+
   <div class="card">
-    <h1>Consulta de CPF → QR Code</h1>
-    <p class="desc">Informe um CPF para buscar o QR Code (imagem na célula) na planilha pública.</p>
-
-    <form id="cpfForm">
-      <input id="cpfInput" type="text" inputmode="numeric" autocomplete="off" placeholder="Digite o CPF (com ou sem pontos/traço)" />
-      <button type="submit">Buscar</button>
-      <div id="loading" class="small" style="display:none;"><span class="spinner"></span> carregando dados…</div>
-    </form>
-    <div class="hint">A aba deve ter cabeçalhos <strong>CPF</strong> e <strong>QR_CODE</strong>. O QR_CODE é uma imagem inserida na célula.</div>
-
-    <div id="result" class="result" style="display:none;">
-      <div class="row">
-        <div class="qrbox" id="qrBox"><!-- QR aqui --></div>
-        <div class="meta">
-          <div id="statusLine" class="ok">Encontrado.</div>
-          <div id="detail" class="small"></div>
-        </div>
-      </div>
-      <div class="footer-note">Certifique-se de que as imagens estejam publicamente acessíveis; caso contrário, o navegador pode bloquear (403).</div>
+    <div class="row">
+      <input id="nome" type="text" placeholder="Ex.: Maria Oliveira" autocomplete="name" />
+      <button id="btnBuscar">Buscar</button>
     </div>
+    <div class="meta">Pasta alvo: <code>1w9zADrtxwfkUpWb3b3FBozEY6MMw8XPy</code> (precisa estar pública como “Qualquer pessoa com o link → Leitor”)</div>
+
+    <div class="result" id="resultado"></div>
   </div>
 
+  <div class="foot">
+    Dica: o URL exibido usa o formato público do Drive <code>https://drive.google.com/uc?export=view&id=FILE_ID</code>.
+  </div>
+</div>
+
 <script>
-/** =========================
- *  CONFIGURAÇÃO
- *  =========================
- *  Ajuste o ID e o nome da aba abaixo para a sua planilha.
+/**
+ * CONFIGURAÇÃO
+ *  - Substitua pela sua chave de API do Google Cloud (Drive API habilitada).
+ *  - Restrinja a chave a referrers do seu domínio e à Drive API.
  */
-const SHEET_ID   = '1ZgufTl3pPXNXjE22mzZ5HzTepTi8NSDNN4lPEtRGQcY'; // <- seu ID
-const SHEET_NAME = 'Dados'; // <- nome da aba
+const API_KEY   = "YOUR_API_KEY_HERE";
+const FOLDER_ID = "1w9zADrtxwfkUpWb3b3FBozEY6MMw8XPy";
 
-/** Monta a URL GViz JSON para a aba publicada */
-const GVIZ_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}`;
-
-/** Normaliza CPF removendo tudo que não for número */
-function normalizeCPF(v) { return String(v || '').replace(/\D+/g, ''); }
-
-/** Extrai URL de imagem a partir do conteúdo "formatado" (f) da célula.
- *  Possíveis formatos:
- *   - =IMAGE("https://...")            → extrai a URL entre aspas
- *   - <img src="https://..." ...>      → extrai o src
- *   - string com URL                   → retorna a própria string se for URL
+/**
+ * Utilitários
  */
-function extractImageUrlFromFormatted(f) {
-  if (!f) return '';
-  const s = String(f);
+const $ = (sel) => document.querySelector(sel);
 
-  // Caso 1: fórmula =IMAGE("...")
-  const m1 = s.match(/=IMAGE\(\s*"([^"]+)"\s*[,\)]/i);
-  if (m1 && m1[1]) return m1[1];
-
-  // Caso 2: HTML <img src="...">
-  const m2 = s.match(/<img[^>]+src=["']([^"']+)["']/i);
-  if (m2 && m2[1]) return m2[1];
-
-  // Caso 3: próprio texto parece uma URL
-  if (/^https?:\/\//i.test(s)) return s.trim();
-
-  return '';
+function showMessage(html, cls="") {
+  $("#resultado").innerHTML = `<div class="${cls}">${html}</div>`;
 }
 
-/** Busca e parseia a planilha publicada (GViz) */
-async function fetchSheet() {
-  const res = await fetch(GVIZ_URL, { cache: 'no-store' });
-  const text = await res.text();
-  // Remove o wrapper do GViz
-  const json = JSON.parse(text.replace(/^[\s\S]*setResponse\(/, '').replace(/\);\s*$/, ''));
-  const table = json.table;
-  if (!table || !table.cols || !table.rows) throw new Error('Estrutura inesperada da planilha.');
-
-  const headers = table.cols.map(c => (c.label || c.id || '').trim());
-  const rows = table.rows.map(r => (r.c || []).map(cell => cell ? { v: cell.v ?? '', f: cell.f ?? '' } : { v:'', f:'' }));
-
-  // Transforma em array de objetos, preservando v/f
-  const data = rows.map(row => {
-    const obj = {};
-    headers.forEach((h, i) => {
-      const cell = row[i] || { v:'', f:'' };
-      // guardamos ambos para poder extrair imagens
-      obj[h] = { v: (cell.v ?? '').toString().trim(), f: (cell.f ?? '').toString().trim() };
-    });
-    return obj;
-  });
-
-  return { headers, data };
+function showImage(id, name, mimeType) {
+  const viewUrl = `https://drive.google.com/uc?export=view&id=${id}`;
+  const fileUrl = `https://drive.google.com/file/d/${id}/view`;
+  $("#resultado").innerHTML = `
+    <div class="ok">Encontrado: <strong>${name}</strong> <span class="tip">(${mimeType})</span></div>
+    <div class="imgbox">
+      <img src="${viewUrl}" alt="${name}" onerror="this.onerror=null; this.src=''; document.getElementById('resultado').insertAdjacentHTML('beforeend','<div class=err>Não foi possível exibir a imagem. Verifique se o arquivo está público.</div>');" />
+    </div>
+    <div class="tip">Abrir no Drive: <a href="${fileUrl}" target="_blank" rel="noopener">link do arquivo</a></div>
+  `;
 }
 
-/** Renderização */
-function renderResult(found) {
-  const $res = document.getElementById('result');
-  const $status = document.getElementById('statusLine');
-  const $detail = document.getElementById('detail');
-  const $qrBox = document.getElementById('qrBox');
-  $qrBox.innerHTML = '';
+/**
+ * Busca no Drive:
+ * Estratégia:
+ *   1) Tenta "nome exato + .png" (case sensitive do Drive).
+ *   2) Se não achar, lista todos .png da pasta e tenta casar por lower/trim no cliente.
+ */
+async function searchPngByNameExact(folderId, name) {
+  // Consulta por nome EXATO com sufixo .png
+  const exact = `${name}.png`;
+  // Importante: usar escape de aspas simples na query
+  const escaped = exact.replace(/'/g, "\\'");
+  const q = `'${folderId}' in parents and trashed=false and mimeType='image/png' and name='${escaped}'`;
+  const url = new URL("https://www.googleapis.com/drive/v3/files");
+  url.searchParams.set("key", API_KEY);
+  url.searchParams.set("q", q);
+  url.searchParams.set("fields", "files(id,name,mimeType)");
+  url.searchParams.set("pageSize", "10");
+  const res = await fetch(url.toString());
+  if (!res.ok) throw new Error(`Drive API falhou (exact): ${res.status}`);
+  const data = await res.json();
+  if (data.files && data.files.length > 0) {
+    return data.files[0];
+  }
+  return null;
+}
 
-  if (!found) {
-    $status.className = 'err';
-    $status.textContent = 'Não encontrado.';
-    $detail.innerHTML = 'Verifique o CPF ou se ele está presente na planilha.';
-    $res.style.display = 'block';
+async function listAllPngInFolder(folderId) {
+  // Paginação para até ~1000 itens (ajuste se sua pasta for maior)
+  let pageToken = null;
+  const results = [];
+  do {
+    const url = new URL("https://www.googleapis.com/drive/v3/files");
+    url.searchParams.set("key", API_KEY);
+    url.searchParams.set("q", `'${folderId}' in parents and trashed=false and mimeType='image/png'`);
+    url.searchParams.set("fields", "nextPageToken, files(id,name,mimeType)");
+    url.searchParams.set("pageSize", "1000");
+    if (pageToken) url.searchParams.set("pageToken", pageToken);
+    const res = await fetch(url.toString());
+    if (!res.ok) throw new Error(`Drive API falhou (list): ${res.status}`);
+    const data = await res.json();
+    if (data.files) results.push(...data.files);
+    pageToken = data.nextPageToken || null;
+  } while (pageToken);
+  return results;
+}
+
+function normalizeName(s) {
+  return s.trim().toLowerCase()
+    .replace(/\s+/g, " ")
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, ''); // remove acentos
+}
+
+async function buscar() {
+  const btn = $("#btnBuscar");
+  const nome = $("#nome").value;
+  $("#resultado").innerHTML = "";
+  if (!nome.trim()) {
+    showMessage("Digite um nome.", "err");
     return;
   }
-
-  $status.className = 'ok';
-  $status.textContent = 'Encontrado.';
-
-  // Pega campos
-  const cpfCell = found['CPF'] || found['cpf'] || found['Cpf'] || { v:'', f:'' };
-  const qrCell  = found['QR_CODE'] || found['qr_code'] || found['Qr_Code'] || { v:'', f:'' };
-
-  // Tenta extrair URL da imagem a partir de f (ou v se for URL)
-  let qrUrl = extractImageUrlFromFormatted(qrCell.f);
-  if (!qrUrl && qrCell.v && /^https?:\/\//i.test(qrCell.v)) qrUrl = qrCell.v;
-
-  if (qrUrl) {
-    const img = new Image();
-    img.className = 'qr';
-    img.alt = 'QR Code';
-    // Se a hospedagem for Drive/Googleusercontent, o referer costuma ser ok; se precisar, mude política aqui:
-    img.referrerPolicy = 'no-referrer-when-downgrade';
-    img.src = qrUrl;
-    $qrBox.appendChild(img);
-  } else {
-    $qrBox.innerHTML = '<span class="small">Não foi possível extrair a URL da imagem do QR nesta célula.</span>';
-  }
-
-  const cpfShow = cpfCell.v || cpfCell.f || '';
-  const how = qrCell.f ? (qrCell.f.includes('=IMAGE(') ? 'fórmula =IMAGE' : (qrCell.f.includes('<img') ? 'HTML <img>' : 'formatação')) : (qrCell.v ? 'valor bruto' : '—');
-
-  $detail.innerHTML = `<div><strong>CPF:</strong> ${cpfShow || '—'}</div>
-                       <div><strong>QR_CODE:</strong> ${qrUrl ? 'imagem extraída ('+how+')' : '—'}</div>`;
-
-  $res.style.display = 'block';
-}
-
-/** Estado */
-let SHEET_CACHE = null;
-
-/** Carrega e indexa por CPF normalizado */
-async function ensureSheetLoaded() {
-  if (SHEET_CACHE) return SHEET_CACHE;
-  const $loading = document.getElementById('loading');
-  $loading.style.display = 'inline-block';
+  btn.disabled = true; btn.textContent = "Buscando…";
   try {
-    const payload = await fetchSheet();
-    const index = new Map();
-    payload.data.forEach(row => {
-      const cell = row['CPF'] || row['cpf'] || row['Cpf'] || { v:'', f:'' };
-      const key = normalizeCPF(cell.v || cell.f || '');
-      if (key) index.set(key, row);
-    });
-    SHEET_CACHE = { ...payload, index };
-    return SHEET_CACHE;
+    // 1) Tenta nome exato
+    const exact = await searchPngByNameExact(FOLDER_ID, nome);
+    if (exact) {
+      showImage(exact.id, exact.name, exact.mimeType);
+      return;
+    }
+    // 2) Lista todos PNGs e tenta casar por normalização
+    const all = await listAllPngInFolder(FOLDER_ID);
+    const targetNorm = normalizeName(`${nome}.png`);
+    const found = all.find(f => normalizeName(f.name) === targetNorm);
+    if (found) {
+      showImage(found.id, found.name, found.mimeType);
+      return;
+    }
+    // 3) Sugestões (mesmo início)
+    const prefix = normalizeName(nome);
+    const suggestions = all
+      .filter(f => normalizeName(f.name).startsWith(prefix))
+      .slice(0, 6)
+      .map(f => `• ${f.name}`)
+      .join("<br>");
+    showMessage(`Imagem não encontrada para <strong>"${nome}"</strong>.<br><br>` +
+      (suggestions ? `<div class="tip">Sugestões próximas:<br>${suggestions}</div>` : `<div class="tip">Verifique o nome do arquivo (ex.: <code>${nome}.png</code>) e se está nesta pasta.</div>`),
+      "err");
+  } catch (e) {
+    console.error(e);
+    showMessage(`Erro na busca: ${e.message}<br><span class="tip">Possíveis causas: a pasta/arquivos não estão públicos, a chave de API está incorreta/restrita, ou a Drive API não foi habilitada.</span>`, "err");
   } finally {
-    $loading.style.display = 'none';
+    btn.disabled = false; btn.textContent = "Buscar";
   }
 }
 
-document.getElementById('cpfForm').addEventListener('submit', async (ev) => {
-  ev.preventDefault();
-  const raw = document.getElementById('cpfInput').value;
-  const key = normalizeCPF(raw);
-  if (!key) { renderResult(null); return; }
-  const cache = await ensureSheetLoaded();
-  const found = cache.index.get(key) || null;
-  renderResult(found);
-});
+$("#btnBuscar").addEventListener("click", buscar);
+$("#nome").addEventListener("keydown", (ev)=>{ if(ev.key==="Enter"){ buscar(); }});
 </script>
-
 </body>
 </html>
