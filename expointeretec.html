@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Consulta de CPF → QR Code</title>
+  <meta name="description" content="Site estático que consulta CPF em uma planilha pública do Google Sheets e exibe o QR Code correspondente." />
+
+  <!-- QRCode generator (somente se precisar gerar a partir de texto) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" integrity="sha512-MnNni0wK6S3C7F1bQbQ7Qe76L8m8P4f2f7oZ2f3p8b5k1q3h8b8t3lq7n0y0" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <style>
+    :root{
+      --bg:#0b1020; --panel:#121939; --ink:#eaf0ff; --muted:#a9b3d5; --accent:#00e1ff; --danger:#ff5b5b; --success:#22c55e;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial;
+      background:radial-gradient(1200px 600px at 50% -10%, #12204b 0%, #0b1020 60%, #080c1a 100%);
+      color:var(--ink); min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;
+    }
+    .card{
+      width:100%; max-width:680px; background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border:1px solid rgba(255,255,255,.08); border-radius:16px; padding:24px; backdrop-filter: blur(8px);
+      box-shadow:0 10px 30px rgba(0,0,0,.35);
+    }
+    h1{margin:0 0 8px; font-weight:700; letter-spacing:.2px}
+    p.desc{margin:0 0 20px; color:var(--muted); font-size:0.95rem}
+    form{display:flex; gap:12px; flex-wrap:wrap; align-items:center}
+    input[type="text"]{
+      flex:1 1 260px; background:#0f1633; border:1px solid rgba(255,255,255,.12); color:var(--ink);
+      padding:12px 14px; border-radius:10px; outline:none; font-size:1rem;
+    }
+    button{
+      background:linear-gradient(135deg, var(--accent), #4fd1ff);
+      color:#06101a; font-weight:700; padding:12px 16px; border:none; border-radius:10px; cursor:pointer;
+      transition:transform .05s ease, filter .2s ease;
+    }
+    button:hover{filter:brightness(1.05)}
+    button:active{transform:scale(.98)}
+    .hint{font-size:.85rem; color:var(--muted); margin-top:6px}
+    .result{
+      margin-top:20px; padding:16px; border-radius:12px; background:#0e1530; border:1px solid rgba(255,255,255,.08);
+    }
+    .row{display:flex; gap:16px; flex-wrap:wrap; align-items:flex-start}
+    .qrbox{
+      min-width:180px; min-height:180px; display:grid; place-items:center; background:#0b132b; border:1px dashed rgba(255,255,255,.12);
+      border-radius:12px; padding:12px;
+    }
+    .meta{flex:1 1 260px}
+    .ok{color:var(--success); font-weight:600}
+    .err{color:var(--danger); font-weight:600}
+    .footer-note{margin-top:16px; font-size:.8rem; color:var(--muted)}
+    img.qr{max-width:100%; height:auto; image-rendering: pixelated;}
+    .small{font-size:.85rem; color:var(--muted)}
+    .spinner{width:18px;height:18px;border:3px solid rgba(255,255,255,.25);border-top-color:var(--accent);border-radius:50%;display:inline-block;animation:spin 1s linear infinite;vertical-align:middle}
+    @keyframes spin{to{transform:rotate(360deg)}}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Consulta de CPF → QR Code</h1>
+    <p class="desc">Informe um CPF para buscar o QR Code correspondente na planilha pública.</p>
+
+    <form id="cpfForm">
+      <input id="cpfInput" type="text" inputmode="numeric" autocomplete="off" placeholder="Digite o CPF (com ou sem pontos/traço)" />
+      <button type="submit">Buscar</button>
+      <div id="loading" class="small" style="display:none;"><span class="spinner"></span> carregando dados…</div>
+    </form>
+    <div class="hint">Dica: você pode colar o CPF com pontos/traço; nós normalizamos automaticamente.</div>
+
+    <div id="result" class="result" style="display:none;">
+      <div class="row">
+        <div class="qrbox" id="qrBox"><!-- QR aqui --></div>
+        <div class="meta">
+          <div id="statusLine" class="ok">Encontrado.</div>
+          <div id="detail" class="small"></div>
+        </div>
+      </div>
+      <div class="footer-note">Se o valor em <strong>QR_CODE</strong> for uma URL de imagem, exibimos a imagem; se for texto, geramos o QR localmente (sem enviar seus dados a terceiros).</div>
+    </div>
+  </div>
+
+<script>
+/** =========================
+ *  CONFIGURAÇÃO
+ *  =========================
+ *  Ajuste o ID e o nome da aba abaixo para a sua planilha.
+ */
+const SHEET_ID   = '1ZgufTl3pPXNXjE22mzZ5HzTepTi8NSDNN4lPEtRGQcY'; // ID da sua planilha
+const SHEET_NAME = 'Dados'; // nome da aba (ex: 'Dados')
+/**
+ * A planilha precisa ter cabeçalhos exatos 'CPF' e 'QR_CODE' na linha 1.
+ * Certifique-se de ter feito: Arquivo → Publicar na Web → publicar a aba.
+ */
+
+/** Monta a URL GViz JSON (não precisa de API key, desde que publicado) */
+const GVIZ_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}`;
+
+/** Utilidade: normaliza CPF removendo tudo que não for dígito. */
+function normalizeCPF(v) {
+  return String(v || '').replace(/\D+/g, '');
+}
+
+/** Faz o fetch dos dados da planilha (GViz retorna um JSON "embrulhado") */
+async function fetchSheet() {
+  const res = await fetch(GVIZ_URL, { cache: 'no-store' });
+  const text = await res.text();
+  // O retorno começa com "/*O_o*/\ngoogle.visualization.Query.setResponse(...);"
+  const json = JSON.parse(text.replace(/^[\s\S]*setResponse\(/, '').replace(/\);\s*$/, ''));
+  const table = json.table;
+  if (!table || !table.cols || !table.rows) throw new Error('Estrutura inesperada da planilha.');
+
+  const headers = table.cols.map(c => (c.label || c.id || '').trim());
+  const rows = table.rows.map(r => (r.c || []).map(cell => (cell ? (cell.f ?? cell.v) : '')));
+
+  // Transforma em array de objetos {Header: Valor}
+  const data = rows.map(row => {
+    const obj = {};
+    headers.forEach((h, i) => obj[h] = (row[i] ?? '').toString().trim());
+    return obj;
+  });
+
+  return { headers, data };
+}
+
+/** Renderiza resultado */
+function renderResult(found) {
+  const $res = document.getElementById('result');
+  const $status = document.getElementById('statusLine');
+  const $detail = document.getElementById('detail');
+  const $qrBox = document.getElementById('qrBox');
+
+  // limpa QR
+  $qrBox.innerHTML = '';
+
+  if (!found) {
+    $status.className = 'err';
+    $status.textContent = 'Não encontrado.';
+    $detail.innerHTML = 'Verifique o CPF ou se ele está presente na planilha.';
+    $res.style.display = 'block';
+    return;
+  }
+
+  $status.className = 'ok';
+  $status.textContent = 'Encontrado.';
+
+  const qrValue = found['QR_CODE'] || found['qr_code'] || found['Qr_Code'] || '';
+  const cpfShow = found['CPF'] || '';
+  const isUrl = /^https?:\/\//i.test(qrValue);
+
+  if (isUrl) {
+    const img = new Image();
+    img.className = 'qr';
+    img.alt = 'QR Code';
+    img.referrerPolicy = 'no-referrer'; // evita passar referer se a hospedagem do QR bloquear
+    img.src = qrValue;
+    $qrBox.appendChild(img);
+  } else if (qrValue) {
+    // Gera QR localmente (não envia dados para fora)
+    const q = new QRCode($qrBox, {
+      text: qrValue,
+      width: 220,
+      height: 220,
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  } else {
+    $qrBox.innerHTML = '<span class="small">Sem valor em <strong>QR_CODE</strong>.</span>';
+  }
+
+  $detail.innerHTML = `<div><strong>CPF:</strong> ${cpfShow}</div>
+                       <div><strong>QR_CODE:</strong> ${qrValue ? (isUrl ? 'URL de imagem' : 'conteúdo gerado localmente') : '—'}</div>`;
+
+  $res.style.display = 'block';
+}
+
+/** Estado */
+let SHEET_CACHE = null;
+
+/** Inicializa: carrega a planilha uma vez e guarda em cache (memória) */
+async function ensureSheetLoaded() {
+  if (SHEET_CACHE) return SHEET_CACHE;
+  const $loading = document.getElementById('loading');
+  $loading.style.display = 'inline-block';
+  try {
+    const payload = await fetchSheet();
+    // Indexa por CPF normalizado
+    const index = new Map();
+    payload.data.forEach(row => {
+      const key = normalizeCPF(row['CPF'] || row['cpf'] || row['Cpf'] || '');
+      if (key) index.set(key, row);
+    });
+    SHEET_CACHE = { ...payload, index };
+    return SHEET_CACHE;
+  } finally {
+    $loading.style.display = 'none';
+  }
+}
+
+/** Submit handler */
+document.getElementById('cpfForm').addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  const raw = document.getElementById('cpfInput').value;
+  const key = normalizeCPF(raw);
+  if (!key) {
+    renderResult(null);
+    return;
+  }
+  const cache = await ensureSheetLoaded();
+  const found = cache.index.get(key) || null;
+  renderResult(found);
+});
+</script>
+
+</body>
+</html>
