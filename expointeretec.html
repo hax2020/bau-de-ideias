@@ -3,11 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Consulta de CPF → QR Code</title>
-  <meta name="description" content="Site estático que consulta CPF em uma planilha pública do Google Sheets e exibe o QR Code correspondente." />
-
-  <!-- QRCode generator (somente se precisar gerar a partir de texto) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" integrity="sha512-MnNni0wK6S3C7F1bQbQ7Qe76L8m8P4f2f7oZ2f3p8b5k1q3h8b8t3lq7n0y0" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <title>Consulta de CPF → QR Code (imagem na célula)</title>
+  <meta name="description" content="Site estático que consulta CPF em uma planilha pública do Google Sheets e exibe o QR Code inserido como imagem na célula." />
 
   <style>
     :root{
@@ -60,14 +57,14 @@
 <body>
   <div class="card">
     <h1>Consulta de CPF → QR Code</h1>
-    <p class="desc">Informe um CPF para buscar o QR Code correspondente na planilha pública.</p>
+    <p class="desc">Informe um CPF para buscar o QR Code (imagem na célula) na planilha pública.</p>
 
     <form id="cpfForm">
       <input id="cpfInput" type="text" inputmode="numeric" autocomplete="off" placeholder="Digite o CPF (com ou sem pontos/traço)" />
       <button type="submit">Buscar</button>
       <div id="loading" class="small" style="display:none;"><span class="spinner"></span> carregando dados…</div>
     </form>
-    <div class="hint">Dica: você pode colar o CPF com pontos/traço; nós normalizamos automaticamente.</div>
+    <div class="hint">A aba deve ter cabeçalhos <strong>CPF</strong> e <strong>QR_CODE</strong>. O QR_CODE é uma imagem inserida na célula.</div>
 
     <div id="result" class="result" style="display:none;">
       <div class="row">
@@ -77,7 +74,7 @@
           <div id="detail" class="small"></div>
         </div>
       </div>
-      <div class="footer-note">Se o valor em <strong>QR_CODE</strong> for uma URL de imagem, exibimos a imagem; se for texto, geramos o QR localmente (sem enviar seus dados a terceiros).</div>
+      <div class="footer-note">Certifique-se de que as imagens estejam publicamente acessíveis; caso contrário, o navegador pode bloquear (403).</div>
     </div>
   </div>
 
@@ -87,51 +84,71 @@
  *  =========================
  *  Ajuste o ID e o nome da aba abaixo para a sua planilha.
  */
-const SHEET_ID   = '1ZgufTl3pPXNXjE22mzZ5HzTepTi8NSDNN4lPEtRGQcY'; // ID da sua planilha
-const SHEET_NAME = 'Dados'; // nome da aba (ex: 'Dados')
-/**
- * A planilha precisa ter cabeçalhos exatos 'CPF' e 'QR_CODE' na linha 1.
- * Certifique-se de ter feito: Arquivo → Publicar na Web → publicar a aba.
- */
+const SHEET_ID   = '1ZgufTl3pPXNXjE22mzZ5HzTepTi8NSDNN4lPEtRGQcY'; // <- seu ID
+const SHEET_NAME = 'Dados'; // <- nome da aba
 
-/** Monta a URL GViz JSON (não precisa de API key, desde que publicado) */
+/** Monta a URL GViz JSON para a aba publicada */
 const GVIZ_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_NAME)}`;
 
-/** Utilidade: normaliza CPF removendo tudo que não for dígito. */
-function normalizeCPF(v) {
-  return String(v || '').replace(/\D+/g, '');
+/** Normaliza CPF removendo tudo que não for número */
+function normalizeCPF(v) { return String(v || '').replace(/\D+/g, ''); }
+
+/** Extrai URL de imagem a partir do conteúdo "formatado" (f) da célula.
+ *  Possíveis formatos:
+ *   - =IMAGE("https://...")            → extrai a URL entre aspas
+ *   - <img src="https://..." ...>      → extrai o src
+ *   - string com URL                   → retorna a própria string se for URL
+ */
+function extractImageUrlFromFormatted(f) {
+  if (!f) return '';
+  const s = String(f);
+
+  // Caso 1: fórmula =IMAGE("...")
+  const m1 = s.match(/=IMAGE\(\s*"([^"]+)"\s*[,\)]/i);
+  if (m1 && m1[1]) return m1[1];
+
+  // Caso 2: HTML <img src="...">
+  const m2 = s.match(/<img[^>]+src=["']([^"']+)["']/i);
+  if (m2 && m2[1]) return m2[1];
+
+  // Caso 3: próprio texto parece uma URL
+  if (/^https?:\/\//i.test(s)) return s.trim();
+
+  return '';
 }
 
-/** Faz o fetch dos dados da planilha (GViz retorna um JSON "embrulhado") */
+/** Busca e parseia a planilha publicada (GViz) */
 async function fetchSheet() {
   const res = await fetch(GVIZ_URL, { cache: 'no-store' });
   const text = await res.text();
-  // O retorno começa com "/*O_o*/\ngoogle.visualization.Query.setResponse(...);"
+  // Remove o wrapper do GViz
   const json = JSON.parse(text.replace(/^[\s\S]*setResponse\(/, '').replace(/\);\s*$/, ''));
   const table = json.table;
   if (!table || !table.cols || !table.rows) throw new Error('Estrutura inesperada da planilha.');
 
   const headers = table.cols.map(c => (c.label || c.id || '').trim());
-  const rows = table.rows.map(r => (r.c || []).map(cell => (cell ? (cell.f ?? cell.v) : '')));
+  const rows = table.rows.map(r => (r.c || []).map(cell => cell ? { v: cell.v ?? '', f: cell.f ?? '' } : { v:'', f:'' }));
 
-  // Transforma em array de objetos {Header: Valor}
+  // Transforma em array de objetos, preservando v/f
   const data = rows.map(row => {
     const obj = {};
-    headers.forEach((h, i) => obj[h] = (row[i] ?? '').toString().trim());
+    headers.forEach((h, i) => {
+      const cell = row[i] || { v:'', f:'' };
+      // guardamos ambos para poder extrair imagens
+      obj[h] = { v: (cell.v ?? '').toString().trim(), f: (cell.f ?? '').toString().trim() };
+    });
     return obj;
   });
 
   return { headers, data };
 }
 
-/** Renderiza resultado */
+/** Renderização */
 function renderResult(found) {
   const $res = document.getElementById('result');
   const $status = document.getElementById('statusLine');
   const $detail = document.getElementById('detail');
   const $qrBox = document.getElementById('qrBox');
-
-  // limpa QR
   $qrBox.innerHTML = '';
 
   if (!found) {
@@ -145,31 +162,31 @@ function renderResult(found) {
   $status.className = 'ok';
   $status.textContent = 'Encontrado.';
 
-  const qrValue = found['QR_CODE'] || found['qr_code'] || found['Qr_Code'] || '';
-  const cpfShow = found['CPF'] || '';
-  const isUrl = /^https?:\/\//i.test(qrValue);
+  // Pega campos
+  const cpfCell = found['CPF'] || found['cpf'] || found['Cpf'] || { v:'', f:'' };
+  const qrCell  = found['QR_CODE'] || found['qr_code'] || found['Qr_Code'] || { v:'', f:'' };
 
-  if (isUrl) {
+  // Tenta extrair URL da imagem a partir de f (ou v se for URL)
+  let qrUrl = extractImageUrlFromFormatted(qrCell.f);
+  if (!qrUrl && qrCell.v && /^https?:\/\//i.test(qrCell.v)) qrUrl = qrCell.v;
+
+  if (qrUrl) {
     const img = new Image();
     img.className = 'qr';
     img.alt = 'QR Code';
-    img.referrerPolicy = 'no-referrer'; // evita passar referer se a hospedagem do QR bloquear
-    img.src = qrValue;
+    // Se a hospedagem for Drive/Googleusercontent, o referer costuma ser ok; se precisar, mude política aqui:
+    img.referrerPolicy = 'no-referrer-when-downgrade';
+    img.src = qrUrl;
     $qrBox.appendChild(img);
-  } else if (qrValue) {
-    // Gera QR localmente (não envia dados para fora)
-    const q = new QRCode($qrBox, {
-      text: qrValue,
-      width: 220,
-      height: 220,
-      correctLevel: QRCode.CorrectLevel.M
-    });
   } else {
-    $qrBox.innerHTML = '<span class="small">Sem valor em <strong>QR_CODE</strong>.</span>';
+    $qrBox.innerHTML = '<span class="small">Não foi possível extrair a URL da imagem do QR nesta célula.</span>';
   }
 
-  $detail.innerHTML = `<div><strong>CPF:</strong> ${cpfShow}</div>
-                       <div><strong>QR_CODE:</strong> ${qrValue ? (isUrl ? 'URL de imagem' : 'conteúdo gerado localmente') : '—'}</div>`;
+  const cpfShow = cpfCell.v || cpfCell.f || '';
+  const how = qrCell.f ? (qrCell.f.includes('=IMAGE(') ? 'fórmula =IMAGE' : (qrCell.f.includes('<img') ? 'HTML <img>' : 'formatação')) : (qrCell.v ? 'valor bruto' : '—');
+
+  $detail.innerHTML = `<div><strong>CPF:</strong> ${cpfShow || '—'}</div>
+                       <div><strong>QR_CODE:</strong> ${qrUrl ? 'imagem extraída ('+how+')' : '—'}</div>`;
 
   $res.style.display = 'block';
 }
@@ -177,17 +194,17 @@ function renderResult(found) {
 /** Estado */
 let SHEET_CACHE = null;
 
-/** Inicializa: carrega a planilha uma vez e guarda em cache (memória) */
+/** Carrega e indexa por CPF normalizado */
 async function ensureSheetLoaded() {
   if (SHEET_CACHE) return SHEET_CACHE;
   const $loading = document.getElementById('loading');
   $loading.style.display = 'inline-block';
   try {
     const payload = await fetchSheet();
-    // Indexa por CPF normalizado
     const index = new Map();
     payload.data.forEach(row => {
-      const key = normalizeCPF(row['CPF'] || row['cpf'] || row['Cpf'] || '');
+      const cell = row['CPF'] || row['cpf'] || row['Cpf'] || { v:'', f:'' };
+      const key = normalizeCPF(cell.v || cell.f || '');
       if (key) index.set(key, row);
     });
     SHEET_CACHE = { ...payload, index };
@@ -197,15 +214,11 @@ async function ensureSheetLoaded() {
   }
 }
 
-/** Submit handler */
 document.getElementById('cpfForm').addEventListener('submit', async (ev) => {
   ev.preventDefault();
   const raw = document.getElementById('cpfInput').value;
   const key = normalizeCPF(raw);
-  if (!key) {
-    renderResult(null);
-    return;
-  }
+  if (!key) { renderResult(null); return; }
   const cache = await ensureSheetLoaded();
   const found = cache.index.get(key) || null;
   renderResult(found);
