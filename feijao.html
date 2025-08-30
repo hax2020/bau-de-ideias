@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Show do Milhão — Feijão (Responsivo)</title>
+  <style>
+    :root{
+      --bg:#0b1020; --panel:#121939; --ink:#eaf0ff; --muted:#a9b3d5; --accent:#00e1ff; --accent-2:#8b5cf6; --danger:#ff5b5b; --success:#22c55e; --gold:#f9c846;
+      --safe-top: env(safe-area-inset-top); --safe-bottom: env(safe-area-inset-bottom);
+      --radius:16px; --gap:14px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Arial,Helvetica,sans-serif; color:var(--ink);
+      background:radial-gradient(1200px 600px at 10% -10%, #1c2560 0%, #0b1020 55%), radial-gradient(1200px 800px at 120% 120%, #2a1040 0%, #0b1020 60%);
+      display:flex; align-items:stretch; justify-content:center; padding:clamp(8px,1.8vw,16px);
+    }
+    .app{width:min(1100px, 100%); display:flex; flex-direction:column; gap:var(--gap);} 
+    header{
+      background:linear-gradient(90deg, rgba(0,225,255,.2), transparent 30%, rgba(139,92,246,.2) 70%, transparent);
+      border:1px solid rgba(255,255,255,.06); border-radius:var(--radius); padding:12px clamp(10px,2.2vw,20px);
+      display:flex; align-items:center; justify-content:space-between; gap:10px; backdrop-filter: blur(6px);
+    }
+    .brand{display:flex; align-items:center; gap:10px; min-width:0}
+    .logo{font-weight:900; letter-spacing:.4px; font-size:clamp(16px,2.6vw,20px); white-space:nowrap}
+    .logo .medal{font-size:clamp(18px,2.6vw,22px); color:var(--gold)}
+    .sub{color:var(--muted); font-size:clamp(11px,2.2vw,13px); overflow:hidden; text-overflow:ellipsis; display:none}
+
+    .layout{display:grid; grid-template-columns: 1.15fr .85fr; gap:var(--gap); align-items:start}
+    @media (max-width: 900px){.layout{grid-template-columns:1fr}}
+
+    .card{background:var(--panel); border:1px solid rgba(255,255,255,.06); border-radius:var(--radius); box-shadow:0 10px 30px rgba(0,0,0,.35)}
+
+    .play{padding:clamp(12px,2.4vw,18px)}
+    .status{display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px}
+    .lifelines{display:flex; gap:8px; flex-wrap:wrap}
+    .lifelines button,
+    .controls button,
+    #ladderToggle{
+      background:#0f1533; color:var(--ink); border:1px solid rgba(255,255,255,.08); padding:10px 12px; border-radius:12px; cursor:pointer; font-weight:700; font-size:clamp(13px,2.6vw,14px);
+      display:flex; align-items:center; gap:8px; transition:.2s transform, .2s background;
+      touch-action:manipulation; -webkit-tap-highlight-color: transparent;
+    }
+    .lifelines button:hover, .controls button:hover, #ladderToggle:hover{transform:translateY(-1px); background:#111a44}
+    .lifelines button:disabled{opacity:.45; cursor:not-allowed; transform:none}
+
+    .question{background:linear-gradient(180deg,#0f1a4d,#0c1333); border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:clamp(12px,2.4vw,16px); font-size:clamp(16px,2.8vw,20px); font-weight:800; line-height:1.35;}
+    .meta{margin-top:6px; color:var(--muted); font-size:clamp(11px,2.2vw,12px)}
+
+    .answers{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:12px}
+    @media (max-width:640px){.answers{grid-template-columns:1fr}}
+    .answers button{
+      text-align:left; padding:clamp(12px,3.5vw,14px); border-radius:12px; background:#0e1430; color:var(--ink); border:1px solid rgba(255,255,255,.08); cursor:pointer;
+      font-size:clamp(14px,3.2vw,15px); font-weight:700; line-height:1.3;
+      display:flex; gap:10px; align-items:flex-start; transition:.2s transform, .2s background; min-height:44px;
+    }
+    .answers button .badge{background:#141c4d; color:#b8c3ff; border:1px solid rgba(255,255,255,.12); border-radius:8px; padding:3px 8px; font-size:clamp(12px,2.8vw,13px); font-weight:900;}
+    .answers button:hover{transform:translateY(-1px); background:#121a40}
+    .answers button.correct{background:rgba(34,197,94,.12); border-color:rgba(34,197,94,.5)}
+    .answers button.wrong{background:rgba(255,91,91,.12); border-color:rgba(255,91,91,.5)}
+    .answers button:disabled{opacity:.95; cursor:not-allowed}
+
+    .audience{margin-top:8px; display:none}
+    .bar{height:26px; display:flex; align-items:center; gap:8px; margin:6px 0}
+    .bar .label{width:28px; text-align:center; font-weight:900; color:var(--muted)}
+    .bar .track{flex:1; background:#0f1533; border:1px solid rgba(255,255,255,.08); border-radius:999px; overflow:hidden}
+    .bar .fill{height:100%; background:linear-gradient(90deg, var(--accent), var(--accent-2)); width:0%}
+    .bar .pct{width:42px; text-align:right; color:var(--muted); font-weight:800}
+
+    .controls{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px; margin-top:12px}
+    .controls .payout{font-weight:900; color:var(--gold); font-size:clamp(14px,3vw,16px)}
+
+    /* Ladder (desktop) */
+    .ladder{padding:clamp(12px,2.4vw,18px); position:sticky; top:calc(8px + var(--safe-top)); max-height:calc(100dvh - 120px); overflow:auto}
+    .ladder h3{margin:0 0 10px 0; font-size:clamp(12px,2.4vw,14px); text-transform:uppercase; letter-spacing:.12em; color:#b3c2ff}
+    .steps{list-style:none; padding:0; margin:0; display:grid; gap:6px}
+    .step{display:flex; justify-content:space-between; background:#0f1533; border:1px solid rgba(255,255,255,.06); border-radius:10px; padding:8px 10px; color:var(--muted); font-weight:800; font-size:clamp(12px,2.4vw,14px)}
+    .step .q{opacity:.8}
+    .step.active{background:linear-gradient(90deg, rgba(249,200,70,.18), #0f1533); color:var(--ink); border-color:rgba(249,200,70,.5)}
+    .step.safe{outline:1px dashed rgba(249,200,70,.6)}
+
+    /* Ladder como "gaveta" no mobile */
+    @media (max-width:900px){
+      .sub{display:none}
+      .ladder{position:fixed; left:0; right:0; bottom:calc(10px + var(--safe-bottom)); max-height:60dvh; width:100%; padding:12px; border-radius:16px;
+               transform:translateY(110%); transition:.3s transform; z-index:30; backdrop-filter: blur(6px)}
+      .ladder.open{transform:translateY(0%)}
+      #ladderToggle{display:inline-flex}
+    }
+    @media (min-width:901px){ #ladderToggle{display:none} }
+
+    footer{opacity:.9; font-size:12px; color:var(--muted); text-align:center; padding-bottom:calc(4px + var(--safe-bottom))}
+    a{color:var(--accent)}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="card">
+      <div class="brand"><div class="logo"><span class="medal">🏅</span>Show do Milhão — Feijão</div></div>
+      <button id="ladderToggle" aria-expanded="false" aria-controls="ladder">🏆 Prêmios</button>
+    </header>
+
+    <div class="layout">
+      <section class="play card" aria-live="polite">
+        <div class="status">
+          <div class="lifelines" role="toolbar" aria-label="Ajudas">
+            <button id="fifty" aria-label="Usar 50:50">🪄 50:50</button>
+            <button id="skip" aria-label="Pular questão">⏭️ Pular</button>
+            <button id="ask" aria-label="Perguntar aos Universitários">🎓 Universitários</button>
+          </div>
+          <div class="meta"><span id="qpos">Pergunta 1/10</span> • Parada segura em <strong>3</strong> e <strong>7</strong></div>
+        </div>
+
+        <div id="question" class="question">Carregando…</div>
+        <div id="answers" class="answers"></div>
+
+        <div id="audience" class="audience" aria-live="polite">
+          <div class="bar"><div class="label">A</div><div class="track"><div class="fill" id="barA"></div></div><div class="pct" id="pctA">0%</div></div>
+          <div class="bar"><div class="label">B</div><div class="track"><div class="fill" id="barB"></div></div><div class="pct" id="pctB">0%</div></div>
+          <div class="bar"><div class="label">C</div><div class="track"><div class="fill" id="barC"></div></div><div class="pct" id="pctC">0%</div></div>
+          <div class="bar"><div class="label">D</div><div class="track"><div class="fill" id="barD"></div></div><div class="pct" id="pctD">0%</div></div>
+        </div>
+
+        <div class="controls">
+          <div class="payout">Prêmio atual: <span id="payout">R$ 0</span></div>
+          <div style="display:flex; gap:8px">
+            <button id="restart" title="Reiniciar o jogo">🔄 Recomeçar</button>
+          </div>
+        </div>
+
+        <details>
+          <summary>Regras e créditos</summary>
+          <div style="margin-top:8px; line-height:1.6; font-size:clamp(12px,2.6vw,14px)">
+            • 10 perguntas aleatórias por partida, sorteadas de um banco de 20. <br/>
+            • A posição da resposta correta muda aleatoriamente a cada questão. <br/>
+            • Ajudas: <strong>50:50</strong> (remove 2 erradas, 1x), <strong>Pular</strong> (troca a questão, 1x), <strong>Universitários</strong> (votos simulados, 1x).<br/>
+            • Paradas seguras ao acertar as perguntas <strong>3</strong> e <strong>7</strong>.<br/>
+            • Prêmio máximo: <strong>R$ 1.000.000</strong> (Show do Milhão).<br/>
+            • Conteúdo baseado no PDF “Feijão” fornecido pelo professor.
+          </div>
+        </details>
+      </section>
+
+      <aside id="ladder" class="ladder card" aria-hidden="true" aria-label="Tabela de prêmios">
+        <h3>Tabela de prêmios</h3>
+        <ol id="ladderList" class="steps"></ol>
+      </aside>
+    </div>
+
+    <footer>Feito com ❤️ para aulas de Agricultura — Cultura do Feijão.</footer>
+  </div>
+
+  <script>
+  // ======= Banco de 20 questões (feitas anteriormente) =======
+  // Cada questão possui: enunciado (q), alternativas (opts) e índice da correta (ans)
+  const BANK = [
+    {q:"Sobre a origem do feijão, é correto afirmar que:", opts:["É originário da Ásia, cultivado inicialmente na China.", "É originário do continente americano, com cultivo há mais de 10 mil anos.", "Foi introduzido no Brasil apenas no século XIX.", "Era utilizado apenas como adubo verde pelos povos antigos."], ans:1},
+    {q:"O Brasil é atualmente:", opts:["O maior importador de feijão do mundo.", "O maior produtor e consumidor mundial de feijão.", "O segundo maior produtor mundial, atrás da Índia.", "O maior produtor, mas com baixo consumo interno."], ans:1},
+    {q:"Qual das espécies abaixo é usada principalmente como adubo verde?", opts:["Phaseolus vulgaris", "Vigna unguiculata", "Canavalia ensiformis", "Vigna angularis"], ans:2},
+    {q:"O ciclo do feijão comum geralmente dura:", opts:["30 a 45 dias", "60 a 70 dias", "80 a 100 dias", "120 a 150 dias"], ans:2},
+    {q:"O feijoeiro apresenta dois tipos principais de folhas:", opts:["Primárias e secundárias", "Primárias e trifolioladas", "Trifolioladas e quadrifolioladas", "Unifolioladas e bifolioladas"], ans:1},
+    {q:"Sobre o caule do feijoeiro, é correto afirmar:", opts:["Apresenta apenas crescimento indeterminado.", "O crescimento determinado termina em flores.", "O crescimento indeterminado ocorre apenas em cultivares arbustivas.", "Não influencia no porte da planta."], ans:1},
+    {q:"As flores do feijoeiro apresentam:", opts:["Apenas pétalas brancas e róseas.", "Estrutura composta por estandarte, asas e quilha.", "Apenas gineceu e ausência de androceu.", "São sempre isoladas e de cor uniforme."], ans:1},
+    {q:"A semente de feijão pode variar quanto a:", opts:["Forma, tamanho, cor e brilho.", "Apenas cor e tamanho.", "Apenas presença ou ausência de brilho.", "Apenas forma e tegumento."], ans:0},
+    {q:"A temperatura ideal para o desenvolvimento do feijoeiro é:", opts:["10–15 °C", "18–24 °C", "25–30 °C", "30–35 °C"], ans:1},
+    {q:"A necessidade hídrica da cultura do feijão varia entre:", opts:["50–100 mm", "150–250 mm", "300–500 mm", "600–800 mm"], ans:2},
+    {q:"A calagem no cultivo do feijão visa:", opts:["Aumentar a acidez do solo.", "Corrigir a acidez e fornecer cálcio e magnésio.", "Diminuir o teor de fósforo no solo.", "Evitar a formação de nódulos."], ans:1},
+    {q:"O gesso agrícola tem como fórmula química:", opts:["CaCO₃", "CaSO₄·2H₂O", "MgSO₄", "K₂SO₄"], ans:1},
+    {q:"A primeira safra de feijão no Brasil é semeada geralmente entre:", opts:["Janeiro – Março", "Março – Maio", "Agosto – Novembro", "Junho – Agosto"], ans:2},
+    {q:"Entre as principais pragas do feijoeiro está a Mosca Branca (Bemisia tabaci), cujo principal dano é:", opts:["Seccionamento das plântulas.", "Transmissão de vírus como o mosaico dourado.", "Perfuração das vagens.", "Enrolamento dos folíolos."], ans:1},
+    {q:"A praga conhecida como Vaquinha Verde-Amarela (Diabrotica speciosa), na fase larval, recebe o nome de:", opts:["Lagarta-elasmo", "Larva-alfinete", "Larva-arame", "Larva-minadora"], ans:1},
+    {q:"A doença “Mofo Branco” é causada por:", opts:["Colletotrichum lindemuthianum", "Fusarium oxysporum", "Sclerotinia sclerotiorum", "Uromyces phaseoli"], ans:2},
+    {q:"A doença caracterizada por manchas necróticas angulares delimitadas pelas nervuras da folha é:", opts:["Mancha angular", "Oídio", "Antracnose", "Murcha de fusarium"], ans:0},
+    {q:"As plantas daninhas podem reduzir a produtividade do feijão em até:", opts:["10%", "20%", "50%", "97%"], ans:3},
+    {q:"A umidade ideal dos grãos de feijão para a colheita é:", opts:["8%", "10%", "13%", "20%"], ans:2},
+    {q:"No armazenamento em sacaria, é importante que:", opts:["Os sacos fiquem diretamente sobre o piso.", "Os sacos fiquem afastados do piso e possam receber inseticidas protetores.", "O ambiente seja úmido para evitar ressecamento.", "Seja usado apenas ventilação natural, sem necessidade de tratamento químico."], ans:1}
+  ];
+
+  // ======= Utilidades =======
+  const shuffle = arr => arr.map(v=>[Math.random(),v]).sort((a,b)=>a[0]-b[0]).map(v=>v[1]);
+  const sample = (arr,n) => shuffle(arr).slice(0,n);
+  const currency = n => n.toLocaleString('pt-BR',{style:'currency', currency:'BRL'});
+
+  // ======= Configuração do jogo (10 perguntas; prêmio final R$ 1.000.000) =======
+  const PRIZES = [1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 500000, 1000000];
+  const SAFE_STOPS = [3, 7];
+  const TOTAL_Q = 10; // máximo 10 por partida
+
+  let state;
+
+  function initState(){
+    // Seleciona 10 questões aleatórias do banco de 20, e reinicia estado
+    const pool = sample(BANK, TOTAL_Q).map(q => ({...q}));
+    state = { qIndex: 0, prizeIndex: -1, lastSafe: -1, used:{ fifty:false, skip:false, ask:false }, pool, current:null };
+  }
+
+  // ======= Renderização =======
+  const qEl = document.getElementById('question');
+  const aWrap = document.getElementById('answers');
+  const qPos = document.getElementById('qpos');
+  const payoutEl = document.getElementById('payout');
+  const ladderEl = document.getElementById('ladderList');
+  const ladderAside = document.getElementById('ladder');
+  const ladderToggle = document.getElementById('ladderToggle');
+
+  function buildLadder(){
+    ladderEl.innerHTML = '';
+    for(let i=PRIZES.length-1; i>=0; i--){
+      const li = document.createElement('li');
+      li.className = 'step';
+      li.dataset.index = i;
+      const stepNo = (i+1).toString().padStart(2,'0');
+      li.innerHTML = `<span class="q">${stepNo}</span><span>${currency(PRIZES[i])}</span>`;
+      if(SAFE_STOPS.includes(i+1)) li.classList.add('safe');
+      ladderEl.appendChild(li);
+    }
+  }
+
+  function highlightLadder(){
+    const items = ladderEl.querySelectorAll('.step');
+    items.forEach(el=>el.classList.remove('active'));
+    const current = ladderEl.querySelector(`.step[data-index="${state.prizeIndex}"]`);
+    if(current) current.classList.add('active');
+  }
+
+  function renderQuestion(){
+    // Seleciona a questão atual do pool e embaralha as alternativas + posição correta
+    const base = state.pool[state.qIndex];
+    const letters = ['A','B','C','D'];
+
+    // constrói mapeamento de embaralhamento
+    const idxs = shuffle([0,1,2,3]);
+    const options = idxs.map(i => base.opts[i]);
+    const correctIndex = idxs.indexOf(base.ans); // posição correta após embaralhar
+
+    state.current = { prompt: base.q, options, correctIndex, meta: "Cultura do Feijão" };
+
+    // Render
+    qEl.textContent = state.current.prompt;
+    const metaDiv = document.createElement('div');
+    metaDiv.className = 'meta';
+    metaDiv.textContent = state.current.meta;
+    qEl.appendChild(metaDiv);
+
+    aWrap.innerHTML = '';
+    state.current.options.forEach((opt,idx)=>{
+      const btn = document.createElement('button');
+      btn.innerHTML = `<span class="badge">${letters[idx]}</span> <span>${opt}</span>`;
+      btn.addEventListener('click', ()=>selectAnswer(idx, btn));
+      aWrap.appendChild(btn);
+    });
+
+    document.getElementById('audience').style.display = 'none';
+    ['A','B','C','D'].forEach(L=>{
+      document.getElementById('bar'+L).style.width = '0%';
+      document.getElementById('pct'+L).textContent = '0%';
+    });
+
+    qPos.textContent = `Pergunta ${state.qIndex+1}/${TOTAL_Q}`;
+  }
+
+  function selectAnswer(idx, btn){
+    const buttons = Array.from(aWrap.querySelectorAll('button'));
+    buttons.forEach(b=>b.disabled = true);
+
+    const isCorrect = idx === state.current.correctIndex;
+    if(isCorrect){
+      btn.classList.add('correct');
+      state.qIndex++;
+      state.prizeIndex++;
+      highlightLadder();
+      payoutEl.textContent = currency(PRIZES[Math.max(0, state.prizeIndex)] || 0);
+      if(SAFE_STOPS.includes(state.qIndex)) state.lastSafe = state.prizeIndex;
+
+      setTimeout(()=>{
+        if(state.qIndex >= TOTAL_Q){ endGame(true); }
+        else { renderQuestion(); }
+      }, 700);
+    } else {
+      btn.classList.add('wrong');
+      const correctBtn = buttons[state.current.correctIndex];
+      if(correctBtn) correctBtn.classList.add('correct');
+      setTimeout(()=>endGame(false), 850);
+    }
+  }
+
+  function endGame(won){
+    aWrap.querySelectorAll('button').forEach(b=>b.disabled = true);
+    const earned = won ? PRIZES[PRIZES.length-1] : (state.lastSafe>=0 ? PRIZES[state.lastSafe] : 0);
+    qEl.innerHTML = won
+      ? `🎉 <strong>Parabéns!</strong> Você venceu o Show do Milhão!<div class="meta">Prêmio final: ${currency(earned)}</div>`
+      : `💡 <strong>Fim de jogo.</strong> Você leva: ${currency(earned)} <div class="meta">Tente novamente para alcançar o milhão!</div>`;
+  }
+
+  // ======= Ajudas =======
+  const btn50 = document.getElementById('fifty');
+  const btnSkip = document.getElementById('skip');
+  const btnAsk = document.getElementById('ask');
+
+  btn50.addEventListener('click', ()=>{
+    if(state.used.fifty) return; state.used.fifty = true; btn50.disabled = true;
+    const buttons = Array.from(aWrap.querySelectorAll('button'));
+    const wrongIdx = [0,1,2,3].filter(i=>i!==state.current.correctIndex);
+    shuffle(wrongIdx).slice(0,2).forEach(i=>{ buttons[i].disabled = true; buttons[i].style.opacity = .5; });
+  });
+
+  btnSkip.addEventListener('click', ()=>{
+    if(state.used.skip) return; state.used.skip = true; btnSkip.disabled = true;
+    // Troca a questão atual por outra: sorteia uma nova fora do pool restante
+    const remaining = BANK.filter((_,i)=> !state.pool.includes(BANK[i]));
+    const candidates = BANK.filter(q => !state.pool.includes(q));
+    // fallback simples: insere uma aleatória do banco que não esteja já no pool (ou reembaralha)
+    let replacement = candidates.length ? candidates[Math.floor(Math.random()*candidates.length)] : BANK[Math.floor(Math.random()*BANK.length)];
+    // substitui a questão atual (sem avançar contagem)
+    state.pool[state.qIndex] = {...replacement};
+    renderQuestion();
+  });
+
+  btnAsk.addEventListener('click', ()=>{
+    if(state.used.ask) return; state.used.ask = true; btnAsk.disabled = true;
+    const base = [0,0,0,0];
+    const correct = state.current.correctIndex;
+    let remaining = 100;
+    const correctPct = 45 + Math.floor(Math.random()*26); // 45% a 70%
+    base[correct] = correctPct; remaining -= correctPct;
+    const others = shuffle([0,1,2,3].filter(i=>i!==correct));
+    base[others[0]] = Math.floor(remaining * (30+Math.random()*20)/100);
+    remaining -= base[others[0]];
+    base[others[1]] = Math.floor(remaining * (50+Math.random()*30)/100);
+    remaining -= base[others[1]];
+    base[others[2]] = remaining;
+
+    document.getElementById('audience').style.display = 'block';
+    const letters = ['A','B','C','D'];
+    letters.forEach((L,i)=>{
+      const w = base[i];
+      document.getElementById('bar'+L).style.width = w+'%';
+      document.getElementById('pct'+L).textContent = w+'%';
+    });
+  });
+
+  // ======= Reiniciar =======
+  const btnRestart = document.getElementById('restart'); btnRestart.addEventListener('click', startGame);
+
+  function startGame(){
+    initState();
+    buildLadder();
+    highlightLadder();
+    payoutEl.textContent = currency(0);
+    [btn50, btnSkip, btnAsk].forEach(b=>{ b.disabled=false; });
+    renderQuestion();
+  }
+
+  // ======= Toggle ladder (mobile) =======
+  ladderToggle.addEventListener('click', ()=>{
+    const open = ladderAside.classList.toggle('open');
+    ladderAside.setAttribute('aria-hidden', String(!open));
+    ladderToggle.setAttribute('aria-expanded', String(open));
+  });
+
+  startGame();
+  </script>
+</body>
+</html>
