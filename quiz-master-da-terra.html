@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Quiz: Master da Terra</title>
+  <style>
+    :root{
+      --bg: #0b1220;
+      --panel: rgba(255,255,255,.06);
+      --panel2: rgba(255,255,255,.10);
+      --border: rgba(255,255,255,.12);
+      --text: #e9eefc;
+      --muted: rgba(233,238,252,.70);
+      --ok: #2be38a;
+      --bad: #ff5c7a;
+      --warn: #ffd166;
+      --accent: #7aa7ff;
+      --shadow: 0 16px 50px rgba(0,0,0,.35);
+      --radius: 18px;
+      --radius2: 14px;
+      --ring: 0 0 0 4px rgba(122,167,255,.18);
+      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Helvetica Neue", "Noto Sans", "Liberation Sans";
+    }
+
+    *{ box-sizing: border-box; }
+    body{
+      margin: 0;
+      font-family: var(--font);
+      background:
+        radial-gradient(1200px 500px at 20% -10%, rgba(122,167,255,.20), transparent 60%),
+        radial-gradient(900px 450px at 90% 10%, rgba(43,227,138,.12), transparent 55%),
+        radial-gradient(1000px 600px at 70% 120%, rgba(255,209,102,.12), transparent 60%),
+        var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .app{
+      width: min(980px, 100%);
+      display: grid;
+      gap: 18px;
+    }
+
+    header{
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 18px;
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .title{
+      display: grid;
+      gap: 4px;
+    }
+    .title h1{
+      font-size: clamp(18px, 2.4vw, 26px);
+      margin: 0;
+      letter-spacing: .2px;
+    }
+    .title p{
+      margin: 0;
+      color: var(--muted);
+      font-size: 13.5px;
+    }
+
+    .pillbar{
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .pill{
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 10px 12px;
+      display: flex;
+      gap: 8px;
+      align-items: baseline;
+      min-width: 128px;
+      justify-content: space-between;
+    }
+    .pill span{
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .pill strong{
+      font-size: 14px;
+      letter-spacing: .2px;
+    }
+
+    .grid{
+      display: grid;
+      grid-template-columns: 1.5fr .9fr;
+      gap: 18px;
+    }
+
+    @media (max-width: 900px){
+      .grid{ grid-template-columns: 1fr; }
+      .pill{ min-width: unset; }
+      .pillbar{ justify-content: flex-start; }
+    }
+
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+
+    .progress-wrap{
+      display: grid;
+      gap: 10px;
+    }
+    .progress-top{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .progress-top .small{
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .bar{
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.10);
+      border: 1px solid rgba(255,255,255,.10);
+      overflow: hidden;
+    }
+    .bar > div{
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, rgba(122,167,255,.95), rgba(43,227,138,.85));
+      transition: width .35s ease;
+    }
+
+    .qmeta{
+      margin-top: 14px;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .question{
+      margin-top: 12px;
+      font-size: clamp(16px, 2.1vw, 20px);
+      line-height: 1.3;
+      letter-spacing: .15px;
+    }
+
+    .choices{
+      margin-top: 14px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .choice{
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.05);
+      border-radius: var(--radius2);
+      padding: 12px 12px;
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      gap: 10px;
+      align-items: center;
+      cursor: pointer;
+      transition: transform .05s ease, background .2s ease, border-color .2s ease;
+      user-select: none;
+    }
+    .choice:hover{
+      background: rgba(255,255,255,.08);
+      border-color: rgba(255,255,255,.18);
+      transform: translateY(-1px);
+    }
+    .choice:focus-visible{
+      outline: none;
+      box-shadow: var(--ring);
+    }
+    .badge{
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: rgba(122,167,255,.16);
+      border: 1px solid rgba(122,167,255,.22);
+      font-weight: 700;
+      letter-spacing: .3px;
+    }
+    .choice .text{
+      font-size: 15px;
+      line-height: 1.25;
+    }
+
+    .choice.locked{
+      cursor: default;
+      transform: none !important;
+      opacity: .95;
+    }
+
+    .choice.correct{
+      border-color: rgba(43,227,138,.55);
+      background: rgba(43,227,138,.12);
+    }
+    .choice.correct .badge{
+      background: rgba(43,227,138,.18);
+      border-color: rgba(43,227,138,.35);
+    }
+
+    .choice.wrong{
+      border-color: rgba(255,92,122,.55);
+      background: rgba(255,92,122,.10);
+    }
+    .choice.wrong .badge{
+      background: rgba(255,92,122,.18);
+      border-color: rgba(255,92,122,.35);
+    }
+
+    .feedback{
+      margin-top: 14px;
+      padding: 12px 12px;
+      border-radius: var(--radius2);
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.04);
+      display: none;
+      gap: 8px;
+    }
+    .feedback.show{ display: grid; }
+    .feedback .line1{
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .feedback .tag{
+      font-weight: 700;
+      letter-spacing: .2px;
+    }
+    .feedback .tag.ok{ color: var(--ok); }
+    .feedback .tag.bad{ color: var(--bad); }
+    .feedback .explain{
+      color: var(--muted);
+      font-size: 13.5px;
+      line-height: 1.35;
+    }
+
+    .actions{
+      margin-top: 14px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    button{
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      padding: 11px 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background .2s ease, transform .05s ease, border-color .2s ease;
+      font-weight: 700;
+      letter-spacing: .2px;
+    }
+    button:hover{
+      background: rgba(255,255,255,.09);
+      border-color: rgba(255,255,255,.18);
+      transform: translateY(-1px);
+    }
+    button:active{ transform: translateY(0px); }
+    button.primary{
+      background: linear-gradient(90deg, rgba(122,167,255,.95), rgba(43,227,138,.85));
+      border-color: rgba(255,255,255,.18);
+      color: #07101f;
+    }
+    button.primary:hover{ filter: brightness(1.02); }
+    button:disabled{
+      opacity: .5;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    .side{
+      display: grid;
+      gap: 18px;
+      align-content: start;
+    }
+
+    .panel-title{
+      margin: 0 0 10px 0;
+      font-size: 14px;
+      letter-spacing: .2px;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    .tips{
+      display: grid;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 13.5px;
+      line-height: 1.35;
+    }
+
+    .stats{
+      display: grid;
+      gap: 10px;
+    }
+
+    .statrow{
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: rgba(255,255,255,.04);
+    }
+    .statrow span{ color: var(--muted); }
+    .statrow strong{ letter-spacing: .2px; }
+
+    .end{
+      display: none;
+      gap: 12px;
+    }
+    .end.show{ display: grid; }
+
+    .end h2{
+      margin: 0;
+      font-size: 18px;
+      letter-spacing: .2px;
+    }
+    .end p{
+      margin: 0;
+      color: var(--muted);
+      font-size: 13.5px;
+      line-height: 1.35;
+    }
+
+    .summary{
+      display: grid;
+      gap: 8px;
+      margin-top: 6px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255,255,255,.10);
+      color: var(--muted);
+      font-size: 13.5px;
+      line-height: 1.35;
+    }
+
+    .kbd{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New";
+      font-size: 12px;
+      padding: 2px 6px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,.15);
+      background: rgba(255,255,255,.05);
+      color: var(--text);
+      opacity: .85;
+    }
+
+    .sr-only{
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      border: 0;
+    }
+  </style>
+</head>
+<body>
+  <main class="app" role="application" aria-label="Quiz Master da Terra">
+    <header>
+      <div class="title">
+        <h1>Quiz: Master da Terra</h1>
+        <p>Correção e Fertilização do Solo (1º ano) · 25 perguntas · ordem aleatória a cada partida</p>
+      </div>
+      <div class="pillbar" aria-label="Indicadores do jogo">
+        <div class="pill"><span>Pontos</span><strong id="score">0</strong></div>
+        <div class="pill"><span>Streak</span><strong id="streak">0</strong></div>
+        <div class="pill"><span>Acertos</span><strong id="hits">0</strong></div>
+      </div>
+    </header>
+
+    <section class="grid">
+      <section class="card" aria-live="polite">
+        <div class="progress-wrap">
+          <div class="progress-top">
+            <div class="small"><strong id="qIndex">1</strong> / <span id="qTotal">25</span></div>
+            <div class="small">Progresso: <span id="progressPct">0%</span></div>
+          </div>
+          <div class="bar" aria-hidden="true"><div id="barFill"></div></div>
+        </div>
+
+        <div class="qmeta">
+          <div>Modo: <strong>1 tentativa</strong> por questão</div>
+          <div>Atalhos: <span class="kbd">1</span> <span class="kbd">2</span> <span class="kbd">3</span> · <span class="kbd">N</span> próximo</div>
+        </div>
+
+        <div class="question" id="questionText"></div>
+
+        <div class="choices" id="choices"></div>
+
+        <div class="feedback" id="feedback">
+          <div class="line1">
+            <div class="tag" id="tag"></div>
+            <div class="small" id="mini"></div>
+          </div>
+          <div class="explain" id="explain"></div>
+        </div>
+
+        <div class="actions">
+          <button id="btnRestart">Reiniciar</button>
+          <button class="primary" id="btnNext" disabled>Próxima</button>
+        </div>
+      </section>
+
+      <aside class="side">
+        <section class="card">
+          <h3 class="panel-title">Como funciona</h3>
+          <div class="tips">
+            <div>• Cada partida embaralha as perguntas.</div>
+            <div>• Pontos: <strong>+100</strong> por acerto, <strong>+20</strong> extra a cada 3 acertos seguidos (streak).</div>
+            <div>• Feedback imediato mostra a alternativa correta.</div>
+            <div>• Você pode usar o teclado: <span class="kbd">1</span>, <span class="kbd">2</span>, <span class="kbd">3</span>, e <span class="kbd">N</span>.</div>
+          </div>
+        </section>
+
+        <section class="card">
+          <h3 class="panel-title">Estatísticas</h3>
+          <div class="stats">
+            <div class="statrow"><span>Erros</span><strong id="misses">0</strong></div>
+            <div class="statrow"><span>Precisão</span><strong id="acc">0%</strong></div>
+            <div class="statrow"><span>Maior streak</span><strong id="bestStreak">0</strong></div>
+          </div>
+
+          <div class="end" id="endPanel">
+            <h2>Fim de jogo</h2>
+            <p id="endText"></p>
+            <div class="summary" id="summary"></div>
+            <div class="actions" style="justify-content:flex-start; margin-top: 10px;">
+              <button class="primary" id="btnPlayAgain">Jogar novamente (embaralhar)</button>
+            </div>
+          </div>
+        </section>
+      </aside>
+    </section>
+  </main>
+
+  <script>
+    // =========================
+    // Banco de questões
+    // =========================
+    const QUESTIONS = [
+      {
+        id: 1,
+        q: "O que é o solo do ponto de vista agrícola?",
+        options: [
+          { key: "A", text: "Apenas uma camada de poeira." },
+          { key: "B", text: "Um corpo natural vivo que sustenta as plantas." },
+          { key: "C", text: "Uma fonte inesgotável de adubo químico." }
+        ],
+        correct: "B"
+      },
+      {
+        id: 2,
+        q: "Qual é a composição volumétrica ideal de um solo produtivo?",
+        options: [
+          { key: "A", text: "100% de minerais." },
+          { key: "B", text: "50% de parte sólida, 25% de ar e 25% de água." },
+          { key: "C", text: "80% de água e 20% de matéria orgânica." }
+        ],
+        correct: "B"
+      },
+      {
+        id: 3,
+        q: "O que define a textura do solo?",
+        options: [
+          { key: "A", text: "A quantidade de adubo colocado." },
+          { key: "B", text: "A cor do solo quando está molhado." },
+          { key: "C", text: "A proporção de areia, silte e argila." }
+        ],
+        correct: "C"
+      },
+      {
+        id: 4,
+        q: "Qual partícula do solo é a menor e responsável pela retenção de nutrientes?",
+        options: [
+          { key: "A", text: "Areia." },
+          { key: "B", text: "Argila." },
+          { key: "C", text: "Silte." }
+        ],
+        correct: "B"
+      },
+      {
+        id: 5,
+        q: "A cor escura no horizonte superficial do solo geralmente indica presença de:",
+        options: [
+          { key: "A", text: "Calcário." },
+          { key: "B", text: "Matéria Orgânica." },
+          { key: "C", text: "Excesso de ferro." }
+        ],
+        correct: "B"
+      },
+      {
+        id: 6,
+        q: "Como se chama a sequência de camadas horizontais que vemos em um corte de solo?",
+        options: [
+          { key: "A", text: "Perfil do solo." },
+          { key: "B", text: "Escada de terra." },
+          { key: "C", text: "Mapa geológico." }
+        ],
+        correct: "A"
+      },
+      {
+        id: 7,
+        q: "O solo é considerado um recurso natural:",
+        options: [
+          { key: "A", text: "Renovável em curto prazo (meses)." },
+          { key: "B", text: "Não renovável na escala de tempo humana." },
+          { key: "C", text: "Infinito e indestrutível." }
+        ],
+        correct: "B"
+      },
+      {
+        id: 8,
+        q: "Qual destes agentes é o principal causador da formação do solo (intemperismo)?",
+        options: [
+          { key: "A", text: "O clima (chuva e temperatura)." },
+          { key: "B", text: "O uso de tratores." },
+          { key: "C", text: "A aplicação de defensivos." }
+        ],
+        correct: "A"
+      },
+      {
+        id: 9,
+        q: "O que é a CTC (Capacidade de Troca de Cátions) do solo?",
+        options: [
+          { key: "A", text: "A velocidade com que a água escorre." },
+          { key: "B", text: "A capacidade do solo de \"segurar\" nutrientes." },
+          { key: "C", text: "O peso total do solo por hectare." }
+        ],
+        correct: "B"
+      },
+      {
+        id: 10,
+        q: "Qual é a função da Calagem no solo?",
+        options: [
+          { key: "A", text: "Aumentar a acidez." },
+          { key: "B", text: "Corrigir o pH e fornecer Cálcio e Magnésio." },
+          { key: "C", text: "Matar as formigas da lavoura." }
+        ],
+        correct: "B"
+      },
+      {
+        id: 11,
+        q: "Um solo com pH 4,5 é considerado:",
+        options: [
+          { key: "A", text: "Ácido." },
+          { key: "B", text: "Neutro." },
+          { key: "C", text: "Alcalino." }
+        ],
+        correct: "A"
+      },
+      {
+        id: 12,
+        q: "O que significa a sigla N-P-K nos fertilizantes?",
+        options: [
+          { key: "A", text: "Nitrogênio, Fósforo e Potássio." },
+          { key: "B", text: "Natrium, Platina e Krypton." },
+          { key: "C", text: "Nitrato, Prata e Potássio." }
+        ],
+        correct: "A"
+      },
+      {
+        id: 13,
+        q: "Qual nutriente é famoso por ajudar no crescimento das folhas (parte verde)?",
+        options: [
+          { key: "A", text: "Fósforo." },
+          { key: "B", text: "Nitrogênio." },
+          { key: "C", text: "Cálcio." }
+        ],
+        correct: "B"
+      },
+      {
+        id: 14,
+        q: "O Fósforo (P) é fundamental para qual fase da planta?",
+        options: [
+          { key: "A", text: "Apenas para a cor das flores." },
+          { key: "B", text: "Enraizamento e transferência de energia." },
+          { key: "C", text: "Apenas para repelir insetos." }
+        ],
+        correct: "B"
+      },
+      {
+        id: 15,
+        q: "Qual a principal vantagem do plantio direto para o solo?",
+        options: [
+          { key: "A", text: "Deixar a terra exposta ao sol." },
+          { key: "B", text: "Proteger o solo contra erosão e manter a umidade." },
+          { key: "C", text: "Gastar mais combustível com o trator." }
+        ],
+        correct: "B"
+      },
+      {
+        id: 16,
+        q: "O que é a erosão hídrica?",
+        options: [
+          { key: "A", text: "O desgaste do solo causado pela água da chuva." },
+          { key: "B", text: "O aumento de nutrientes causado pela irrigação." },
+          { key: "C", text: "A formação de rochas novas no rio." }
+        ],
+        correct: "A"
+      },
+      {
+        id: 17,
+        q: "Os Macronutrientes são chamados assim porque:",
+        options: [
+          { key: "A", text: "São maiores em tamanho físico." },
+          { key: "B", text: "A planta precisa deles em grandes quantidades." },
+          { key: "C", text: "São encontrados apenas em solos de macro-propriedades." }
+        ],
+        correct: "B"
+      },
+      {
+        id: 18,
+        q: "Qual destes é um Micronutriente?",
+        options: [
+          { key: "A", text: "Nitrogênio." },
+          { key: "B", text: "Boro." },
+          { key: "C", text: "Potássio." }
+        ],
+        correct: "B"
+      },
+      {
+        id: 19,
+        q: "A técnica de curvas de nível serve para:",
+        options: [
+          { key: "A", text: "Deixar a lavoura mais bonita." },
+          { key: "B", text: "Reduzir a velocidade da água e evitar a erosão." },
+          { key: "C", text: "Facilitar apenas o passeio dos animais." }
+        ],
+        correct: "B"
+      },
+      {
+        id: 20,
+        q: "O que indica a cor avermelhada de um solo?",
+        options: [
+          { key: "A", text: "Presença de óxidos de ferro." },
+          { key: "B", text: "Falta de oxigênio." },
+          { key: "C", text: "Que o solo está queimado." }
+        ],
+        correct: "A"
+      },
+      {
+        id: 21,
+        q: "Qual a função dos microrganismos (biota) no solo?",
+        options: [
+          { key: "A", text: "Eles não têm função importante." },
+          { key: "B", text: "Decompor a matéria orgânica e ciclar nutrientes." },
+          { key: "C", text: "Apenas causar doenças nas raízes." }
+        ],
+        correct: "B"
+      },
+      {
+        id: 22,
+        q: "Para fazer uma análise de solo correta, a amostra deve ser:",
+        options: [
+          { key: "A", text: "Coletada de um único ponto da lavoura." },
+          { key: "B", text: "Representativa (vários pontos misturados)." },
+          { key: "C", text: "Tirada apenas da beira da estrada." }
+        ],
+        correct: "B"
+      },
+      {
+        id: 23,
+        q: "O que é compactação do solo?",
+        options: [
+          { key: "A", text: "Quando o solo fica muito fofo." },
+          { key: "B", text: "A redução dos poros, dificultando a entrada de ar e água." },
+          { key: "C", text: "O ato de colocar adubo no sulco de plantio." }
+        ],
+        correct: "B"
+      },
+      {
+        id: 24,
+        q: "Qual a profundidade padrão para coleta de solo em culturas anuais (grãos)?",
+        options: [
+          { key: "A", text: "0 a 20 centímetros." },
+          { key: "B", text: "2 a 3 metros." },
+          { key: "C", text: "Apenas a palhada da superfície." }
+        ],
+        correct: "A"
+      },
+      {
+        id: 25,
+        q: "O uso da Inteligência Artificial na agricultura (como no seu plano) ajuda a:",
+        options: [
+          { key: "A", text: "Substituir completamente o agricultor." },
+          { key: "B", text: "Interpretar laudos de análise e recomendar adubação precisa." },
+          { key: "C", text: "Criar novos tipos de solos em laboratório." }
+        ],
+        correct: "B"
+      }
+    ];
+
+    // =========================
+    // Utilitários
+    // =========================
+    function shuffle(arr){
+      const a = arr.slice();
+      for(let i = a.length - 1; i > 0; i--){
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function pct(n, d){
+      if(d === 0) return 0;
+      return Math.round((n / d) * 100);
+    }
+
+    // =========================
+    // Estado do jogo
+    // =========================
+    let deck = [];
+    let idx = 0;
+    let locked = false;
+
+    let score = 0;
+    let hits = 0;
+    let misses = 0;
+    let streak = 0;
+    let bestStreak = 0;
+
+    // para resumo final
+    let history = []; // {id, correctKey, chosenKey, ok}
+
+    // =========================
+    // Elementos
+    // =========================
+    const elScore = document.getElementById("score");
+    const elHits = document.getElementById("hits");
+    const elMisses = document.getElementById("misses");
+    const elStreak = document.getElementById("streak");
+    const elBestStreak = document.getElementById("bestStreak");
+    const elAcc = document.getElementById("acc");
+
+    const elQIndex = document.getElementById("qIndex");
+    const elQTotal = document.getElementById("qTotal");
+    const elPct = document.getElementById("progressPct");
+    const elBar = document.getElementById("barFill");
+
+    const elQuestion = document.getElementById("questionText");
+    const elChoices = document.getElementById("choices");
+    const elFeedback = document.getElementById("feedback");
+    const elTag = document.getElementById("tag");
+    const elMini = document.getElementById("mini");
+    const elExplain = document.getElementById("explain");
+
+    const btnNext = document.getElementById("btnNext");
+    const btnRestart = document.getElementById("btnRestart");
+    const btnPlayAgain = document.getElementById("btnPlayAgain");
+
+    const endPanel = document.getElementById("endPanel");
+    const endText = document.getElementById("endText");
+    const summary = document.getElementById("summary");
+
+    // =========================
+    // Render
+    // =========================
+    function updateTop(){
+      elScore.textContent = score;
+      elHits.textContent = hits;
+      elMisses.textContent = misses;
+      elStreak.textContent = streak;
+      elBestStreak.textContent = bestStreak;
+
+      const answered = hits + misses;
+      elAcc.textContent = pct(hits, answered) + "%";
+    }
+
+    function updateProgress(){
+      const total = deck.length;
+      elQTotal.textContent = total;
+      elQIndex.textContent = Math.min(idx + 1, total);
+      const progress = pct(idx, total);
+      elPct.textContent = progress + "%";
+      elBar.style.width = progress + "%";
+    }
+
+    function clearFeedback(){
+      elFeedback.classList.remove("show");
+      elTag.textContent = "";
+      elMini.textContent = "";
+      elExplain.textContent = "";
+    }
+
+    function showFeedback(ok, correctKey, chosenKey){
+      elFeedback.classList.add("show");
+      if(ok){
+        elTag.textContent = "Correto";
+        elTag.className = "tag ok";
+      } else {
+        elTag.textContent = "Incorreto";
+        elTag.className = "tag bad";
+      }
+      elMini.textContent = `Correta: ${correctKey} · Sua resposta: ${chosenKey}`;
+      elExplain.textContent = "Dica: memorize o conceito central da questão e relacione com prática de campo (análise, manejo, correção, adubação e conservação).";
+    }
+
+    function renderQuestion(){
+      if(idx >= deck.length){
+        finishGame();
+        return;
+      }
+
+      locked = false;
+      btnNext.disabled = true;
+      clearFeedback();
+
+      updateTop();
+      updateProgress();
+
+      const item = deck[idx];
+      elQuestion.textContent = `${item.id}. ${item.q}`;
+
+      // render choices
+      elChoices.innerHTML = "";
+      item.options.forEach((opt, i) => {
+        const btn = document.createElement("div");
+        btn.className = "choice";
+        btn.tabIndex = 0;
+        btn.setAttribute("role", "button");
+        btn.setAttribute("aria-label", `Alternativa ${i+1}: ${opt.key}`);
+
+        btn.innerHTML = `
+          <div class="badge">${i+1}</div>
+          <div class="text"><strong>${opt.key})</strong> ${opt.text}</div>
+        `;
+
+        const handler = () => choose(opt.key);
+        btn.addEventListener("click", handler);
+        btn.addEventListener("keydown", (e) => {
+          if(e.key === "Enter" || e.key === " "){
+            e.preventDefault();
+            handler();
+          }
+        });
+
+        elChoices.appendChild(btn);
+      });
+
+      endPanel.classList.remove("show");
+    }
+
+    function lockChoices(){
+      [...elChoices.querySelectorAll(".choice")].forEach(c => c.classList.add("locked"));
+    }
+
+    function paintChoices(correctKey, chosenKey){
+      const nodes = [...elChoices.querySelectorAll(".choice")];
+      nodes.forEach((node) => {
+        const label = node.querySelector(".text").textContent;
+        // label começa com "A) ..." dentro do text, então pegamos a letra
+        const key = label.trim().charAt(0);
+        if(key === correctKey) node.classList.add("correct");
+        if(key === chosenKey && chosenKey !== correctKey) node.classList.add("wrong");
+      });
+    }
+
+    // =========================
+    // Lógica de jogo
+    // =========================
+    function choose(key){
+      if(locked) return;
+
+      const item = deck[idx];
+      const ok = (key === item.correct);
+
+      locked = true;
+      lockChoices();
+      paintChoices(item.correct, key);
+
+      if(ok){
+        hits++;
+        streak++;
+        if(streak > bestStreak) bestStreak = streak;
+
+        let bonus = 0;
+        if(streak > 0 && streak % 3 === 0) bonus = 20; // a cada 3 acertos seguidos
+        score += 100 + bonus;
+
+      } else {
+        misses++;
+        streak = 0;
+      }
+
+      history.push({
+        id: item.id,
+        correctKey: item.correct,
+        chosenKey: key,
+        ok
+      });
+
+      showFeedback(ok, item.correct, key);
+      updateTop();
+      btnNext.disabled = false;
+      btnNext.focus();
+    }
+
+    function next(){
+      if(idx >= deck.length) return;
+      idx++;
+      renderQuestion();
+    }
+
+    function restart(){
+      deck = shuffle(QUESTIONS);
+      idx = 0;
+      locked = false;
+
+      score = 0;
+      hits = 0;
+      misses = 0;
+      streak = 0;
+      bestStreak = 0;
+      history = [];
+
+      clearFeedback();
+      updateTop();
+      updateProgress();
+      renderQuestion();
+    }
+
+    function finishGame(){
+      // barra 100%
+      elPct.textContent = "100%";
+      elBar.style.width = "100%";
+      endPanel.classList.add("show");
+
+      const total = deck.length;
+      const accuracy = pct(hits, total);
+      endText.textContent = `Você concluiu as ${total} questões com ${hits} acertos e ${misses} erros (precisão: ${accuracy}%). Pontuação final: ${score}.`;
+
+      // resumo: listar as 5 questões erradas (se houver), para revisão
+      summary.innerHTML = "";
+      const wrongs = history.filter(h => !h.ok);
+      if(wrongs.length === 0){
+        const div = document.createElement("div");
+        div.textContent = "Revisão: desempenho perfeito. Próximo passo: peça exemplos práticos (campo) para cada tema e relacione com análise de solo e manejo.";
+        summary.appendChild(div);
+      } else {
+        const title = document.createElement("div");
+        title.innerHTML = `<strong>Revisão sugerida (erros):</strong>`;
+        summary.appendChild(title);
+
+        wrongs.slice(0, 5).forEach(w => {
+          const q = QUESTIONS.find(x => x.id === w.id);
+          const line = document.createElement("div");
+          line.textContent = `• Q${w.id}: correta ${w.correctKey} (você marcou ${w.chosenKey}) — ${q.q}`;
+          summary.appendChild(line);
+        });
+
+        if(wrongs.length > 5){
+          const extra = document.createElement("div");
+          extra.textContent = `… e mais ${wrongs.length - 5} questão(ões) para revisar.`;
+          summary.appendChild(extra);
+        }
+      }
+    }
+
+    // =========================
+    // Eventos
+    // =========================
+    btnNext.addEventListener("click", next);
+    btnRestart.addEventListener("click", restart);
+    btnPlayAgain.addEventListener("click", restart);
+
+    document.addEventListener("keydown", (e) => {
+      // 1,2,3 respondem
+      if(e.key === "1" || e.key === "2" || e.key === "3"){
+        const n = Number(e.key) - 1;
+        const nodes = [...elChoices.querySelectorAll(".choice")];
+        if(nodes[n] && !locked){
+          nodes[n].click();
+        }
+      }
+      // N = próxima
+      if((e.key === "n" || e.key === "N") && !btnNext.disabled){
+        btnNext.click();
+      }
+      // R = reiniciar
+      if(e.key === "r" || e.key === "R"){
+        restart();
+      }
+    });
+
+    // Start
+    restart();
+  </script>
+</body>
+</html>
