@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Show do Milhão — Nutrição de Plantas (versão “Milhos” + Timer)</title>
+<title>Show do Milhão — Nutrição de Plantas (Milhos + Timer + Tela Inicial)</title>
 
 <style>
 :root{
@@ -17,10 +17,8 @@
   --success:#22c55e;
   --gold:#f9c846;
 
-  /* ===== Estética Show do Milhão (alternativas) ===== */
-  --ansRed1:#b31818;     /* topo */
-  --ansRed2:#7f0f0f;     /* base */
-  --ansBorder:#ffb35c;   /* filete dourado */
+  --ansRed1:#b31818;
+  --ansRed2:#7f0f0f;
   --ansShadow:rgba(0,0,0,.45);
   --ansText:#fff3e0;
 }
@@ -53,7 +51,8 @@ body{
   box-shadow:0 10px 30px rgba(0,0,0,.4);
   display:flex;
   flex-direction:column;
-  gap:20px;
+  gap:14px;
+  position:relative;
 }
 
 /* ===== Cabeçalho ===== */
@@ -75,6 +74,43 @@ header .logo{
 }
 header .logo .medal{font-size:22px; color:var(--gold)}
 header .sub{color:var(--muted); font-size:13px}
+
+/* ===== Placar abaixo do cabeçalho ===== */
+.scoreboard{
+  background:#0f1533;
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:14px;
+  padding:10px 12px;
+  font-weight:900;
+  color:var(--gold);
+  text-align:center;
+  font-size:16px;
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.scoreboard #payout{ display:inline-block; min-width:12ch; text-align:right; }
+
+.playerTag{
+  color:#dbe7ff;
+  font-weight:800;
+  font-size:14px;
+  opacity:.95;
+}
+
+#restart{
+  background:#111a44;
+  color:var(--ink);
+  border:1px solid rgba(255,255,255,.12);
+  padding:8px 10px;
+  border-radius:10px;
+  font-weight:900;
+  cursor:pointer;
+}
+#restart:hover{filter:brightness(1.05)}
 
 /* ===== Layout principal ===== */
 .layout{
@@ -102,7 +138,7 @@ header .sub{color:var(--muted); font-size:13px}
   align-items:center;
   flex-wrap:wrap;
   gap:8px;
-  margin-bottom:10px
+  margin-bottom:10px;
 }
 
 /* ===== Timer ===== */
@@ -164,9 +200,7 @@ header .sub{color:var(--muted); font-size:13px}
 }
 .meta{margin-top:8px; color:var(--muted); font-size:12px}
 
-/* =========================================================
-   ===== ALTERNATIVAS — estilo “Show do Milhão” (patch) =====
-   ========================================================= */
+/* ===== Alternativas ===== */
 .answers{
   display:grid;
   grid-template-columns: 1fr 1fr;
@@ -176,37 +210,26 @@ header .sub{color:var(--muted); font-size:13px}
 @media (max-width:560px){
   .answers{grid-template-columns:1fr}
 }
-
-/* Botão em formato “barra” */
 .answers button{
   position:relative;
   text-align:left;
   padding:14px 16px;
-  padding-left:62px; /* espaço p/ badge */
+  padding-left:62px;
   border-radius:12px;
-
   background:linear-gradient(180deg, var(--ansRed1), var(--ansRed2));
   color:var(--ansText);
-
   border:2px solid rgba(255,179,92,.75);
-  box-shadow:
-    0 10px 18px var(--ansShadow),
-    inset 0 1px 0 rgba(255,255,255,.18);
-
+  box-shadow: 0 10px 18px var(--ansShadow), inset 0 1px 0 rgba(255,255,255,.18);
   cursor:pointer;
   font-size:clamp(14px, 2vw, 15px);
   font-weight:800;
   letter-spacing:.01em;
-
   display:flex;
   gap:12px;
   align-items:center;
-
   transition: transform .12s ease, filter .12s ease, box-shadow .12s ease;
   min-height:56px;
 }
-
-/* brilho/contorno interno, lembrando o “filete” */
 .answers button::before{
   content:"";
   position:absolute;
@@ -215,8 +238,6 @@ header .sub{color:var(--muted); font-size:13px}
   border:1px solid rgba(255,255,255,.12);
   pointer-events:none;
 }
-
-/* badge numérico estilo “placa” */
 .answers button .badge{
   position:absolute;
   left:12px;
@@ -224,31 +245,22 @@ header .sub{color:var(--muted); font-size:13px}
   transform:translateY(-50%);
   width:38px;
   height:30px;
-
   display:flex;
   align-items:center;
   justify-content:center;
-
   background:linear-gradient(180deg, rgba(25,40,120,.95), rgba(10,18,70,.95));
   border:2px solid rgba(255,179,92,.85);
   border-radius:8px;
-
   color:#eaf0ff;
   font-weight:900;
   font-size:14px;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.15);
 }
-
-/* hover */
 .answers button:hover{
   transform:translateY(-1px);
   filter:brightness(1.05);
-  box-shadow:
-    0 12px 22px rgba(0,0,0,.55),
-    inset 0 1px 0 rgba(255,255,255,.18);
+  box-shadow: 0 12px 22px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.18);
 }
-
-/* estados */
 .answers button.correct{
   background:linear-gradient(180deg, rgba(20,120,60,.95), rgba(8,70,35,.95));
   border-color:rgba(249,200,70,.9);
@@ -258,17 +270,8 @@ header .sub{color:var(--muted); font-size:13px}
   border-color:rgba(255,91,91,.9);
 }
 .answers button:disabled{opacity:.95; cursor:not-allowed}
-
-.answers button.correct::after{
-  content:" ✓";
-  font-weight:900;
-  margin-left:6px;
-}
-.answers button.wrong::after{
-  content:" ✕";
-  font-weight:900;
-  margin-left:6px;
-}
+.answers button.correct::after{ content:" ✓"; font-weight:900; margin-left:6px; }
+.answers button.wrong::after{ content:" ✕"; font-weight:900; margin-left:6px; }
 
 /* ===== Gráfico da plateia ===== */
 .audience{margin-top:10px; display:none}
@@ -278,14 +281,13 @@ header .sub{color:var(--muted); font-size:13px}
 .bar .fill{height:100%; background:linear-gradient(90deg, var(--accent), var(--accent-2)); width:0%}
 .bar .pct{width:42px; text-align:right; color:var(--muted); font-weight:700}
 
-/* =========================================================
-   ===== Lado direito: imagem do entrevistador (patch) =====
-   ========================================================= */
+/* ===== Entrevistador (RESPONSIVO / SEM CORTE) ===== */
 .host{
   padding:14px;
   display:flex;
   flex-direction:column;
   gap:10px;
+  min-height:0;
 }
 .hostFrame{
   width:100%;
@@ -294,26 +296,19 @@ header .sub{color:var(--muted); font-size:13px}
   border:1px solid rgba(255,255,255,.12);
   background:#0f1533;
   box-shadow:0 10px 24px rgba(0,0,0,.45);
-  position:relative;
-}
-
-/* Mantém proporção 600x900 (2:3) e encaixa bonito */
-.hostFrame::before{
-  content:"";
-  display:block;
-  padding-top:150%; /* 3/2 = 150% */
+  height: clamp(360px, 60vh, 720px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
 .hostFrame img{
-  position:absolute;
-  inset:0;
   width:100%;
   height:100%;
-  object-fit:cover;
+  object-fit: contain;
   object-position:center;
   display:block;
   filter:contrast(1.02) saturate(1.02);
 }
-
 .hostCaption{
   text-align:center;
   color:#b3c2ff;
@@ -323,41 +318,151 @@ header .sub{color:var(--muted); font-size:13px}
   letter-spacing:.12em;
   opacity:.95;
 }
-
-/* ===== Placar fixo abaixo ===== */
-.scoreboard{
-  background:#0f1533;
-  border:1px solid rgba(255,255,255,.1);
-  border-radius:14px;
-  padding:10px;
-  font-weight:800;
-  color:var(--gold);
-  text-align:center;
-  font-size:16px;
-  max-width:min(1100px, 100%);
-  width:100%;
+@media (max-width: 880px){
+  .hostFrame{ height: clamp(260px, 45vh, 520px); }
 }
-.scoreboard #payout{ display:inline-block; min-width:12ch; text-align:right; }
 
-#restart{
-  background:#111a44;
-  color:var(--ink);
+/* ===== Tela inicial ===== */
+.startScreen{
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:16px;
+
+  background: radial-gradient(900px 500px at 20% 10%, rgba(28,37,96,.75), rgba(11,16,32,.92) 55%),
+              radial-gradient(900px 600px at 90% 90%, rgba(42,16,64,.75), rgba(11,16,32,.92) 60%);
+  backdrop-filter: blur(6px);
+}
+
+.startCard{
+  width:min(920px, 100%);
+  border-radius:18px;
   border:1px solid rgba(255,255,255,.12);
-  padding:8px 10px;
-  border-radius:10px;
-  font-weight:800;
-  cursor:pointer;
+  background:rgba(18,25,57,0.88);
+  box-shadow:0 18px 44px rgba(0,0,0,.55);
+  overflow:hidden;
+  display:grid;
+  grid-template-columns: 1fr 1fr;
 }
-#restart:hover{filter:brightness(1.05)}
+@media (max-width: 860px){
+  .startCard{ grid-template-columns:1fr; }
+}
+
+.startLeft{
+  padding:18px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.startTitle{
+  font-weight:900;
+  font-size:clamp(20px, 2.4vw, 26px);
+}
+.startSubtitle{
+  color:var(--muted);
+  font-size:14px;
+  line-height:1.35;
+}
+
+.startForm{
+  margin-top:6px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.startForm label{
+  font-weight:800;
+  color:#dbe7ff;
+  font-size:13px;
+}
+.startForm input{
+  width:100%;
+  padding:12px 12px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.14);
+  background:#0f1533;
+  color:var(--ink);
+  font-weight:800;
+  outline:none;
+}
+.startForm input:focus{
+  border-color: rgba(0,225,255,.7);
+  box-shadow: 0 0 0 3px rgba(0,225,255,.15);
+}
+
+.startActions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:6px;
+}
+.btnPrimary{
+  appearance:none;
+  border:none;
+  cursor:pointer;
+  font-weight:900;
+  padding:12px 14px;
+  border-radius:12px;
+  color:#081018;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  box-shadow: 0 12px 26px rgba(0,0,0,.35);
+}
+.btnPrimary:hover{ filter:brightness(1.03); transform:translateY(-1px); }
+.btnGhost{
+  appearance:none;
+  cursor:pointer;
+  font-weight:900;
+  padding:12px 14px;
+  border-radius:12px;
+  color:var(--ink);
+  border:1px solid rgba(255,255,255,.14);
+  background:#0f1533;
+}
+.btnGhost:hover{ filter:brightness(1.04); transform:translateY(-1px); }
+
+.startRight{
+  background:#0f1533;
+  border-left:1px solid rgba(255,255,255,.10);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:14px;
+}
+@media (max-width: 860px){
+  .startRight{ border-left:none; border-top:1px solid rgba(255,255,255,.10); }
+}
+.startPreview{
+  width:100%;
+  height: clamp(260px, 50vh, 560px);
+  border-radius:14px;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.12);
+  background:#0b1020;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.startPreview img{
+  width:100%;
+  height:100%;
+  object-fit: contain;
+  object-position:center;
+  display:block;
+}
 
 /* ===== Footer ===== */
 footer{opacity:.9; font-size:12px; color:var(--muted); text-align:center}
-a{color:var(--accent)}
 
 /* ===== Acessibilidade (foco visível) ===== */
 .lifelines button:focus-visible,
 .answers button:focus-visible,
-#restart:focus-visible{
+#restart:focus-visible,
+.btnPrimary:focus-visible,
+.btnGhost:focus-visible,
+.startForm input:focus-visible{
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
@@ -370,11 +475,46 @@ a{color:var(--accent)}
 </head>
 
 <body>
-<div class="app">
+
+<!-- TELA INICIAL -->
+<div class="startScreen" id="startScreen" role="dialog" aria-modal="true" aria-label="Tela inicial">
+  <div class="startCard">
+    <div class="startLeft">
+      <div class="startTitle">🌽 Show do Milhão — Nutrição de Plantas</div>
+      <div class="startSubtitle">
+        Digite seu nome para começar. Você terá 30 segundos por pergunta e pode usar 3 ajudas.
+      </div>
+
+      <form class="startForm" id="startForm">
+        <label for="playerName">Nome do participante</label>
+        <input id="playerName" name="playerName" type="text" maxlength="24" placeholder="Ex.: Ana, João, Turma 201..." autocomplete="off" required />
+        <div class="startActions">
+          <button class="btnPrimary" type="submit">Começar</button>
+          <button class="btnGhost" type="button" id="startNoName">Entrar sem nome</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="startRight" aria-hidden="false">
+      <div class="startPreview">
+        <img src="https://i.imgur.com/0dkhHKi.png" alt="Entrevistador" />
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="app" id="app">
   <header class="card" role="banner">
     <div class="logo"><span class="medal">🌽</span>Show do Milhão — Nutrição de Plantas</div>
     <div class="sub">Responda 15 questões sobre nutrição de plantas. Use as ajudas com sabedoria! Cuidado com o timer!</div>
   </header>
+
+  <div class="scoreboard" role="status" aria-live="polite">
+    <span class="playerTag" id="playerTag" style="display:none;">Jogador: <span id="playerNameTag"></span></span>
+    <span>Prêmio atual:</span>
+    <span id="payout">0 milhos</span>
+    <button id="restart" type="button">🔄 Recomeçar</button>
+  </div>
 
   <main class="layout" role="main">
     <section class="play card" aria-live="polite">
@@ -387,13 +527,12 @@ a{color:var(--accent)}
         <div class="meta"><span id="qpos">Pergunta 1/15</span></div>
       </div>
 
-      <!-- Timer -->
       <div class="timer" aria-label="Tempo restante">
         <div class="fill" id="tfill"></div>
         <div class="clock" id="tclock">30s</div>
       </div>
 
-      <div id="question" class="question" role="heading" aria-level="2">Carregando…</div>
+      <div id="question" class="question" role="heading" aria-level="2">Aguardando início…</div>
       <div id="answers" class="answers" role="group" aria-label="Alternativas de resposta"></div>
 
       <div id="audience" class="audience" aria-hidden="true">
@@ -404,7 +543,6 @@ a{color:var(--accent)}
       </div>
     </section>
 
-    <!-- PATCH: substitui a escada de prêmios pela imagem do entrevistador -->
     <aside class="host card" aria-label="Entrevistador">
       <div class="hostFrame">
         <img
@@ -418,17 +556,13 @@ a{color:var(--accent)}
     </aside>
   </main>
 
-  <!-- Placar -->
-  <div class="scoreboard">
-    Prêmio atual: <span id="payout">0 milhos</span>
-    <button id="restart" style="margin-left:10px;">🔄 Recomeçar</button>
-  </div>
-
   <footer>Professor Fernando Hax.</footer>
 </div>
 
 <script>
-// ======= Base de dados =======
+/* =========================
+   Dados
+========================= */
 const DATA = [
   {name:"Nitrogênio (N)", symbol:"N", tipo:"Macronutriente", categoria:"Não Metal", metalidade:"Não Metal",
    sintoma:"Amarelecimento das folhas inferiores (mais velhas).",
@@ -487,22 +621,46 @@ const DATA = [
    mobilidade:"Pouco Móvel"}
 ];
 
-// ======= Utilidades =======
 const shuffle = arr => arr.map(v=>[Math.random(),v]).sort((a,b)=>a[0]-b[0]).map(v=>v[1]);
 const sample = (arr,n) => shuffle(arr).slice(0,n);
 const fmtMilhos = n => `${n.toLocaleString('pt-BR')} milhos`;
 
-// ======= Configuração do jogo =======
 const PRIZES = [1000, 2000, 5000, 10000, 20000, 30000, 50000, 100000, 200000, 300000, 400000, 500000, 600000, 800000, 1000000];
 const SAFE_STOPS = [5,10];
 const TOTAL_Q = 15;
 
-// Timer
 const TIME_PER_Q = 30_000;
 let tStart = 0, tRemain = TIME_PER_Q, tTick = null, isTiming = false;
 
 let state;
+let playerName = "";
 
+/* =========================
+   Elementos
+========================= */
+const startScreen = document.getElementById('startScreen');
+const startForm = document.getElementById('startForm');
+const playerNameInput = document.getElementById('playerName');
+const startNoName = document.getElementById('startNoName');
+
+const qEl = document.getElementById('question');
+const aWrap = document.getElementById('answers');
+const qPos = document.getElementById('qpos');
+const payoutEl = document.getElementById('payout');
+const tfill = document.getElementById('tfill');
+const tclock = document.getElementById('tclock');
+
+const playerTag = document.getElementById('playerTag');
+const playerNameTag = document.getElementById('playerNameTag');
+
+const btn50 = document.getElementById('fifty');
+const btnSkip = document.getElementById('skip');
+const btnAsk = document.getElementById('ask');
+const btnRestart = document.getElementById('restart');
+
+/* =========================
+   Estado
+========================= */
 function initState(){
   state = {
     qIndex: 0,
@@ -516,7 +674,9 @@ function initState(){
   tRemain = TIME_PER_Q;
 }
 
-// ======= Geração de questões =======
+/* =========================
+   Questões
+========================= */
 const MOB_OPTS = ["Móvel","Imóvel","Pouco Móvel","Moderadamente móvel"];
 const TYPE_OPTS = ["Macronutriente","Micronutriente","Apenas traço","Nutriente benéfico"];
 const CAT_OPTS = ["Metal","Não Metal","Metaloide","Gás nobre"];
@@ -582,21 +742,9 @@ function makeQuestion(){
   return { prompt, options, correctIndex, meta };
 }
 
-// ======= Renderização =======
-const qEl = document.getElementById('question');
-const aWrap = document.getElementById('answers');
-const qPos = document.getElementById('qpos');
-const payoutEl = document.getElementById('payout');
-const tfill = document.getElementById('tfill');
-const tclock = document.getElementById('tclock');
-
-function buildLadder(){
-  // PATCH: escada removida
-}
-function highlightLadder(){
-  // PATCH: escada removida
-}
-
+/* =========================
+   Render
+========================= */
 function renderQuestion(){
   state.current = makeQuestion();
   const {prompt, options, meta} = state.current;
@@ -608,7 +756,7 @@ function renderQuestion(){
   qEl.appendChild(metaDiv);
 
   aWrap.innerHTML = '';
-  const labels = ['1','2','3','4']; // numeração como no print
+  const labels = ['1','2','3','4'];
   options.forEach((opt,idx)=>{
     const btn = document.createElement('button');
     btn.type = "button";
@@ -641,7 +789,6 @@ function selectAnswer(idx, btn){
     btn.classList.add('correct');
     state.qIndex++;
     state.prizeIndex++;
-    highlightLadder();
     payoutEl.textContent = fmtMilhos(PRIZES[Math.max(0, state.prizeIndex)] || 0);
     if(SAFE_STOPS.includes(state.qIndex)) state.lastSafe = state.prizeIndex;
 
@@ -666,10 +813,12 @@ function endGame(won){
   stopTimer();
 
   const earned = won ? PRIZES[PRIZES.length-1] : (state.lastSafe>=0 ? PRIZES[state.lastSafe] : 0);
+  const who = playerName ? `<div class="meta">Participante: <strong>${escapeHTML(playerName)}</strong></div>` : "";
 
   if(won){
     qEl.innerHTML = `
       🎉 <strong>Parabéns!</strong> Você venceu o Show do Milhão!
+      ${who}
       <div class="meta">Prêmio final: 1.000.000 milhos</div>
       <div style="margin-top:16px;display:flex;justify-content:center;">
         ${bigCornSVG()}
@@ -677,11 +826,17 @@ function endGame(won){
     `;
     payoutEl.textContent = "🌽 1.000.000 milhos";
   }else{
-    qEl.innerHTML = `💡 <strong>Fim de jogo.</strong> Você leva: ${fmtMilhos(earned)} <div class="meta">Tente novamente para alcançar o milhão!</div>`;
+    qEl.innerHTML = `
+      💡 <strong>Fim de jogo.</strong> Você leva: ${fmtMilhos(earned)}
+      ${who}
+      <div class="meta">Tente novamente para alcançar o milhão!</div>
+    `;
   }
 }
 
-// ======= Timer =======
+/* =========================
+   Timer
+========================= */
 function resetTimer(){
   tRemain = TIME_PER_Q;
   updateTimerUI(1, Math.ceil(tRemain/1000));
@@ -732,14 +887,14 @@ function timeOutLose(){
   setTimeout(()=>endGame(false), 800);
 }
 
-// ======= Ajudas =======
-const btn50 = document.getElementById('fifty');
-const btnSkip = document.getElementById('skip');
-const btnAsk = document.getElementById('ask');
-
+/* =========================
+   Ajudas
+========================= */
 btn50.addEventListener('click', ()=>{
   if(state.used.fifty || !state.current || state.finished) return;
-  state.used.fifty = true; btn50.disabled = true; btn50.setAttribute('aria-disabled','true');
+  state.used.fifty = true;
+  btn50.disabled = true;
+  btn50.setAttribute('aria-disabled','true');
   const buttons = Array.from(aWrap.querySelectorAll('button'));
   const wrongIdx = [0,1,2,3].filter(i=>i!==state.current.correctIndex);
   shuffle(wrongIdx).slice(0,2).forEach(i=>{
@@ -750,14 +905,18 @@ btn50.addEventListener('click', ()=>{
 
 btnSkip.addEventListener('click', ()=>{
   if(state.used.skip || !state.current || state.finished) return;
-  state.used.skip = true; btnSkip.disabled = true; btnSkip.setAttribute('aria-disabled','true');
+  state.used.skip = true;
+  btnSkip.disabled = true;
+  btnSkip.setAttribute('aria-disabled','true');
   stopTimer(true);
   renderQuestion();
 });
 
 btnAsk.addEventListener('click', ()=>{
   if(state.used.ask || !state.current || state.finished) return;
-  state.used.ask = true; btnAsk.disabled = true; btnAsk.setAttribute('aria-disabled','true');
+  state.used.ask = true;
+  btnAsk.disabled = true;
+  btnAsk.setAttribute('aria-disabled','true');
   const base = [0,0,0,0];
   const correct = state.current.correctIndex;
   let remaining = 100;
@@ -781,20 +940,58 @@ btnAsk.addEventListener('click', ()=>{
   });
 });
 
-// ======= Reiniciar =======
-const btnRestart = document.getElementById('restart');
-btnRestart.addEventListener('click', startGame);
+/* =========================
+   Início / Reiniciar
+========================= */
+btnRestart.addEventListener('click', ()=>{
+  // reinicia o jogo mantendo o nome
+  startGame();
+});
+
+startForm.addEventListener('submit', (e)=>{
+  e.preventDefault();
+  const name = (playerNameInput.value || "").trim();
+  setPlayerName(name);
+  hideStartScreen();
+  startGame();
+});
+
+startNoName.addEventListener('click', ()=>{
+  setPlayerName("");
+  hideStartScreen();
+  startGame();
+});
+
+function setPlayerName(name){
+  playerName = name.slice(0, 24);
+  if(playerName){
+    playerNameTag.textContent = playerName;
+    playerTag.style.display = "inline";
+  }else{
+    playerNameTag.textContent = "";
+    playerTag.style.display = "none";
+  }
+}
+
+function hideStartScreen(){
+  startScreen.style.display = "none";
+}
 
 function startGame(){
-  state = null;
   initState();
-  buildLadder();
-  highlightLadder();
   payoutEl.textContent = "0 milhos";
-  [btn50, btnSkip, btnAsk].forEach(b=>{ b.disabled=false; b.setAttribute('aria-disabled','false'); });
+  [btn50, btnSkip, btnAsk].forEach(b=>{
+    b.disabled=false;
+    b.setAttribute('aria-disabled','false');
+  });
+  qEl.textContent = "Carregando…";
+  aWrap.innerHTML = "";
   renderQuestion();
 }
 
+/* =========================
+   Utilitários
+========================= */
 function bigCornSVG(){
   return `
 <svg width="180" height="220" viewBox="0 0 180 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Milho gigante">
@@ -823,7 +1020,18 @@ function bigCornSVG(){
 </svg>`;
 }
 
-startGame();
+function escapeHTML(str){
+  return String(str)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+/* Mantém o jogo parado até a pessoa clicar "Começar"
+   (pode dar foco automático no input) */
+setTimeout(()=>playerNameInput.focus(), 50);
 </script>
 </body>
 </html>
