@@ -4,9 +4,25 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Show do Milhão — Nutrição de Plantas (versão “Milhos” + Timer)</title>
+
 <style>
 :root{
-  --bg:#0b1020; --panel:#121939; --ink:#eaf0ff; --muted:#a9b3d5; --accent:#00e1ff; --accent-2:#8b5cf6; --danger:#ff5b5b; --success:#22c55e; --gold:#f9c846;
+  --bg:#0b1020;
+  --panel:#121939;
+  --ink:#eaf0ff;
+  --muted:#a9b3d5;
+  --accent:#00e1ff;
+  --accent-2:#8b5cf6;
+  --danger:#ff5b5b;
+  --success:#22c55e;
+  --gold:#f9c846;
+
+  /* ===== Estética Show do Milhão (alternativas) ===== */
+  --ansRed1:#b31818;     /* topo */
+  --ansRed2:#7f0f0f;     /* base */
+  --ansBorder:#ffb35c;   /* filete dourado */
+  --ansShadow:rgba(0,0,0,.45);
+  --ansText:#fff3e0;
 }
 
 *{ box-sizing:border-box }
@@ -25,7 +41,6 @@ body{
   justify-content:flex-start;
   min-height:100%;
   padding:16px;
-  box-sizing:border-box;
 }
 
 /* ===== Caixa principal ===== */
@@ -45,16 +60,27 @@ body{
 header{
   background:linear-gradient(90deg, rgba(0,225,255,.15), transparent 30%, rgba(139,92,246,.15) 70%, transparent);
   border:1px solid rgba(255,255,255,.1);
-  border-radius:14px; padding:18px; 
-  display:flex; flex-direction:column; gap:6px;
+  border-radius:14px;
+  padding:18px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
 }
-header .logo{font-weight:900; font-size:clamp(18px,2.4vw,20px); display:flex; align-items:center; gap:10px}
+header .logo{
+  font-weight:900;
+  font-size:clamp(18px,2.4vw,20px);
+  display:flex;
+  align-items:center;
+  gap:10px
+}
 header .logo .medal{font-size:22px; color:var(--gold)}
 header .sub{color:var(--muted); font-size:13px}
 
 /* ===== Layout principal ===== */
 .layout{
-  display:grid; grid-template-columns: 1.2fr .8fr; gap:14px;
+  display:grid;
+  grid-template-columns: 1.2fr .8fr;
+  gap:14px;
 }
 @media (max-width: 880px){
   .layout{grid-template-columns:1fr;}
@@ -70,7 +96,14 @@ header .sub{color:var(--muted); font-size:13px}
 
 /* ===== Área de jogo ===== */
 .play{padding:18px}
-.status{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px}
+.status{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-bottom:10px
+}
 
 /* ===== Timer ===== */
 .timer{
@@ -89,8 +122,15 @@ header .sub{color:var(--muted); font-size:13px}
   transition: width .1s linear;
 }
 .timer .clock{
-  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-  font-size:11px; color:#cfe3ff; font-weight:800; text-shadow:0 1px 0 rgba(0,0,0,.6);
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:11px;
+  color:#cfe3ff;
+  font-weight:800;
+  text-shadow:0 1px 0 rgba(0,0,0,.6);
 }
 
 /* ===== Botões de ajuda ===== */
@@ -98,8 +138,14 @@ header .sub{color:var(--muted); font-size:13px}
 .lifelines button{
   background:#0f1533; color:var(--ink);
   border:1px solid rgba(255,255,255,.1);
-  padding:10px 12px; border-radius:12px; cursor:pointer; font-weight:600; font-size:14px;
-  display:flex; align-items:center; gap:8px;
+  padding:10px 12px;
+  border-radius:12px;
+  cursor:pointer;
+  font-weight:600;
+  font-size:14px;
+  display:flex;
+  align-items:center;
+  gap:8px;
   transition:.2s transform, .2s background;
 }
 .lifelines button:hover{transform:translateY(-1px); background:#111a44}
@@ -109,35 +155,120 @@ header .sub{color:var(--muted); font-size:13px}
 .question{
   background:linear-gradient(180deg,#0f1a4d,#0c1333);
   border:1px solid rgba(255,255,255,.1);
-  border-radius:14px; padding:16px; font-size:clamp(16px, 2.2vw, 20px); font-weight:700; line-height:1.35;
+  border-radius:14px;
+  padding:16px;
+  font-size:clamp(16px, 2.2vw, 20px);
+  font-weight:700;
+  line-height:1.35;
   white-space:pre-wrap;
 }
 .meta{margin-top:8px; color:var(--muted); font-size:12px}
 
-/* ===== Respostas ===== */
+/* =========================================================
+   ===== ALTERNATIVAS — estilo “Show do Milhão” (patch) =====
+   ========================================================= */
 .answers{
-  display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:14px;
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:12px;
+  margin-top:14px;
 }
 @media (max-width:560px){
   .answers{grid-template-columns:1fr}
 }
+
+/* Botão em formato “barra” */
 .answers button{
-  text-align:left; padding:14px 16px; border-radius:12px;
-  background:#0e1430; color:var(--ink);
-  border:1px solid rgba(255,255,255,.1); cursor:pointer; font-size:clamp(14px, 2vw, 15px); font-weight:600;
-  display:flex; gap:10px; align-items:flex-start;
-  transition:.2s transform, .2s background;
+  position:relative;
+  text-align:left;
+  padding:14px 16px;
+  padding-left:62px; /* espaço p/ badge */
+  border-radius:12px;
+
+  background:linear-gradient(180deg, var(--ansRed1), var(--ansRed2));
+  color:var(--ansText);
+
+  border:2px solid rgba(255,179,92,.75);
+  box-shadow:
+    0 10px 18px var(--ansShadow),
+    inset 0 1px 0 rgba(255,255,255,.18);
+
+  cursor:pointer;
+  font-size:clamp(14px, 2vw, 15px);
+  font-weight:800;
+  letter-spacing:.01em;
+
+  display:flex;
+  gap:12px;
+  align-items:center;
+
+  transition: transform .12s ease, filter .12s ease, box-shadow .12s ease;
+  min-height:56px;
 }
+
+/* brilho/contorno interno, lembrando o “filete” */
+.answers button::before{
+  content:"";
+  position:absolute;
+  inset:6px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,.12);
+  pointer-events:none;
+}
+
+/* badge numérico estilo “placa” */
 .answers button .badge{
-  background:#141c4d; color:#b8c3ff; border:1px solid rgba(255,255,255,.12);
-  border-radius:8px; padding:3px 8px; font-size:13px; font-weight:800;
+  position:absolute;
+  left:12px;
+  top:50%;
+  transform:translateY(-50%);
+  width:38px;
+  height:30px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  background:linear-gradient(180deg, rgba(25,40,120,.95), rgba(10,18,70,.95));
+  border:2px solid rgba(255,179,92,.85);
+  border-radius:8px;
+
+  color:#eaf0ff;
+  font-weight:900;
+  font-size:14px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.15);
 }
-.answers button:hover{transform:translateY(-1px); background:#121a40}
-.answers button.correct{background:rgba(34,197,94,.12); border-color:rgba(34,197,94,.5)}
-.answers button.wrong{background:rgba(255,91,91,.12); border-color:rgba(255,91,91,.5)}
+
+/* hover */
+.answers button:hover{
+  transform:translateY(-1px);
+  filter:brightness(1.05);
+  box-shadow:
+    0 12px 22px rgba(0,0,0,.55),
+    inset 0 1px 0 rgba(255,255,255,.18);
+}
+
+/* estados */
+.answers button.correct{
+  background:linear-gradient(180deg, rgba(20,120,60,.95), rgba(8,70,35,.95));
+  border-color:rgba(249,200,70,.9);
+}
+.answers button.wrong{
+  background:linear-gradient(180deg, rgba(160,20,20,.95), rgba(90,8,8,.95));
+  border-color:rgba(255,91,91,.9);
+}
 .answers button:disabled{opacity:.95; cursor:not-allowed}
-.answers button.correct::after{ content:" ✓"; font-weight:900; margin-left:6px;}
-.answers button.wrong::after{ content:" ✕"; font-weight:900; margin-left:6px;}
+
+.answers button.correct::after{
+  content:" ✓";
+  font-weight:900;
+  margin-left:6px;
+}
+.answers button.wrong::after{
+  content:" ✕";
+  font-weight:900;
+  margin-left:6px;
+}
 
 /* ===== Gráfico da plateia ===== */
 .audience{margin-top:10px; display:none}
@@ -147,13 +278,51 @@ header .sub{color:var(--muted); font-size:13px}
 .bar .fill{height:100%; background:linear-gradient(90deg, var(--accent), var(--accent-2)); width:0%}
 .bar .pct{width:42px; text-align:right; color:var(--muted); font-weight:700}
 
-/* ===== Escada de prêmios (milhos) ===== */
-.ladder{padding:18px}
-.ladder h3{margin:0 0 10px 0; font-size:14px; text-transform:uppercase; letter-spacing:.12em; color:#b3c2ff}
-.steps{list-style:none; padding:0; margin:0; display:grid; gap:6px}
-.step{display:flex; justify-content:space-between; background:#0f1533; border:1px solid rgba(255,255,255,.06); border-radius:10px; padding:8px 10px; color:var(--muted); font-weight:700}
-.step.active{background:linear-gradient(90deg, rgba(249,200,70,.18), #0f1533); color:var(--ink); border-color:rgba(249,200,70,.5)}
-.step.safe{outline:1px dashed rgba(249,200,70,.6)}
+/* =========================================================
+   ===== Lado direito: imagem do entrevistador (patch) =====
+   ========================================================= */
+.host{
+  padding:14px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.hostFrame{
+  width:100%;
+  border-radius:14px;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.12);
+  background:#0f1533;
+  box-shadow:0 10px 24px rgba(0,0,0,.45);
+  position:relative;
+}
+
+/* Mantém proporção 600x900 (2:3) e encaixa bonito */
+.hostFrame::before{
+  content:"";
+  display:block;
+  padding-top:150%; /* 3/2 = 150% */
+}
+.hostFrame img{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center;
+  display:block;
+  filter:contrast(1.02) saturate(1.02);
+}
+
+.hostCaption{
+  text-align:center;
+  color:#b3c2ff;
+  font-size:12px;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.12em;
+  opacity:.95;
+}
 
 /* ===== Placar fixo abaixo ===== */
 .scoreboard{
@@ -169,6 +338,17 @@ header .sub{color:var(--muted); font-size:13px}
   width:100%;
 }
 .scoreboard #payout{ display:inline-block; min-width:12ch; text-align:right; }
+
+#restart{
+  background:#111a44;
+  color:var(--ink);
+  border:1px solid rgba(255,255,255,.12);
+  padding:8px 10px;
+  border-radius:10px;
+  font-weight:800;
+  cursor:pointer;
+}
+#restart:hover{filter:brightness(1.05)}
 
 /* ===== Footer ===== */
 footer{opacity:.9; font-size:12px; color:var(--muted); text-align:center}
@@ -188,11 +368,12 @@ a{color:var(--accent)}
 }
 </style>
 </head>
+
 <body>
 <div class="app">
   <header class="card" role="banner">
     <div class="logo"><span class="medal">🌽</span>Show do Milhão — Nutrição de Plantas</div>
-    <div class="sub">Responda 15 questões sobre nutrição de plantas. Use as ajudas com sabedoria! Cuidado com o timer! ⏳</div>
+    <div class="sub">Responda 15 questões sobre nutrição de plantas. Use as ajudas com sabedoria! Cuidado com o timer!</div>
   </header>
 
   <main class="layout" role="main">
@@ -223,9 +404,17 @@ a{color:var(--accent)}
       </div>
     </section>
 
-    <aside class="ladder card">
-      <h3>Tabela de prêmios (milhos)</h3>
-      <ol id="ladder" class="steps"></ol>
+    <!-- PATCH: substitui a escada de prêmios pela imagem do entrevistador -->
+    <aside class="host card" aria-label="Entrevistador">
+      <div class="hostFrame">
+        <img
+          src="https://i.imgur.com/0dkhHKi.png"
+          alt="Entrevistador"
+          loading="eager"
+          decoding="async"
+        />
+      </div>
+      <div class="hostCaption">Entrevistador</div>
     </aside>
   </main>
 
@@ -241,7 +430,7 @@ a{color:var(--accent)}
 <script>
 // ======= Base de dados =======
 const DATA = [
-  {name:"Nitrogênio (N)", symbol:"N", tipo:"Macronutriente", categoria:"Não Metal", metalidade:"Não Metal", 
+  {name:"Nitrogênio (N)", symbol:"N", tipo:"Macronutriente", categoria:"Não Metal", metalidade:"Não Metal",
    sintoma:"Amarelecimento das folhas inferiores (mais velhas).",
    funcao:"Composição da clorofila, aminoácidos, proteínas, hormônios, DNA e RNA.",
    causas:["Excesso de água","Baixa atividade biológica","pH baixo","Pouca matéria orgânica","Seca prolongada"],
@@ -267,7 +456,7 @@ const DATA = [
    causas:["Solos ácidos e arenosos","Baixa CTC","Solos argilosos com alta relação Ca","Alta dose de calcário calcítico","Adubação potássica pesada"],
    mobilidade:"Móvel"},
   {name:"Enxofre (S)", symbol:"S", tipo:"Macronutriente", categoria:"Não Metal", metalidade:"Não Metal",
-   sintoma:"Folhas superiores (mais novas) verde‑amareladas e pequenas, com necrose nas bordas.",
+   sintoma:"Folhas superiores (mais novas) verde-amareladas e pequenas, com necrose nas bordas.",
    funcao:"Componente de alguns aminoácidos e enzimas.",
    causas:["Pouca matéria orgânica","Acidez e lixiviação","Estiagens prolongadas","Cultivos intensivos sem adubos com enxofre"],
    mobilidade:"Pouco Móvel"},
@@ -304,13 +493,12 @@ const sample = (arr,n) => shuffle(arr).slice(0,n);
 const fmtMilhos = n => `${n.toLocaleString('pt-BR')} milhos`;
 
 // ======= Configuração do jogo =======
-// 15 perguntas. Último prêmio = 1.000.000 milhos
 const PRIZES = [1000, 2000, 5000, 10000, 20000, 30000, 50000, 100000, 200000, 300000, 400000, 500000, 600000, 800000, 1000000];
 const SAFE_STOPS = [5,10];
 const TOTAL_Q = 15;
 
 // Timer
-const TIME_PER_Q = 30_000; // 30s por pergunta
+const TIME_PER_Q = 30_000;
 let tStart = 0, tRemain = TIME_PER_Q, tTick = null, isTiming = false;
 
 let state;
@@ -334,7 +522,7 @@ const TYPE_OPTS = ["Macronutriente","Micronutriente","Apenas traço","Nutriente 
 const CAT_OPTS = ["Metal","Não Metal","Metaloide","Gás nobre"];
 
 function makeQuestion(){
-  const types = ["SYM_TO_EL", "EL_TO_SYM", "FUNC_TO_EL", "EL_TO_FUNC", "EL_TO_MOB", "EL_TO_TYPE", "EL_TO_CAT", "CAUSE_TO_EL"]; 
+  const types = ["SYM_TO_EL", "EL_TO_SYM", "FUNC_TO_EL", "EL_TO_FUNC", "EL_TO_MOB", "EL_TO_TYPE", "EL_TO_CAT", "CAUSE_TO_EL"];
   const qType = types[Math.floor(Math.random()*types.length)];
   const el = DATA[Math.floor(Math.random()*DATA.length)];
 
@@ -399,59 +587,36 @@ const qEl = document.getElementById('question');
 const aWrap = document.getElementById('answers');
 const qPos = document.getElementById('qpos');
 const payoutEl = document.getElementById('payout');
-const ladderEl = document.getElementById('ladder');
 const tfill = document.getElementById('tfill');
 const tclock = document.getElementById('tclock');
 
 function buildLadder(){
-  ladderEl.innerHTML = '';
-  for(let i=PRIZES.length-1; i>=0; i--){
-    const li = document.createElement('li');
-    li.className = 'step';
-    li.dataset.index = i;
-    const stepNo = (i+1).toString().padStart(2,'0');
-
-    // No topo (15ª), mostra “1.000.000” e um milho
-    const label = i === PRIZES.length-1
-      ? `<span class="q">${stepNo}</span><span>🌽 1.000.000</span>`
-      : `<span class="q">${stepNo}</span><span>${PRIZES[i].toLocaleString('pt-BR')}</span>`;
-
-    li.innerHTML = label;
-    if(SAFE_STOPS.includes(i+1)) li.classList.add('safe');
-    ladderEl.appendChild(li);
-  }
+  // PATCH: escada removida
 }
-
 function highlightLadder(){
-  const items = ladderEl.querySelectorAll('.step');
-  items.forEach(el=>el.classList.remove('active'));
-  const current = ladderEl.querySelector(`.step[data-index="${state.prizeIndex}"]`);
-  if(current) current.classList.add('active');
+  // PATCH: escada removida
 }
 
 function renderQuestion(){
   state.current = makeQuestion();
   const {prompt, options, meta} = state.current;
 
-  // pergunta e meta
   qEl.textContent = prompt;
   const metaDiv = document.createElement('div');
   metaDiv.className = 'meta';
   metaDiv.textContent = meta;
   qEl.appendChild(metaDiv);
 
-  // respostas
   aWrap.innerHTML = '';
-  const letters = ['A','B','C','D'];
+  const labels = ['1','2','3','4']; // numeração como no print
   options.forEach((opt,idx)=>{
     const btn = document.createElement('button');
     btn.type = "button";
-    btn.innerHTML = `<span class="badge">${letters[idx]}</span> <span>${opt}</span>`;
+    btn.innerHTML = `<span class="badge">${labels[idx]}</span> <span>${opt}</span>`;
     btn.addEventListener('click', ()=>selectAnswer(idx, btn));
     aWrap.appendChild(btn);
   });
 
-  // reset audiência
   document.getElementById('audience').style.display = 'none';
   ['A','B','C','D'].forEach(L=>{
     document.getElementById('bar'+L).style.width = '0%';
@@ -460,7 +625,6 @@ function renderQuestion(){
 
   qPos.textContent = `Pergunta ${state.qIndex+1}/${TOTAL_Q}`;
 
-  // Timer
   resetTimer();
   startTimer();
 }
@@ -505,7 +669,7 @@ function endGame(won){
 
   if(won){
     qEl.innerHTML = `
-      🎉 <strong>Parabéns!</strong> Você venceu o Show do Milhão! 
+      🎉 <strong>Parabéns!</strong> Você venceu o Show do Milhão!
       <div class="meta">Prêmio final: 1.000.000 milhos</div>
       <div style="margin-top:16px;display:flex;justify-content:center;">
         ${bigCornSVG()}
@@ -554,7 +718,6 @@ function stopTimer(reset=false){
 function updateTimerUI(pct, secs){
   tfill.style.width = `${Math.max(0,Math.min(1,pct))*100}%`;
   tclock.textContent = `${secs}s`;
-  // cor de alerta nos 5s finais
   if(secs <= 5){
     tfill.style.background = `linear-gradient(90deg, ${getComputedStyle(document.documentElement).getPropertyValue('--danger')}, #ff9d5b)`;
   }else{
@@ -562,7 +725,6 @@ function updateTimerUI(pct, secs){
   }
 }
 function timeOutLose(){
-  // marca correta e encerra
   const buttons = Array.from(aWrap.querySelectorAll('button'));
   buttons.forEach(b=>b.disabled = true);
   const correctBtn = buttons[state.current.correctIndex];
@@ -589,7 +751,7 @@ btn50.addEventListener('click', ()=>{
 btnSkip.addEventListener('click', ()=>{
   if(state.used.skip || !state.current || state.finished) return;
   state.used.skip = true; btnSkip.disabled = true; btnSkip.setAttribute('aria-disabled','true');
-  stopTimer(true); // reseta e pausa antes de nova render
+  stopTimer(true);
   renderQuestion();
 });
 
@@ -646,9 +808,7 @@ function bigCornSVG(){
       <stop offset="100%" stop-color="#2ca25f"/>
     </linearGradient>
   </defs>
-  <!-- espiga -->
   <ellipse cx="95" cy="105" rx="45" ry="85" fill="url(#g1)" stroke="#d4a927" stroke-width="4"/>
-  <!-- grãos -->
   ${Array.from({length:10}).map((_,r)=>{
       return Array.from({length:6}).map((__,c)=>{
         const x = 70 + c*12 + (r%2)*6;
@@ -656,7 +816,6 @@ function bigCornSVG(){
         return `<circle cx="${x}" cy="${y}" r="5.5" fill="#ffd34d" stroke="#d4a927" stroke-width="1"/>`;
       }).join('');
     }).join('')}
-  <!-- palha -->
   <path d="M55 150 C 10 150, 15 210, 60 200" fill="url(#g2)"/>
   <path d="M135 150 C 170 150, 165 210, 120 200" fill="url(#g2)"/>
   <path d="M55 150 C 40 120, 55 90, 70 80" fill="url(#g2)"/>
@@ -664,7 +823,6 @@ function bigCornSVG(){
 </svg>`;
 }
 
-// start
 startGame();
 </script>
 </body>
