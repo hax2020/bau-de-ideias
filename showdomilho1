@@ -1,0 +1,1482 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>O Show do Milhão - O Solo (100 questões + sorteio)</title>
+
+<style>
+:root{
+  --bg:#0b1020;
+  --panel:#121939;
+  --ink:#eaf0ff;
+  --muted:#a9b3d5;
+  --accent:#00e1ff;
+  --accent-2:#8b5cf6;
+  --danger:#ff5b5b;
+  --success:#22c55e;
+  --gold:#f9c846;
+
+  --ansRed1:#b31818;
+  --ansRed2:#7f0f0f;
+  --ansShadow:rgba(0,0,0,.45);
+  --ansText:#fff3e0;
+}
+
+*{ box-sizing:border-box }
+html, body { height: 100%; }
+
+body{
+  margin:0;
+  font-family: Inter, system-ui, Segoe UI, Roboto, Arial, Helvetica, sans-serif;
+  color:var(--ink);
+  background:
+    radial-gradient(1200px 600px at 10% -10%, #1c2560 0%, #0b1020 55%),
+    radial-gradient(1200px 800px at 120% 120%, #2a1040 0%, #0b1020 60%);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+  min-height:100%;
+  padding:16px;
+}
+
+/* ===== Caixa principal ===== */
+.app{
+  width:min(1100px, 100%);
+  background:rgba(18,25,57,0.85);
+  border:2px solid var(--accent);
+  border-radius:20px;
+  padding:20px;
+  box-shadow:0 10px 30px rgba(0,0,0,.4);
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  position:relative;
+}
+
+/* ===== Cabeçalho ===== */
+header{
+  background:linear-gradient(90deg, rgba(0,225,255,.15), transparent 30%, rgba(139,92,246,.15) 70%, transparent);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:14px;
+  padding:18px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+header .logo{
+  font-weight:900;
+  font-size:clamp(18px,2.4vw,20px);
+  display:flex;
+  align-items:center;
+  gap:10px
+}
+header .logo .medal{font-size:22px; color:var(--gold)}
+header .sub{color:var(--muted); font-size:13px}
+
+/* ===== Placar abaixo do cabeçalho ===== */
+.scoreboard{
+  background:#0f1533;
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:14px;
+  padding:10px 12px;
+  font-weight:900;
+  color:var(--gold);
+  text-align:center;
+  font-size:16px;
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.scoreboard #payout{ display:inline-block; min-width:12ch; text-align:right; }
+
+.playerTag{
+  color:#dbe7ff;
+  font-weight:800;
+  font-size:14px;
+  opacity:.95;
+}
+
+#restart{
+  background:#111a44;
+  color:var(--ink);
+  border:1px solid rgba(255,255,255,.12);
+  padding:8px 10px;
+  border-radius:10px;
+  font-weight:900;
+  cursor:pointer;
+}
+#restart:hover{filter:brightness(1.05)}
+
+/* ===== Layout principal ===== */
+.layout{
+  display:grid;
+  grid-template-columns: 1.2fr .8fr;
+  gap:14px;
+}
+@media (max-width: 880px){
+  .layout{grid-template-columns:1fr;}
+}
+
+/* ===== Cartões ===== */
+.card{
+  background:var(--panel);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:16px;
+  box-shadow:0 6px 20px rgba(0,0,0,.35);
+}
+
+/* ===== Área de jogo ===== */
+.play{padding:18px}
+.status{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-bottom:10px;
+}
+
+/* ===== Timer ===== */
+.timer{
+  width:100%;
+  background:#0f1533;
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:999px;
+  overflow:hidden;
+  height:14px;
+  position:relative;
+}
+.timer .fill{
+  height:100%;
+  width:100%;
+  background:linear-gradient(90deg, var(--accent), var(--accent-2));
+  transition: width .1s linear;
+}
+.timer .clock{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:11px;
+  color:#cfe3ff;
+  font-weight:800;
+  text-shadow:0 1px 0 rgba(0,0,0,.6);
+}
+
+/* ===== Botões de ajuda ===== */
+.lifelines{display:flex; gap:8px; flex-wrap:wrap}
+.lifelines button{
+  background:#0f1533; color:var(--ink);
+  border:1px solid rgba(255,255,255,.1);
+  padding:10px 12px;
+  border-radius:12px;
+  cursor:pointer;
+  font-weight:600;
+  font-size:14px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  transition:.2s transform, .2s background;
+}
+.lifelines button:hover{transform:translateY(-1px); background:#111a44}
+.lifelines button:disabled{opacity:.45; cursor:not-allowed; transform:none}
+
+/* ===== Pergunta ===== */
+.question{
+  background:linear-gradient(180deg,#0f1a4d,#0c1333);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:14px;
+  padding:16px;
+  font-size:clamp(16px, 2.2vw, 20px);
+  font-weight:700;
+  line-height:1.35;
+  white-space:pre-wrap;
+}
+.meta{
+  margin-top:10px;
+  color:var(--muted);
+  font-size:12px;
+  font-weight:700;
+}
+
+/* ===== Alternativas ===== */
+.answers{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:12px;
+  margin-top:14px;
+}
+@media (max-width:560px){
+  .answers{grid-template-columns:1fr}
+}
+.answers button{
+  position:relative;
+  text-align:left;
+  padding:14px 16px;
+  padding-left:62px;
+  border-radius:12px;
+  background:linear-gradient(180deg, var(--ansRed1), var(--ansRed2));
+  color:var(--ansText);
+  border:2px solid rgba(255,179,92,.75);
+  box-shadow: 0 10px 18px var(--ansShadow), inset 0 1px 0 rgba(255,255,255,.18);
+  cursor:pointer;
+  font-size:clamp(14px, 2vw, 15px);
+  font-weight:800;
+  letter-spacing:.01em;
+  display:flex;
+  gap:12px;
+  align-items:center;
+  transition: transform .12s ease, filter .12s ease, box-shadow .12s ease;
+  min-height:56px;
+}
+.answers button::before{
+  content:"";
+  position:absolute;
+  inset:6px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,.12);
+  pointer-events:none;
+}
+.answers button .badge{
+  position:absolute;
+  left:12px;
+  top:50%;
+  transform:translateY(-50%);
+  width:38px;
+  height:30px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(180deg, rgba(25,40,120,.95), rgba(10,18,70,.95));
+  border:2px solid rgba(255,179,92,.85);
+  border-radius:8px;
+  color:#eaf0ff;
+  font-weight:900;
+  font-size:14px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.15);
+}
+.answers button:hover{
+  transform:translateY(-1px);
+  filter:brightness(1.05);
+  box-shadow: 0 12px 22px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.18);
+}
+.answers button.correct{
+  background:linear-gradient(180deg, rgba(20,120,60,.95), rgba(8,70,35,.95));
+  border-color:rgba(249,200,70,.9);
+}
+.answers button.wrong{
+  background:linear-gradient(180deg, rgba(160,20,20,.95), rgba(90,8,8,.95));
+  border-color:rgba(255,91,91,.9);
+}
+.answers button:disabled{opacity:.95; cursor:not-allowed}
+.answers button.correct::after{ content:" ✓"; font-weight:900; margin-left:6px; }
+.answers button.wrong::after{ content:" ✕"; font-weight:900; margin-left:6px; }
+
+/* ===== Entrevistador (opcional) ===== */
+.host{
+  padding:14px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  min-height:0;
+}
+.hostFrame{
+  width:100%;
+  border-radius:14px;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.12);
+  background:#0f1533;
+  box-shadow:0 10px 24px rgba(0,0,0,.45);
+  height: clamp(260px, 55vh, 560px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:10px;
+}
+.hostFrame .placeholder{
+  text-align:center;
+  color:#b3c2ff;
+  font-weight:900;
+  line-height:1.35;
+}
+.hostCaption{
+  text-align:center;
+  color:#b3c2ff;
+  font-size:12px;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.12em;
+  opacity:.95;
+}
+
+/* ===== Tela inicial ===== */
+.startScreen{
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:16px;
+  background: radial-gradient(900px 500px at 20% 10%, rgba(28,37,96,.75), rgba(11,16,32,.92) 55%),
+              radial-gradient(900px 600px at 90% 90%, rgba(42,16,64,.75), rgba(11,16,32,.92) 60%);
+  backdrop-filter: blur(6px);
+}
+
+.startCard{
+  width:min(920px, 100%);
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(18,25,57,0.88);
+  box-shadow:0 18px 44px rgba(0,0,0,.55);
+  overflow:hidden;
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+}
+@media (max-width: 860px){
+  .startCard{ grid-template-columns:1fr; }
+}
+
+.startLeft{
+  padding:18px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.startTitle{
+  font-weight:900;
+  font-size:clamp(20px, 2.4vw, 26px);
+}
+.startSubtitle{
+  color:var(--muted);
+  font-size:14px;
+  line-height:1.35;
+}
+
+.startForm{
+  margin-top:6px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.startForm label{
+  font-weight:800;
+  color:#dbe7ff;
+  font-size:13px;
+}
+.startForm input{
+  width:100%;
+  padding:12px 12px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.14);
+  background:#0f1533;
+  color:var(--ink);
+  font-weight:800;
+  outline:none;
+}
+.startForm input:focus{
+  border-color: rgba(0,225,255,.7);
+  box-shadow: 0 0 0 3px rgba(0,225,255,.15);
+}
+
+.startActions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:6px;
+}
+.btnPrimary{
+  appearance:none;
+  border:none;
+  cursor:pointer;
+  font-weight:900;
+  padding:12px 14px;
+  border-radius:12px;
+  color:#081018;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  box-shadow: 0 12px 26px rgba(0,0,0,.35);
+}
+.btnPrimary:hover{ filter:brightness(1.03); transform:translateY(-1px); }
+.btnGhost{
+  appearance:none;
+  cursor:pointer;
+  font-weight:900;
+  padding:12px 14px;
+  border-radius:12px;
+  color:var(--ink);
+  border:1px solid rgba(255,255,255,.14);
+  background:#0f1533;
+}
+.btnGhost:hover{ filter:brightness(1.04); transform:translateY(-1px); }
+
+.startRight{
+  background:#0f1533;
+  border-left:1px solid rgba(255,255,255,.10);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:14px;
+}
+@media (max-width: 860px){
+  .startRight{ border-left:none; border-top:1px solid rgba(255,255,255,.10); }
+}
+.startPreview{
+  width:100%;
+  height: clamp(220px, 45vh, 420px);
+  border-radius:14px;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.12);
+  background:#0b1020;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:16px;
+  text-align:center;
+  color:#b3c2ff;
+  font-weight:900;
+  line-height:1.35;
+}
+
+/* ===== Footer ===== */
+footer{opacity:.9; font-size:12px; color:var(--muted); text-align:center}
+
+/* ===== Acessibilidade (foco visível) ===== */
+.lifelines button:focus-visible,
+.answers button:focus-visible,
+#restart:focus-visible,
+.btnPrimary:focus-visible,
+.btnGhost:focus-visible,
+.startForm input:focus-visible{
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ===== Redução de movimento ===== */
+@media (prefers-reduced-motion: reduce){
+  *{ transition:none !important; animation:none !important; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- TELA INICIAL -->
+<div class="startScreen" id="startScreen" role="dialog" aria-modal="true" aria-label="Tela inicial">
+  <div class="startCard">
+    <div class="startLeft">
+      <div class="startTitle">O Show do Milhão - O Solo</div>
+      <div class="startSubtitle">
+        Digite seu nome para começar. Você terá 30 segundos por pergunta e pode usar 3 ajudas.
+      </div>
+
+      <form class="startForm" id="startForm">
+        <label for="playerName">Nome do participante</label>
+        <input id="playerName" name="playerName" type="text" maxlength="24"
+               placeholder="Ex.: Ana, João, Turma 201..." autocomplete="off" required />
+        <div class="startActions">
+          <button class="btnPrimary" type="submit">Começar</button>
+          <button class="btnGhost" type="button" id="startNoName">Entrar sem nome</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="startRight" aria-hidden="false">
+      <div class="startPreview">
+        Banco com 100 questões sobre SOLO (pedogênese, intemperismo, textura, CTC, matéria orgânica).
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="app" id="app">
+  <header class="card" role="banner">
+    <div class="logo"><span class="medal">S</span>O Show do Milhão - O Solo</div>
+    <div class="sub">Responda 15 questões. Ordem das perguntas e alternativas muda a cada partida.</div>
+  </header>
+
+  <div class="scoreboard" role="status" aria-live="polite">
+    <span class="playerTag" id="playerTag" style="display:none;">Jogador: <span id="playerNameTag"></span></span>
+    <span>Prêmio atual:</span>
+    <span id="payout">0 milhos</span>
+    <button id="restart" type="button">Recomeçar</button>
+  </div>
+
+  <main class="layout" role="main">
+    <section class="play card" aria-live="polite">
+      <div class="status">
+        <div class="lifelines">
+          <button id="fifty" aria-disabled="false">Eliminar metade</button>
+          <button id="skip" aria-disabled="false">Pular</button>
+          <button id="ask" aria-disabled="false">Pergunte ao especialista</button>
+        </div>
+        <div class="meta"><span id="qpos">Pergunta 1/15</span></div>
+      </div>
+
+      <div class="timer" aria-label="Tempo restante">
+        <div class="fill" id="tfill"></div>
+        <div class="clock" id="tclock">30s</div>
+      </div>
+
+      <div id="question" class="question" role="heading" aria-level="2">Aguardando início…</div>
+      <div id="qmeta" class="meta" aria-hidden="false"></div>
+      <div id="answers" class="answers" role="group" aria-label="Alternativas de resposta"></div>
+    </section>
+
+    <aside class="host card" aria-label="Painel lateral">
+      <div class="hostFrame">
+        <div class="placeholder">
+          Dica: use o PDF "O Solo" como material de estudo.
+        </div>
+      </div>
+      <div class="hostCaption">O Solo</div>
+    </aside>
+  </main>
+
+  <footer>Professor Fernando Hax.</footer>
+</div>
+
+<script>
+/* =========================
+   Utilitários
+========================= */
+const shuffle = arr => arr.map(v=>[Math.random(),v]).sort((a,b)=>a[0]-b[0]).map(v=>v[1]);
+const fmtMilhos = n => `${n.toLocaleString('pt-BR')} milhos`;
+
+function escapeHTML(str){
+  return String(str)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+/* =========================
+   Regras do jogo
+========================= */
+const PRIZES = [1000, 2000, 5000, 10000, 20000, 30000, 50000, 100000, 200000, 300000, 400000, 500000, 600000, 800000, 1000000];
+const SAFE_STOPS = [5,10];
+const TOTAL_Q = 15;
+
+const TIME_PER_Q = 30_000;
+let tStart = 0, tRemain = TIME_PER_Q, tTick = null, isTiming = false;
+
+let state;
+let playerName = "";
+
+/* =========================
+   Banco de 100 questões (base: PDF "O Solo")
+   Formato:
+   { id, q, options:[...4], a: índice correto (0..3), meta }
+========================= */
+const QBANK = [
+  {id:1,  q:"O solo é definido principalmente como:", options:[
+    "Um meio complexo e heterogêneo com minerais, matéria orgânica, água, ar e organismos vivos",
+    "Apenas rocha moída misturada com água",
+    "Um material homogêneo, sem vida, usado apenas na construção civil",
+    "Um reservatório de fertilizantes químicos prontos"
+  ], a:0, meta:"Conceito de solo"},
+  {id:2,  q:"Qual alternativa é uma função do solo?", options:[
+    "Manutenção do ciclo da água e dos nutrientes",
+    "Produção de energia elétrica por si só",
+    "Substituição do clima local",
+    "Eliminação total de organismos vivos"
+  ], a:0, meta:"Funções do solo"},
+  {id:3,  q:"Pedogênese é:", options:[
+    "O processo de formação e desenvolvimento dos solos",
+    "A queima controlada do solo para aumentar a fertilidade",
+    "O processo de compactar o solo para reduzir erosão",
+    "A irrigação artificial de um terreno"
+  ], a:0, meta:"Pedogênese"},
+  {id:4, q:"A expressão clássica da formação do solo pode ser representada por:", options:[
+    "Solo = Rocha + Clima + Tempo + Relevo + Organismos",
+    "Solo = Água + Fertilizante + Trator",
+    "Solo = Semente + Luz + CO2",
+    "Solo = Areia + Argila apenas"
+  ], a:0, meta:"Fatores de formação"},
+  {id:5, q:"Quanto tempo (aprox.) pode levar para formar 1 cm de solo?", options:[
+    "Cerca de 400 anos",
+    "Cerca de 40 anos",
+    "Cerca de 4 anos",
+    "Cerca de 4 meses"
+  ], a:0, meta:"Tempo de formação"},
+  {id:6, q:"Intemperismo é o processo pelo qual:", options:[
+    "Rochas e minerais são alterados pela ação do tempo e do meio ambiente",
+    "A matéria orgânica vira húmus exclusivamente por minhocas",
+    "A água do lençol freático evapora e vira chuva",
+    "Os nutrientes são aplicados em cobertura e incorporados"
+  ], a:0, meta:"Intemperismo"},
+  {id:7, q:"Existem dois tipos principais de intemperismo:", options:[
+    "Físico e químico",
+    "Biológico e térmico",
+    "Químico e elétrico",
+    "Físico e magnético"
+  ], a:0, meta:"Intemperismo"},
+  {id:8, q:"O intemperismo físico é associado a:", options:[
+    "Mudanças mecânicas (quebra, fissuração, abrasão) nas rochas",
+    "Dissolução química por CO2 em rocha calcária",
+    "Formação de húmus por humificação",
+    "Fixação biológica de nitrogênio"
+  ], a:0, meta:"Intemperismo físico"},
+  {id:9, q:"O intemperismo químico envolve:", options:[
+    "Dissolução ou alteração química de minerais e rochas",
+    "Somente a quebra mecânica por variação de temperatura",
+    "Apenas a ação de vento forte",
+    "A compactação do solo por máquinas"
+  ], a:0, meta:"Intemperismo químico"},
+  {id:10, q:"A rocha original da qual o solo se forma é chamada de:", options:[
+    "Rocha-mãe (rocha matriz)",
+    "Húmus",
+    "Silte",
+    "Lençol freático"
+  ], a:0, meta:"Rocha-mãe"},
+  {id:11, q:"Rochas-mães ricas em quartzo tendem a formar solos:", options:[
+    "Menos férteis",
+    "Mais férteis",
+    "Sempre orgânicos",
+    "Sempre alcalinos"
+  ], a:0, meta:"Composição mineralógica"},
+  {id:12, q:"Alta porosidade/permeabilidade na rocha-mãe favorece:", options:[
+    "Entrada de água e gases, importante para crescimento de plantas",
+    "Formação de solo sem água disponível",
+    "Eliminação de toda a fase gasosa do solo",
+    "Redução total de raízes e microrganismos"
+  ], a:0, meta:"Porosidade e permeabilidade"},
+  {id:13, q:"No clima, um fator que afeta a formação do solo é:", options:[
+    "Precipitação",
+    "Cor da planta cultivada",
+    "Tipo de combustível usado no trator",
+    "Marca do calcário"
+  ], a:0, meta:"Clima"},
+  {id:14, q:"Segundo o material, a temperatura influencia sobretudo:", options:[
+    "A taxa de intemperismo físico e químico",
+    "A cor do lençol freático",
+    "A existência de quartzo no solo",
+    "A textura como areia/silte/argila diretamente"
+  ], a:0, meta:"Clima"},
+  {id:15, q:"O tempo é importante na formação do solo porque:", options:[
+    "Controla a velocidade e extensão do intemperismo e da erosão",
+    "Substitui o papel da rocha-mãe",
+    "Elimina o efeito do relevo",
+    "Impede a ação dos organismos"
+  ], a:0, meta:"Tempo"},
+  {id:16, q:"Organismos do solo contribuem para:", options:[
+    "Decomposição de matéria orgânica e liberação de nutrientes",
+    "Aumento da salinidade por definição",
+    "Neutralização completa do pH em todos os solos",
+    "Transformar argila em areia"
+  ], a:0, meta:"Organismos"},
+  {id:17, q:"Um exemplo citado de efeito biológico no solo é:", options:[
+    "Fixação de nitrogênio por bactérias",
+    "Produção de rocha calcária por fungos",
+    "Transformação de água em potássio",
+    "Criação de minerais primários novos por minhocas"
+  ], a:0, meta:"Organismos"},
+  {id:18, q:"No solo como sistema trifásico, as fases são:", options:[
+    "Sólida, líquida e gasosa",
+    "Sólida, elétrica e magnética",
+    "Orgânica, mineral e metálica",
+    "Ácida, básica e neutra"
+  ], a:0, meta:"Sistema trifásico"},
+  {id:19, q:"A parte sólida do solo é formada principalmente por:", options:[
+    "Minerais e matéria orgânica",
+    "Apenas água e ar",
+    "Somente argila",
+    "Somente areia"
+  ], a:0, meta:"Composição do solo"},
+  {id:20, q:"Os poros do solo são formados principalmente pela:", options:[
+    "Agregação das partículas sólidas",
+    "Transformação de areia em argila",
+    "Evaporação do lençol freático",
+    "Queima da matéria orgânica"
+  ], a:0, meta:"Porosidade"},
+  {id:21, q:"Macroporos e microporos estão relacionados principalmente com:", options:[
+    "Espaços que podem ser ocupados por água e ar",
+    "Quantidade de rochas > 20 cm",
+    "Proporção de CO2 no ar atmosférico",
+    "Quantidade de fertilizante aplicado"
+  ], a:0, meta:"Poros"},
+  {id:22, q:"Quando o solo está alagado, a fase gasosa:", options:[
+    "É expulsa dos poros e a água ocupa o espaço",
+    "Aumenta e ocupa toda a fase sólida",
+    "Vira húmus rapidamente",
+    "Neutraliza o pH automaticamente"
+  ], a:0, meta:"Aeração/saturação"},
+  {id:23, q:"A terra fina é composta por partículas menores que:", options:[
+    "2 mm",
+    "20 mm",
+    "0,2 mm",
+    "0,02 mm"
+  ], a:0, meta:"Granulometria"},
+  {id:24, q:"Areia (terra fina) corresponde aproximadamente a:", options:[
+    "2 a 0,05 mm",
+    "0,05 a 0,002 mm",
+    "Menor que 0,002 mm",
+    "Maior que 20 cm"
+  ], a:0, meta:"Granulometria"},
+  {id:25, q:"Silte (terra fina) corresponde aproximadamente a:", options:[
+    "0,05 a 0,002 mm",
+    "2 a 0,05 mm",
+    "Menor que 0,0002 mm",
+    "2 mm a 2 cm"
+  ], a:0, meta:"Granulometria"},
+  {id:26, q:"Argila (terra fina) corresponde aproximadamente a:", options:[
+    "Menor que 0,002 mm",
+    "2 a 0,05 mm",
+    "0,05 a 0,02 mm",
+    "Maior que 2 mm"
+  ], a:0, meta:"Granulometria"},
+  {id:27, q:"Quando dizemos que um solo é argiloso, significa:", options:[
+    "Predomínio de partículas do tamanho de argila",
+    "Predomínio de quartzo na fração areia",
+    "Ausência total de areia e silte",
+    "Que a argila é sempre um mineral primário"
+  ], a:0, meta:"Textura"},
+  {id:28, q:"Minerais primários são aqueles que:", options:[
+    "Vêm das rochas e sofreram principalmente intemperismo físico (redução de tamanho)",
+    "Se formam no próprio solo por recombinação química",
+    "São sempre argilas e óxidos de Fe e Al",
+    "Existem apenas em solos muito intemperizados"
+  ], a:0, meta:"Minerais"},
+  {id:29, q:"Minerais secundários são:", options:[
+    "Formados no solo a partir do intemperismo químico de minerais primários",
+    "Sempre iguais à rocha matriz",
+    "Apenas quartzo e feldspato",
+    "Partículas maiores que 2 mm"
+  ], a:0, meta:"Minerais"},
+  {id:30, q:"A lixiviação é:", options:[
+    "Percolação da água que carrega elementos dissolvidos para camadas mais profundas",
+    "A quebra mecânica de rochas por temperatura",
+    "A formação de húmus por decomposição",
+    "A neutralização do alumínio por calagem"
+  ], a:0, meta:"Lixiviação"},
+  {id:31, q:"O quartzo é comum na fração areia e silte e é composto por:", options:[
+    "Silício (Si) e oxigênio (O)",
+    "Cálcio (Ca) e carbono (C)",
+    "Ferro (Fe) e alumínio (Al)",
+    "Nitrogênio (N) e fósforo (P)"
+  ], a:0, meta:"Minerais primários"},
+  {id:32, q:"O triângulo textural serve principalmente para:", options:[
+    "Classificar a textura do solo a partir de areia, silte e argila",
+    "Medir pH diretamente",
+    "Medir CTC sem laboratório",
+    "Calcular a chuva anual de uma região"
+  ], a:0, meta:"Triângulo textural"},
+  {id:33, q:"Em geral, solos arenosos tendem a:", options:[
+    "Ter menor retenção de água e exigir irrigação mais frequente",
+    "Ter maior retenção de água e maior pegajosidade",
+    "Ser sempre mais férteis",
+    "Ser sempre orgânicos"
+  ], a:0, meta:"Manejo e textura"},
+  {id:34, q:"As cargas na superfície da argila são importantes porque:", options:[
+    "Retêm nutrientes e explicam a CTC do solo",
+    "Geram areia a partir de argila",
+    "Impedem qualquer lixiviação",
+    "Aumentam automaticamente a matéria orgânica"
+  ], a:0, meta:"Cargas/CTC"},
+  {id:35, q:"CTC está relacionada principalmente com:", options:[
+    "Cargas negativas na argila e na matéria orgânica",
+    "Somente com a presença de cascalhos",
+    "Somente com a chuva",
+    "Somente com a temperatura"
+  ], a:0, meta:"CTC"},
+  {id:36, q:"A planta consegue retirar nutrientes retidos na argila porque:", options:[
+    "Libera H+ e troca pelo cátion adsorvido na superfície",
+    "Transforma o nutriente em gás",
+    "Dissolve completamente toda a argila",
+    "Converte água em nutrientes"
+  ], a:0, meta:"Troca iônica"},
+  {id:37, q:"Em solos jovens (pouco intemperizados), é comum predominar na argila:", options:[
+    "Vermiculita e esmectita",
+    "Caulinita apenas",
+    "Hematita e goethita apenas",
+    "Quartzo e calcita"
+  ], a:0, meta:"Minerais da argila"},
+  {id:38, q:"Vermiculita e esmectita são associadas a:", options:[
+    "Alta CTC e expansão/contração com umidade",
+    "Baixa CTC e ausência de variação física",
+    "Alta CTA por cargas positivas predominantes",
+    "Ausência total de água nos poros"
+  ], a:0, meta:"CTC e expansão"},
+  {id:39, q:"Em solos muito intemperizados, a argila tende a ter mais:", options:[
+    "Caulinita (baixa CTC)",
+    "Esmectita (alta CTC)",
+    "Vermiculita (alta CTC)",
+    "Cascalhos (alta CTC)"
+  ], a:0, meta:"Solos velhos"},
+  {id:40, q:"Óxidos de ferro (hematita/goethita) e hidróxido de alumínio (gibbsita) podem contribuir para:", options:[
+    "CTA (capacidade de troca de ânions) por cargas positivas na superfície",
+    "Transformar argila em areia",
+    "Aumentar sempre a CTC",
+    "Impedir respiração das raízes em qualquer solo"
+  ], a:0, meta:"CTA"},
+  {id:41, q:"A superfície com cargas negativas tende a reter:", options:[
+    "Cátions (ex.: Ca2+)",
+    "Ânions (ex.: NO3-)",
+    "Somente água",
+    "Somente ar"
+  ], a:0, meta:"Adsorção"},
+  {id:42, q:"A superfície com cargas positivas tende a reter:", options:[
+    "Ânions (ex.: NO3-)",
+    "Cátions (ex.: Ca2+)",
+    "Somente partículas de areia",
+    "Somente húmus"
+  ], a:0, meta:"Adsorção"},
+  {id:43, q:"A matéria orgânica do solo é constituída por:", options:[
+    "Restos vegetais e animais em diferentes graus de decomposição",
+    "Somente minerais primários",
+    "Somente argila",
+    "Somente sais dissolvidos"
+  ], a:0, meta:"Matéria orgânica"},
+  {id:44, q:"A fração completamente decomposta e rica em moléculas complexas é chamada:", options:[
+    "Húmus",
+    "Silte",
+    "Rocha-mãe",
+    "Cascalho"
+  ], a:0, meta:"Húmus"},
+  {id:45, q:"A matéria orgânica geralmente se concentra mais:", options:[
+    "Nas primeiras camadas do solo",
+    "No lençol freático",
+    "Abaixo de 3 metros em qualquer solo",
+    "Apenas em solos arenosos"
+  ], a:0, meta:"Distribuição vertical"},
+  {id:46, q:"Mineralização é:", options:[
+    "Transformação de moléculas orgânicas em compostos inorgânicos (CO2, H2O e nutrientes)",
+    "Transformação de minerais em matéria orgânica",
+    "Formação de cascalhos a partir de argila",
+    "Aumento da CTC por adição de areia"
+  ], a:0, meta:"Processos da MO"},
+  {id:47, q:"Humificação é:", options:[
+    "Formação do húmus a partir de matéria orgânica em decomposição",
+    "Perda de nutrientes por lixiviação",
+    "Quebra mecânica de rochas",
+    "Formação de minerais primários"
+  ], a:0, meta:"Processos da MO"},
+  {id:48, q:"Decomposição (no contexto do material) é:", options:[
+    "Quebra das moléculas orgânicas por organismos do solo",
+    "Dissolução de calcário pelo CO2 do ar apenas",
+    "Formação de argila a partir de quartzo",
+    "Perda de água por evaporação"
+  ], a:0, meta:"Processos da MO"},
+  {id:49, q:"A ciclagem de nutrientes envolve:", options:[
+    "Nutrientes saem do solo para a planta e retornam via resíduos vegetais",
+    "Apenas a aplicação de fertilizantes minerais",
+    "Apenas a lixiviação de sais",
+    "Apenas a fixação de nitrogênio"
+  ], a:0, meta:"Ciclagem"},
+  {id:50, q:"A matéria orgânica pode melhorar o solo por:", options:[
+    "Aumentar retenção de água e fornecer energia a microrganismos",
+    "Diminuir porosidade e infiltração sempre",
+    "Eliminar a fase gasosa do solo",
+    "Transformar areia em argila"
+  ], a:0, meta:"Funções da MO"},
+
+  /* 51 a 100: mais questões no mesmo padrão (curtas e diretas) */
+  {id:51, q:"O solo é suporte para atividades humanas como:", options:[
+    "Agricultura, pecuária e construção civil",
+    "Apenas mineração submarina",
+    "Apenas navegação aérea",
+    "Somente produção de combustíveis fósseis"
+  ], a:0, meta:"Importância"},
+  {id:52, q:"Em áreas alagadas, a matéria orgânica pode:", options:[
+    "Acumular devido a condições anaeróbicas, formando solos orgânicos",
+    "Desaparecer sempre em 24 horas",
+    "Virar quartzo",
+    "Aumentar a fração cascalho"
+  ], a:0, meta:"Solos orgânicos"},
+  {id:53, q:"A fase líquida do solo é também chamada de:", options:[
+    "Solução do solo",
+    "Rocha-mãe",
+    "Esqueleto do solo",
+    "Terra fina"
+  ], a:0, meta:"Sistema trifásico"},
+  {id:54, q:"Um solo bem arejado é importante porque:", options:[
+    "Raízes e organismos precisam de oxigênio para metabolismo",
+    "Elimina toda a decomposição",
+    "Impede qualquer intemperismo",
+    "Aumenta sempre o teor de argila"
+  ], a:0, meta:"Aeração"},
+  {id:55, q:"Partículas maiores que 2 mm no solo são chamadas de:", options:[
+    "Esqueleto do solo",
+    "Terra fina",
+    "Silte",
+    "Húmus"
+  ], a:0, meta:"Frações do solo"},
+  {id:56, q:"Cascalhos têm tamanho aproximado de:", options:[
+    "2 mm a 2 cm",
+    "2 a 20 cm",
+    "Maior que 20 cm",
+    "0,05 a 0,002 mm"
+  ], a:0, meta:"Esqueleto do solo"},
+  {id:57, q:"Calhaus têm tamanho aproximado de:", options:[
+    "2 a 20 cm",
+    "2 mm a 2 cm",
+    "Menor que 0,002 mm",
+    "0,05 a 0,002 mm"
+  ], a:0, meta:"Esqueleto do solo"},
+  {id:58, q:"Matacão é uma partícula:", options:[
+    "Maior que 20 cm",
+    "Menor que 2 mm",
+    "Entre 0,05 e 0,002 mm",
+    "Entre 2 mm e 2 cm"
+  ], a:0, meta:"Esqueleto do solo"},
+  {id:59, q:"Em geral, a fração argila:", options:[
+    "Não tem reserva de nutrientes, mas tem cargas superficiais",
+    "É composta de quartzo e tem muita reserva de nutrientes",
+    "É sempre o esqueleto do solo",
+    "Não participa de CTC/CTA"
+  ], a:0, meta:"Argila e cargas"},
+  {id:60, q:"Nutrientes na solução do solo podem ser perdidos por:", options:[
+    "Lixiviação antes de serem absorvidos",
+    "Humificação",
+    "Formação de cascalho",
+    "Fixação biológica"
+  ], a:0, meta:"Perdas"},
+  {id:61, q:"A fração argila contém com frequência:", options:[
+    "Minerais silicatados e oxihidróxidos de Fe e Al",
+    "Somente quartzo",
+    "Somente calcita e gesso",
+    "Apenas minerais primários"
+  ], a:0, meta:"Mineralogia"},
+  {id:62, q:"Solos tropicais tendem a ter mais:", options:[
+    "Solos intemperizados, com caulinita e óxidos comuns",
+    "Solos jovens sempre rasos e esmectíticos",
+    "Solos orgânicos em toda a paisagem",
+    "Ausência de intemperismo"
+  ], a:0, meta:"Contexto tropical"},
+  {id:63, q:"A fração húmica é importante porque:", options:[
+    "Ajuda na agregação e responde por muitas cargas do solo",
+    "É composta só por água",
+    "Elimina a porosidade do solo",
+    "Substitui minerais primários"
+  ], a:0, meta:"Fração húmica"},
+  {id:64, q:"A matéria orgânica pode dar cor ao solo, tornando-o:", options:[
+    "Mais escuro (castanho a preto) nas camadas superficiais",
+    "Sempre branco",
+    "Sempre vermelho, independentemente do Fe",
+    "Sempre azul"
+  ], a:0, meta:"Cor do solo"},
+  {id:65, q:"No material, uma prática inadequada que pode degradar o solo é:", options:[
+    "Queimadas e uso excessivo de agrotóxicos e fertilizantes",
+    "Cobertura do solo com resíduos vegetais",
+    "Adição moderada de matéria orgânica",
+    "Rotação de culturas"
+  ], a:0, meta:"Degradação"},
+  {id:66, q:"A decomposição da matéria orgânica libera:", options:[
+    "Nutrientes essenciais ao crescimento das plantas",
+    "Apenas areia",
+    "Apenas rochas novas",
+    "Somente gases nobres"
+  ], a:0, meta:"Biologia do solo"},
+  {id:67, q:"A ação de minhocas pode:", options:[
+    "Alterar pH liberando ácidos orgânicos e aumentar porosidade",
+    "Transformar quartzo em húmus",
+    "Eliminar toda a fase líquida",
+    "Aumentar o tamanho das partículas de argila"
+  ], a:0, meta:"Organismos"},
+  {id:68, q:"Animais como tatus/roedores podem contribuir ao solo por:", options:[
+    "Criar buracos que aumentam porosidade e infiltração",
+    "Produzir minerais primários novos",
+    "Reduzir totalmente a infiltração",
+    "Eliminar a matéria orgânica"
+  ], a:0, meta:"Bioturbação"},
+  {id:69, q:"A agricultura orgânica é citada como alternativa por:", options:[
+    "Basear-se em processos biológicos e evitar químicos sintéticos",
+    "Usar apenas fertilizante solúvel",
+    "Eliminar organismos do solo",
+    "Priorizar compactação para reduzir poros"
+  ], a:0, meta:"Sustentabilidade"},
+  {id:70, q:"A pedogênese pode levar:", options:[
+    "Milhões de anos",
+    "Apenas dias",
+    "Apenas uma semana",
+    "Sempre 1 ano exato"
+  ], a:0, meta:"Escala temporal"},
+
+  {id:71, q:"Umidade do solo influencia:", options:[
+    "Conteúdo de ar e reações de redução/oxidação",
+    "A existência de rocha-mãe",
+    "A presença de cascalho",
+    "O tamanho do triângulo textural"
+  ], a:0, meta:"Fase líquida"},
+  {id:72, q:"A fase sólida mineral inclui:", options:[
+    "Fragmentos de rochas e minerais de vários tamanhos",
+    "Somente húmus",
+    "Somente ar",
+    "Somente água"
+  ], a:0, meta:"Fase sólida"},
+  {id:73, q:"Os minerais primários constituem majoritariamente:", options:[
+    "Frações grosseiras: areia e silte",
+    "Fração argila apenas",
+    "Somente húmus",
+    "Somente esqueleto do solo"
+  ], a:0, meta:"Minerais primários"},
+  {id:74, q:"Os minerais secundários predominam em:", options:[
+    "Fração argila",
+    "Fração cascalho",
+    "Fração calhaus",
+    "Matacão"
+  ], a:0, meta:"Minerais secundários"},
+  {id:75, q:"Quando elementos dissolvidos não se recombinam no solo, eles podem:", options:[
+    "Permanecer na solução e ser absorvidos ou lixiviados",
+    "Virar cascalhos",
+    "Virar quartzo automaticamente",
+    "Eliminar CTC"
+  ], a:0, meta:"Solução do solo"},
+  {id:76, q:"A rocha-mãe pode afetar:", options:[
+    "Textura, cor, estrutura e acidez (pH) do solo resultante",
+    "Somente a cor da planta",
+    "Somente o vento regional",
+    "Somente a radiação solar"
+  ], a:0, meta:"Influência da rocha"},
+  {id:77, q:"Clima com ventos fortes tende a:", options:[
+    "Favorecer erosão e solos mais finos/menos férteis",
+    "Produzir mais húmus automaticamente",
+    "Eliminar intemperismo químico",
+    "Formar sempre solos orgânicos"
+  ], a:0, meta:"Ventos e erosão"},
+  {id:78, q:"Erosão é importante na formação do solo porque:", options:[
+    "Remove e deposita sedimentos, alterando perfis e profundidade",
+    "Cria minerais primários no solo",
+    "Substitui a rocha-mãe",
+    "Impede a ação dos organismos"
+  ], a:0, meta:"Erosão"},
+  {id:79, q:"O teor de matéria orgânica costuma:", options:[
+    "Diminuir com a profundidade do solo",
+    "Aumentar com a profundidade sempre",
+    "Ser igual em todas as camadas",
+    "Ser zero em solos tropicais"
+  ], a:0, meta:"Perfil do solo"},
+  {id:80, q:"A quantidade de matéria orgânica acumulada depende de:", options:[
+    "Clima, vegetação, textura, umidade e uso do solo",
+    "Apenas do tipo de semente",
+    "Apenas da cor do solo",
+    "Somente do vento"
+  ], a:0, meta:"MO: fatores"},
+
+  {id:81, q:"No material, o intemperismo é descrito como processo:", options:[
+    "Contínuo e em constante evolução",
+    "Instantâneo e sempre igual",
+    "Que só ocorre em laboratório",
+    "Que depende apenas de fertilizante"
+  ], a:0, meta:"Intemperismo"},
+  {id:82, q:"Uma consequência de argilas expansivas pode ser:", options:[
+    "Elevada dureza/pegajosidade e fendas no período seco",
+    "Eliminação total de poros",
+    "Aumento do tamanho das partículas",
+    "Neutralização do pH automaticamente"
+  ], a:0, meta:"Argilas expansivas"},
+  {id:83, q:"A CTA se relaciona principalmente com:", options:[
+    "Superfícies com cargas positivas que retêm ânions",
+    "Superfícies com cargas negativas que retêm cátions",
+    "Areia e silte por reserva de nutrientes",
+    "Apenas a fase líquida"
+  ], a:0, meta:"CTA"},
+  {id:84, q:"Cátions e ânions retidos em superfícies sólidas são descritos como:", options:[
+    "Prontamente disponíveis para as plantas (via solução do solo)",
+    "Sempre indisponíveis",
+    "Sempre perdidos por erosão",
+    "Sempre convertidos em rocha"
+  ], a:0, meta:"Disponibilidade"},
+  {id:85, q:"A proporção média ideal (conceitual) citada inclui cerca de:", options:[
+    "25% ar e 25% água (com minerais e MO completando)",
+    "75% água e 25% ar sempre",
+    "100% minerais",
+    "100% matéria orgânica"
+  ], a:0, meta:"Proporções médias"},
+  {id:86, q:"Solo em Canguçu é citado como exemplo de:", options:[
+    "Tendência a apresentar matéria orgânica abaixo de 3%",
+    "Solo orgânico sempre acima de 20% MO",
+    "Solo sem minerais",
+    "Solo sem poros"
+  ], a:0, meta:"Exemplo regional"},
+  {id:87, q:"A biologia do solo inclui (exemplos):", options:[
+    "Bactérias, fungos, protozoários e invertebrados",
+    "Apenas peixes",
+    "Apenas aves",
+    "Apenas grandes mamíferos"
+  ], a:0, meta:"Biota do solo"},
+  {id:88, q:"O solo protege:", options:[
+    "A água subterrânea",
+    "A luz do sol",
+    "A temperatura do planeta sozinha",
+    "Os oceanos contra evaporação"
+  ], a:0, meta:"Funções do solo"},
+  {id:89, q:"Uma função do solo citada é:", options:[
+    "Manutenção do patrimônio histórico, natural e cultural",
+    "Criar novos continentes",
+    "Produzir oxigênio diretamente sem plantas",
+    "Eliminar o ciclo da água"
+  ], a:0, meta:"Funções do solo"},
+  {id:90, q:"O solo é meio para manutenção da:", options:[
+    "Atividade socioeconômica",
+    "Atividade astronômica",
+    "Radiação nuclear natural",
+    "Rotação da Terra"
+  ], a:0, meta:"Funções do solo"},
+
+  {id:91, q:"A matéria orgânica é importante, mas geralmente está em:", options:[
+    "Pequenas quantidades (cerca de 5% do volume ou menos)",
+    "50% do volume na maioria dos solos",
+    "90% do volume em solos minerais",
+    "100% do volume em qualquer solo"
+  ], a:0, meta:"MO: proporção"},
+  {id:92, q:"Resíduos vegetais frescos sofrem:", options:[
+    "Decomposição por organismos do solo",
+    "Viragem imediata em quartzo",
+    "Compactação espontânea",
+    "Transformação direta em areia"
+  ], a:0, meta:"MO"},
+  {id:93, q:"Quando o solo perde material orgânico por transformação em inorgânico, isso é:", options:[
+    "Mineralização",
+    "Humificação",
+    "Erosão eólica",
+    "Intemperismo físico"
+  ], a:0, meta:"MO"},
+  {id:94, q:"No material, a ciclagem de nutrientes é associada a:", options:[
+    "Manter florestas exuberantes mesmo em solos pobres",
+    "Impedir qualquer crescimento vegetal",
+    "Eliminar a biodiversidade",
+    "Formar apenas areia"
+  ], a:0, meta:"Ciclagem"},
+  {id:95, q:"O material cita a Floresta Amazônica como exemplo de:", options:[
+    "Ciclagem de nutrientes sustentando floresta em solos pobres",
+    "Solo sempre rico em nutrientes minerais",
+    "Ausência de matéria orgânica",
+    "Predomínio total de cascalhos"
+  ], a:0, meta:"Exemplo"},
+  {id:96, q:"A fase gasosa do solo é influenciada por:", options:[
+    "Textura, profundidade, conteúdo de água e agregação",
+    "Somente pelo tipo de adubo",
+    "Somente pelo pH",
+    "Somente pela cor do solo"
+  ], a:0, meta:"Fase gasosa"},
+  {id:97, q:"A presença de minerais como calcita e gesso na rocha-mãe pode:", options:[
+    "Fornecer nutrientes e aumentar fertilidade do solo resultante",
+    "Impedir qualquer formação de solo",
+    "Eliminar porosidade do solo",
+    "Transformar argila em cascalho"
+  ], a:0, meta:"Rocha-mãe"},
+  {id:98, q:"Rochas-mães duras e insolúveis como granito/gnaisse tendem a:", options:[
+    "Levar mais tempo para formar solos",
+    "Formar solos instantaneamente",
+    "Formar apenas solos orgânicos",
+    "Eliminar intemperismo físico"
+  ], a:0, meta:"Rocha-mãe"},
+  {id:99, q:"Rochas mais solúveis/macias como calcário/gesso tendem a:", options:[
+    "Ser alteradas mais rapidamente e formar solo mais rápido",
+    "Formar solo mais lentamente que granito",
+    "Impedir intemperismo químico",
+    "Aumentar sempre a fração cascalho"
+  ], a:0, meta:"Rocha-mãe"},
+  {id:100, q:"O solo é considerado um ecossistema vivo porque:", options:[
+    "Abriga diversidade de organismos e processos que sustentam a fertilidade",
+    "Não contém água nem ar",
+    "É formado apenas por rocha intacta",
+    "Não sofre influência do clima"
+  ], a:0, meta:"Solo vivo"}
+];
+
+/* =========================
+   Seleção das 15 questões por partida
+========================= */
+function pickGameQuestions(){
+  // embaralha as 100 e pega 15
+  return shuffle(QBANK).slice(0, TOTAL_Q).map(q => ({
+    ...q,
+    // cópia defensiva das opções
+    options: [...q.options]
+  }));
+}
+
+/* =========================
+   Elementos
+========================= */
+const startScreen = document.getElementById('startScreen');
+const startForm = document.getElementById('startForm');
+const playerNameInput = document.getElementById('playerName');
+const startNoName = document.getElementById('startNoName');
+
+const qEl = document.getElementById('question');
+const qMetaEl = document.getElementById('qmeta');
+const aWrap = document.getElementById('answers');
+const qPos = document.getElementById('qpos');
+const payoutEl = document.getElementById('payout');
+const tfill = document.getElementById('tfill');
+const tclock = document.getElementById('tclock');
+
+const playerTag = document.getElementById('playerTag');
+const playerNameTag = document.getElementById('playerNameTag');
+
+const btn50 = document.getElementById('fifty');
+const btnSkip = document.getElementById('skip');
+const btnAsk = document.getElementById('ask');
+const btnRestart = document.getElementById('restart');
+
+/* =========================
+   Estado
+========================= */
+function initState(){
+  state = {
+    qIndex: 0,
+    prizeIndex: -1,
+    lastSafe: -1,
+    used:{ fifty:false, skip:false, ask:false },
+    finished:false,
+    gameQuestions: pickGameQuestions(),
+    current:null
+  };
+  stopTimer(true);
+  tRemain = TIME_PER_Q;
+}
+
+/* =========================
+   Render / Sorteio de alternativas por questão
+========================= */
+function renderQuestion(){
+  state.current = state.gameQuestions[state.qIndex];
+
+  // embaralha alternativas mantendo resposta correta
+  const zipped = state.current.options.map((text, idx) => ({ text, isCorrect: idx === state.current.a }));
+  const mixed = shuffle(zipped);
+
+  // atualiza o índice correto após shuffle
+  const correctIndex = mixed.findIndex(x => x.isCorrect);
+  state.current._mixed = mixed;
+  state.current._correctIndex = correctIndex;
+
+  qEl.textContent = state.current.q;
+  qMetaEl.textContent = state.current.meta || "";
+
+  aWrap.innerHTML = '';
+  const labels = ['A','B','C','D'];
+  mixed.forEach((opt,idx)=>{
+    const btn = document.createElement('button');
+    btn.type = "button";
+    btn.innerHTML = `<span class="badge">${labels[idx]}</span> <span>${opt.text}</span>`;
+    btn.addEventListener('click', ()=>selectAnswer(idx, btn));
+    aWrap.appendChild(btn);
+  });
+
+  qPos.textContent = `Pergunta ${state.qIndex+1}/${TOTAL_Q}`;
+
+  resetTimer();
+  startTimer();
+}
+
+function selectAnswer(idx, btn){
+  if(state.finished) return;
+  stopTimer();
+
+  const buttons = Array.from(aWrap.querySelectorAll('button'));
+  buttons.forEach(b=>b.disabled = true);
+
+  const isCorrect = idx === state.current._correctIndex;
+
+  if(isCorrect){
+    btn.classList.add('correct');
+    state.qIndex++;
+    state.prizeIndex++;
+    payoutEl.textContent = fmtMilhos(PRIZES[Math.max(0, state.prizeIndex)] || 0);
+    if(SAFE_STOPS.includes(state.qIndex)) state.lastSafe = state.prizeIndex;
+
+    setTimeout(()=>{
+      if(state.qIndex >= TOTAL_Q){
+        endGame(true);
+      }else{
+        renderQuestion();
+      }
+    }, 800);
+  } else {
+    btn.classList.add('wrong');
+    const correctBtn = buttons[state.current._correctIndex];
+    if(correctBtn) correctBtn.classList.add('correct');
+    setTimeout(()=>endGame(false), 900);
+  }
+}
+
+function endGame(won){
+  state.finished = true;
+  aWrap.querySelectorAll('button').forEach(b=>b.disabled = true);
+  stopTimer();
+
+  const earned = won ? PRIZES[PRIZES.length-1] : (state.lastSafe>=0 ? PRIZES[state.lastSafe] : 0);
+  const who = playerName ? `\nParticipante: ${playerName}` : "";
+
+  if(won){
+    qEl.textContent = `Parabéns. Você venceu o Show do Milhão.\n${who}\nPrêmio final: 1.000.000 milhos`;
+    qMetaEl.textContent = "";
+    payoutEl.textContent = "1.000.000 milhos";
+  }else{
+    qEl.textContent = `Fim de jogo. Você leva: ${fmtMilhos(earned)}\n${who}\nTente novamente para alcançar o milhão.`;
+    qMetaEl.textContent = "";
+  }
+}
+
+/* =========================
+   Timer
+========================= */
+function resetTimer(){
+  tRemain = TIME_PER_Q;
+  updateTimerUI(1, Math.ceil(tRemain/1000));
+}
+function startTimer(){
+  if(isTiming) return;
+  isTiming = true;
+  tStart = performance.now();
+  const tick = (now) => {
+    if(!isTiming) return;
+    const elapsed = now - tStart;
+    const left = Math.max(0, tRemain - elapsed);
+    const pct = left / TIME_PER_Q;
+    updateTimerUI(pct, Math.ceil(left/1000));
+    if(left <= 0){
+      stopTimer();
+      timeOutLose();
+    }else{
+      tTick = requestAnimationFrame(tick);
+    }
+  };
+  tTick = requestAnimationFrame(tick);
+}
+function stopTimer(reset=false){
+  if(tTick) cancelAnimationFrame(tTick);
+  if(isTiming){
+    const now = performance.now();
+    const elapsed = now - tStart;
+    tRemain = Math.max(0, tRemain - elapsed);
+  }
+  isTiming = false;
+  if(reset){ tRemain = TIME_PER_Q; updateTimerUI(1, Math.ceil(tRemain/1000)); }
+}
+function updateTimerUI(pct, secs){
+  tfill.style.width = `${Math.max(0,Math.min(1,pct))*100}%`;
+  tclock.textContent = `${secs}s`;
+  if(secs <= 5){
+    tfill.style.background = `linear-gradient(90deg, var(--danger), #ff9d5b)`;
+  }else{
+    tfill.style.background = `linear-gradient(90deg, var(--accent), var(--accent-2))`;
+  }
+}
+function timeOutLose(){
+  const buttons = Array.from(aWrap.querySelectorAll('button'));
+  buttons.forEach(b=>b.disabled = true);
+  const correctBtn = buttons[state.current._correctIndex];
+  if(correctBtn) correctBtn.classList.add('correct');
+  setTimeout(()=>endGame(false), 800);
+}
+
+/* =========================
+   Ajudas
+========================= */
+btn50.addEventListener('click', ()=>{
+  if(state.used.fifty || !state.current || state.finished) return;
+  state.used.fifty = true;
+  btn50.disabled = true;
+  btn50.setAttribute('aria-disabled','true');
+  const buttons = Array.from(aWrap.querySelectorAll('button'));
+  const wrongIdx = [0,1,2,3].filter(i=>i!==state.current._correctIndex);
+  shuffle(wrongIdx).slice(0,2).forEach(i=>{
+    buttons[i].disabled = true;
+    buttons[i].style.opacity = .5;
+  });
+});
+
+btnSkip.addEventListener('click', ()=>{
+  if(state.used.skip || !state.current || state.finished) return;
+  state.used.skip = true;
+  btnSkip.disabled = true;
+  btnSkip.setAttribute('aria-disabled','true');
+  stopTimer(true);
+  // conta como avanço sem prêmio (igual à sua lógica original)
+  state.qIndex++;
+  if(state.qIndex >= TOTAL_Q) endGame(true);
+  else renderQuestion();
+});
+
+btnAsk.addEventListener('click', ()=>{
+  if(state.used.ask || !state.current || state.finished) return;
+  state.used.ask = true;
+  btnAsk.disabled = true;
+  btnAsk.setAttribute('aria-disabled','true');
+
+  // "especialista" (tendencioso ao correto)
+  const correct = state.current._correctIndex;
+  const base = [0,0,0,0];
+  let remaining = 100;
+  const correctPct = 45 + Math.floor(Math.random()*26);
+  base[correct] = correctPct; remaining -= correctPct;
+  const others = shuffle([0,1,2,3].filter(i=>i!==correct));
+  base[others[0]] = Math.floor(remaining * (30+Math.random()*20)/100);
+  remaining -= base[others[0]];
+  base[others[1]] = Math.floor(remaining * (50+Math.random()*30)/100);
+  remaining -= base[others[1]];
+  base[others[2]] = remaining;
+
+  // Mostra dica textual simples no meta (sem gráfico)
+  const labels = ['A','B','C','D'];
+  const ranked = base.map((v,i)=>({v,i})).sort((a,b)=>b.v-a.v);
+  qMetaEl.textContent = `Especialista sugere: ${labels[ranked[0].i]} (${ranked[0].v}%), depois ${labels[ranked[1].i]} (${ranked[1].v}%).`;
+});
+
+/* =========================
+   Início / Reiniciar
+========================= */
+btnRestart.addEventListener('click', ()=>{
+  startGame();
+});
+
+startForm.addEventListener('submit', (e)=>{
+  e.preventDefault();
+  const name = (playerNameInput.value || "").trim();
+  setPlayerName(name);
+  hideStartScreen();
+  startGame();
+});
+
+startNoName.addEventListener('click', ()=>{
+  setPlayerName("");
+  hideStartScreen();
+  startGame();
+});
+
+function setPlayerName(name){
+  playerName = name.slice(0, 24);
+  if(playerName){
+    playerNameTag.textContent = playerName;
+    playerTag.style.display = "inline";
+  }else{
+    playerNameTag.textContent = "";
+    playerTag.style.display = "none";
+  }
+}
+
+function hideStartScreen(){
+  startScreen.style.display = "none";
+}
+
+function startGame(){
+  initState();
+  payoutEl.textContent = "0 milhos";
+  [btn50, btnSkip, btnAsk].forEach(b=>{
+    b.disabled=false;
+    b.setAttribute('aria-disabled','false');
+  });
+  qEl.textContent = "Carregando…";
+  qMetaEl.textContent = "";
+  aWrap.innerHTML = "";
+  renderQuestion();
+}
+
+/* Foco no input */
+setTimeout(()=>playerNameInput.focus(), 50);
+</script>
+
+</body>
+</html>
