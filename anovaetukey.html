@@ -302,12 +302,8 @@
 
     function safeP(x) {
       if (x === null || x === undefined || Number.isNaN(x)) return '';
-      if (x < 0.000001) return '< 0.000001';
+      if (x < 0.000001) return '&lt; 0.000001';
       return Number(x).toFixed(6);
-    }
-
-    function range(n) {
-      return Array.from({ length: n }, (_, i) => i);
     }
 
     function transpose(mat) {
@@ -320,10 +316,6 @@
 
     function mean(arr) {
       return arr.reduce((a, b) => a + b, 0) / arr.length;
-    }
-
-    function sum(arr) {
-      return arr.reduce((a, b) => a + b, 0);
     }
 
     function varianceSample(arr) {
@@ -575,6 +567,7 @@
           });
         }
       }
+
       return { qCrit, hsd, comparisons };
     }
 
@@ -595,7 +588,6 @@
         return sigMap.get([a, b].sort().join('||')) || false;
       }
 
-      // Monta colunas de letras candidatas, permitindo sobreposição.
       const letterCols = [];
 
       for (const t of trts) {
@@ -614,7 +606,6 @@
         }
       }
 
-      // Segunda passagem para permitir grupos do tipo "ab".
       for (const t of trts) {
         for (const col of letterCols) {
           if (col.includes(t)) continue;
@@ -625,10 +616,8 @@
         }
       }
 
-      // Remove duplicatas internas
       const normalizedCols = letterCols.map(col => [...new Set(col)]);
 
-      // Remove colunas redundantes que sejam subconjunto estrito de outra.
       const uniqueCols = [];
       for (let i = 0; i < normalizedCols.length; i++) {
         const a = normalizedCols[i];
@@ -663,15 +652,14 @@
       }));
     }
 
-    function tableHtml(headers, rows, formatter) {
+    function tableHtml(headers, rows) {
       let html = '<div class="table-wrap"><table><thead><tr>';
       headers.forEach(h => { html += `<th>${h}</th>`; });
       html += '</tr></thead><tbody>';
       rows.forEach(row => {
         html += '<tr>';
         headers.forEach(h => {
-          const value = formatter ? formatter(h, row[h], row) : row[h];
-          html += `<td>${value ?? ''}</td>`;
+          html += `<td>${row[h] ?? ''}</td>`;
         });
         html += '</tr>';
       });
@@ -796,10 +784,6 @@
       }
     }
 
-    // -----------------------------
-    // Funções matemáticas
-    // -----------------------------
-
     function logGamma(z) {
       const p = [
         676.5203681218851,
@@ -899,25 +883,26 @@
     function tInvApprox(p, df) {
       if (df <= 0) throw new Error('Graus de liberdade inválidos.');
       if (p <= 0 || p >= 1) throw new Error('p deve estar entre 0 e 1.');
+
       const z = normalInv(p);
       const z2 = z * z;
       const z3 = z2 * z;
       const z5 = z3 * z2;
       const z7 = z5 * z2;
       const z9 = z7 * z2;
+
       const g1 = (z3 + z) / (4 * df);
       const g2 = (5 * z5 + 16 * z3 + 3 * z) / (96 * df * df);
       const g3 = (3 * z7 + 19 * z5 + 17 * z3 - 15 * z) / (384 * Math.pow(df, 3));
       const g4 = (79 * z9 + 776 * z7 + 1482 * z5 - 1920 * z3 - 945 * z) / (92160 * Math.pow(df, 4));
+
       return z + g1 + g2 + g3 + g4;
     }
 
-    function approxQCrit(alpha, k, dfError) {
-      // Aproximação prática baseada em t crítico ajustado para studentized range.
-      const p = 1 - alpha / 2;
-      const tcrit = tInvApprox(p, dfError);
-      const adjust = 1 + (k - 2) * 0.04;
-      return Math.sqrt(2) * tcrit * adjust;
+    function approxQCrit(alpha, k, df) {
+      const t = tInvApprox(1 - alpha / 2, df);
+      const c = 1 + 0.2 * Math.log(k);
+      return Math.sqrt(2) * t * c;
     }
 
     document.getElementById('btnGenerate').addEventListener('click', renderMatrix);
