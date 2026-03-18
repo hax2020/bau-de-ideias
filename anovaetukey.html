@@ -582,6 +582,8 @@
       const ordered = names.map((name, i) => ({ name, mean: means[i] }))
         .sort((a, b) => b.mean - a.mean);
 
+      const trts = ordered.map(x => x.name);
+
       const sigMap = new Map();
       for (const c of comparisons) {
         const key = [c.g1, c.g2].sort().join('||');
@@ -589,27 +591,65 @@
       }
 
       function differs(a, b) {
+        if (a === b) return false;
         return sigMap.get([a, b].sort().join('||')) || false;
       }
 
-      const groups = [];
-      for (const item of ordered) {
+      // Monta colunas de letras candidatas, permitindo sobreposição.
+      const letterCols = [];
+
+      for (const t of trts) {
         let placed = false;
-        for (const group of groups) {
-          if (group.every(other => !differs(item.name, other))) {
-            group.push(item.name);
+
+        for (const col of letterCols) {
+          const conflicts = col.some(existing => differs(t, existing));
+          if (!conflicts) {
+            col.push(t);
             placed = true;
+          }
+        }
+
+        if (!placed) {
+          letterCols.push([t]);
+        }
+      }
+
+      // Segunda passagem para permitir grupos do tipo "ab".
+      for (const t of trts) {
+        for (const col of letterCols) {
+          if (col.includes(t)) continue;
+          const conflicts = col.some(existing => differs(t, existing));
+          if (!conflicts) {
+            col.push(t);
+          }
+        }
+      }
+
+      // Remove duplicatas internas
+      const normalizedCols = letterCols.map(col => [...new Set(col)]);
+
+      // Remove colunas redundantes que sejam subconjunto estrito de outra.
+      const uniqueCols = [];
+      for (let i = 0; i < normalizedCols.length; i++) {
+        const a = normalizedCols[i];
+        let redundant = false;
+        for (let j = 0; j < normalizedCols.length; j++) {
+          if (i === j) continue;
+          const b = normalizedCols[j];
+          const isSubset = a.every(x => b.includes(x));
+          if (isSubset && a.length < b.length) {
+            redundant = true;
             break;
           }
         }
-        if (!placed) groups.push([item.name]);
+        if (!redundant) uniqueCols.push(a);
       }
 
       const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
       const lettersByTreatment = {};
-      ordered.forEach(o => { lettersByTreatment[o.name] = ''; });
+      trts.forEach(t => { lettersByTreatment[t] = ''; });
 
-      groups.forEach((group, idx) => {
+      uniqueCols.forEach((group, idx) => {
         const symbol = alphabet[idx] || `a${idx + 1}`;
         group.forEach(name => {
           lettersByTreatment[name] += symbol;
