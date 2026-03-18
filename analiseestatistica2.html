@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ANOVA e Tukey - DIC e DBC</title>
+  <style>
+    :root {
+      --bg: #f6f8fb;
+      --card: #ffffff;
+      --ink: #1f2937;
+      --muted: #6b7280;
+      --line: #d1d5db;
+      --primary: #2563eb;
+      --primary-2: #1d4ed8;
+      --ok: #166534;
+      --ok-bg: #dcfce7;
+      --warn: #92400e;
+      --warn-bg: #fef3c7;
+      --err: #991b1b;
+      --err-bg: #fee2e2;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+    }
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+      margin-bottom: 18px;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 30px;
+    }
+    h2 {
+      margin: 0 0 14px;
+      font-size: 22px;
+    }
+    h3 {
+      margin: 8px 0 12px;
+      font-size: 18px;
+    }
+    .sub {
+      color: var(--muted);
+      margin-bottom: 18px;
+      line-height: 1.45;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(180px, 1fr));
+      gap: 14px;
+    }
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    input[type="number"], input[type="text"], select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      font-size: 14px;
+      background: #fff;
+    }
+    .row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .radio-group {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      padding-top: 10px;
+    }
+    .radio-group label {
+      margin: 0;
+      font-weight: 400;
+    }
+    button {
+      border: 0;
+      border-radius: 10px;
+      padding: 11px 16px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+    }
+    .btn-primary:hover { background: var(--primary-2); }
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #111827;
+    }
+    .btn-secondary:hover { background: #d1d5db; }
+    .message {
+      padding: 12px 14px;
+      border-radius: 10px;
+      margin-top: 12px;
+      line-height: 1.45;
+      border: 1px solid transparent;
+    }
+    .message.ok {
+      background: var(--ok-bg);
+      color: var(--ok);
+      border-color: #86efac;
+    }
+    .message.warn {
+      background: var(--warn-bg);
+      color: var(--warn);
+      border-color: #fcd34d;
+    }
+    .message.err {
+      background: var(--err-bg);
+      color: var(--err);
+      border-color: #fca5a5;
+    }
+    .table-wrap {
+      overflow-x: auto;
+      margin-top: 8px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      min-width: 720px;
+    }
+    th, td {
+      border: 1px solid var(--line);
+      padding: 8px 10px;
+      text-align: center;
+      font-size: 14px;
+    }
+    th {
+      background: #eff6ff;
+      font-weight: 700;
+    }
+    td:first-child, th:first-child {
+      text-align: left;
+    }
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(140px, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .metric {
+      background: #f9fafb;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+    }
+    .metric .label {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    .metric .value {
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .matrix-table input {
+      width: 100%;
+      min-width: 80px;
+      text-align: center;
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+    }
+    .footer-note {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    @media (max-width: 900px) {
+      .grid, .metrics {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    @media (max-width: 640px) {
+      .grid, .metrics {
+        grid-template-columns: 1fr;
+      }
+      h1 { font-size: 24px; }
+      h2 { font-size: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>ANOVA e teste de Tukey</h1>
+      <div class="sub">
+        Página única em HTML + JavaScript para <strong>DIC</strong> e <strong>DBC</strong>, com entrada manual dos dados.
+        Cada linha representa um tratamento e cada coluna representa uma repetição no DIC ou um bloco no DBC.
+      </div>
+
+      <div class="grid">
+        <div>
+          <label>Delineamento</label>
+          <div class="radio-group">
+            <label><input type="radio" name="design" value="DIC" checked> DIC</label>
+            <label><input type="radio" name="design" value="DBC"> DBC</label>
+          </div>
+        </div>
+        <div>
+          <label for="nTreatments">Número de tratamentos</label>
+          <input id="nTreatments" type="number" min="2" max="30" step="1" value="4" />
+        </div>
+        <div>
+          <label for="nReps">Número de repetições / blocos</label>
+          <input id="nReps" type="number" min="2" max="50" step="1" value="4" />
+        </div>
+        <div>
+          <label for="alpha">Nível de significância</label>
+          <select id="alpha">
+            <option value="0.05">5%</option>
+            <option value="0.01">1%</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:16px;">
+        <button class="btn-primary" id="btnGenerate">Gerar grade</button>
+        <button class="btn-secondary" id="btnExample">Preencher exemplo</button>
+        <button class="btn-secondary" id="btnClear">Limpar valores</button>
+      </div>
+
+      <div id="configMessage"></div>
+    </div>
+
+    <div class="card">
+      <h2>Entrada dos dados</h2>
+      <div class="sub">
+        Você pode editar os nomes dos tratamentos. Para DBC, cada coluna é tratada como um bloco.
+      </div>
+      <div id="matrixContainer"></div>
+      <div class="row" style="margin-top:16px;">
+        <button class="btn-primary" id="btnAnalyze">Analisar</button>
+      </div>
+    </div>
+
+    <div class="card" id="resultsCard" style="display:none;">
+      <h2>Resultados</h2>
+      <div id="resultsMessage"></div>
+      <div id="resultsContent"></div>
+    </div>
+
+    <div class="card">
+      <h3>Observações</h3>
+      <div class="footer-note">
+        Esta implementação foi pensada para dados balanceados. O teste de Tukey usa tabela de q crítico com interpolação linear simples.
+        Quando o número de tratamentos não estiver disponível na tabela, o sistema usa uma aproximação de fallback.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const state = {
+      design: 'DIC',
+      nTreatments: 4,
+      nReps: 4,
+      alpha: 0.05
+    };
+
+    function getDesign() {
+      return document.querySelector('input[name="design"]:checked').value;
+    }
+
+    function showMessage(targetId, text, type) {
+      const el = document.getElementById(targetId);
+      if (!text) {
+        el.innerHTML = '';
+        return;
+      }
+      el.innerHTML = `<div class="message ${type}">${text}</div>`;
+    }
+
+    function formatNum(x, digits = 6) {
+      if (x === null || x === undefined || Number.isNaN(x)) return '';
+      if (!Number.isFinite(x)) return String(x);
+      return Number(x).toFixed(digits);
+    }
+
+    function safeP(x) {
+      if (x === null || x === undefined || Number.isNaN(x)) return '';
+      if (x < 0.000001) return '&lt; 0.000001';
+      return Number(x).toFixed(6);
+    }
+
+    function transpose(mat) {
+      return mat[0].map((_, j) => mat.map(row => row[j]));
+    }
+
+    function flatten(mat) {
+      return mat.reduce((acc, row) => acc.concat(row), []);
+    }
+
+    function mean(arr) {
+      return arr.reduce((a, b) => a + b, 0) / arr.length;
+    }
+
+    function varianceSample(arr) {
+      if (arr.length < 2) return 0;
+      const m = mean(arr);
+      let s = 0;
+      for (const v of arr) s += Math.pow(v - m, 2);
+      return s / (arr.length - 1);
+    }
+
+    function stdSample(arr) {
+      return Math.sqrt(varianceSample(arr));
+    }
+
+    function renderMatrix() {
+      state.design = getDesign();
+      state.nTreatments = parseInt(document.getElementById('nTreatments').value, 10);
+      state.nReps = parseInt(document.getElementById('nReps').value, 10);
+      state.alpha = parseFloat(document.getElementById('alpha').value);
+
+      const nT = state.nTreatments;
+      const nR = state.nReps;
+
+      if (!Number.isInteger(nT) || !Number.isInteger(nR) || nT < 2 || nR < 2) {
+        showMessage('configMessage', 'Informe pelo menos 2 tratamentos e 2 repetições/blocos.', 'err');
+        return;
+      }
+
+      let html = '<div class="table-wrap"><table class="matrix-table">';
+      html += '<tr><th>Tratamento</th>';
+      for (let j = 0; j < nR; j++) {
+        html += `<th>${state.design === 'DBC' ? 'Bloco' : 'Rep'} ${j + 1}</th>`;
+      }
+      html += '</tr>';
+
+      for (let i = 0; i < nT; i++) {
+        html += '<tr>';
+        html += `<td><input type="text" id="name_${i}" value="T${i + 1}" /></td>`;
+        for (let j = 0; j < nR; j++) {
+          html += `<td><input type="number" step="any" id="v_${i}_${j}" /></td>`;
+        }
+        html += '</tr>';
+      }
+      html += '</table></div>';
+
+      document.getElementById('matrixContainer').innerHTML = html;
+      showMessage('configMessage', 'Grade gerada com sucesso.', 'ok');
+    }
+
+    function clearValues() {
+      for (let i = 0; i < state.nTreatments; i++) {
+        const nameEl = document.getElementById(`name_${i}`);
+        if (nameEl) nameEl.value = `T${i + 1}`;
+        for (let j = 0; j < state.nReps; j++) {
+          const el = document.getElementById(`v_${i}_${j}`);
+          if (el) el.value = '';
+        }
+      }
+    }
+
+    function fillExample() {
+      renderMatrix();
+      const exampleDic = [
+        [10.2, 11.1, 10.8, 10.5],
+        [12.4, 12.7, 12.1, 12.8],
+        [13.3, 13.0, 13.5, 13.2],
+        [11.5, 11.6, 11.3, 11.8]
+      ];
+      const exampleDbc = [
+        [10.2, 10.8, 11.0, 10.5],
+        [12.1, 12.7, 12.4, 12.9],
+        [13.2, 13.0, 13.4, 13.1],
+        [11.3, 11.6, 11.7, 11.5]
+      ];
+      const data = state.design === 'DBC' ? exampleDbc : exampleDic;
+      const nT = Math.min(state.nTreatments, data.length);
+      const nR = Math.min(state.nReps, data[0].length);
+      for (let i = 0; i < nT; i++) {
+        for (let j = 0; j < nR; j++) {
+          const el = document.getElementById(`v_${i}_${j}`);
+          if (el) el.value = data[i][j];
+        }
+      }
+      showMessage('configMessage', 'Exemplo preenchido.', 'ok');
+    }
+
+    function collectInput() {
+      const names = [];
+      const matrix = [];
+      const seen = new Set();
+
+      for (let i = 0; i < state.nTreatments; i++) {
+        const name = (document.getElementById(`name_${i}`)?.value || '').trim() || `T${i + 1}`;
+        if (seen.has(name)) {
+          throw new Error('Os nomes dos tratamentos devem ser únicos.');
+        }
+        seen.add(name);
+        names.push(name);
+
+        const row = [];
+        for (let j = 0; j < state.nReps; j++) {
+          const raw = document.getElementById(`v_${i}_${j}`)?.value;
+          const val = Number(raw);
+          if (raw === '' || raw === null || raw === undefined || Number.isNaN(val)) {
+            throw new Error('Preencha todos os valores numéricos antes de analisar.');
+          }
+          row.push(val);
+        }
+        matrix.push(row);
+      }
+
+      return { names, matrix };
+    }
+
+    function buildLongData(names, matrix, design) {
+      const out = [];
+      for (let i = 0; i < names.length; i++) {
+        for (let j = 0; j < matrix[i].length; j++) {
+          const item = {
+            tratamento: names[i],
+            resposta: matrix[i][j],
+            repeticao: j + 1
+          };
+          if (design === 'DBC') item.bloco = `B${j + 1}`;
+          out.push(item);
+        }
+      }
+      return out;
+    }
+
+    function groupSummary(names, matrix) {
+      return names.map((name, i) => ({
+        tratamento: name,
+        media: mean(matrix[i]),
+        desvio: stdSample(matrix[i]),
+        n: matrix[i].length
+      }));
+    }
+
+    function ssTotal(matrix) {
+      const all = flatten(matrix);
+      const gm = mean(all);
+      let out = 0;
+      for (const v of all) out += Math.pow(v - gm, 2);
+      return out;
+    }
+
+    function anovaDIC(names, matrix) {
+      const a = matrix.length;
+      const r = matrix[0].length;
+      const all = flatten(matrix);
+      const grandMean = mean(all);
+      const means = matrix.map(row => mean(row));
+
+      let ssTreat = 0;
+      for (let i = 0; i < a; i++) ssTreat += r * Math.pow(means[i] - grandMean, 2);
+      const ssTot = ssTotal(matrix);
+      const ssRes = ssTot - ssTreat;
+
+      const dfTreat = a - 1;
+      const dfRes = a * (r - 1);
+      const dfTot = a * r - 1;
+
+      const msTreat = ssTreat / dfTreat;
+      const msRes = ssRes / dfRes;
+      const F = msTreat / msRes;
+      const p = 1 - fCdf(F, dfTreat, dfRes);
+
+      return {
+        design: 'DIC',
+        grandMean,
+        treatmentMeans: means,
+        msError: msRes,
+        dfError: dfRes,
+        replications: r,
+        anova: [
+          { fonte: 'Tratamentos', SQ: ssTreat, GL: dfTreat, QM: msTreat, F, p },
+          { fonte: 'Resíduo', SQ: ssRes, GL: dfRes, QM: msRes, F: null, p: null },
+          { fonte: 'Total', SQ: ssTot, GL: dfTot, QM: null, F: null, p: null }
+        ]
+      };
+    }
+
+    function anovaDBC(names, matrix) {
+      const a = matrix.length;
+      const b = matrix[0].length;
+      const all = flatten(matrix);
+      const grandMean = mean(all);
+      const treatMeans = matrix.map(row => mean(row));
+      const blockMeans = transpose(matrix).map(col => mean(col));
+
+      let ssTreat = 0;
+      for (let i = 0; i < a; i++) ssTreat += b * Math.pow(treatMeans[i] - grandMean, 2);
+
+      let ssBlock = 0;
+      for (let j = 0; j < b; j++) ssBlock += a * Math.pow(blockMeans[j] - grandMean, 2);
+
+      const ssTot = ssTotal(matrix);
+      const ssRes = ssTot - ssTreat - ssBlock;
+
+      const dfTreat = a - 1;
+      const dfBlock = b - 1;
+      const dfRes = (a - 1) * (b - 1);
+      const dfTot = a * b - 1;
+
+      const msTreat = ssTreat / dfTreat;
+      const msBlock = ssBlock / dfBlock;
+      const msRes = ssRes / dfRes;
+
+      const FTreat = msTreat / msRes;
+      const FBlock = msBlock / msRes;
+      const pTreat = 1 - fCdf(FTreat, dfTreat, dfRes);
+      const pBlock = 1 - fCdf(FBlock, dfBlock, dfRes);
+
+      return {
+        design: 'DBC',
+        grandMean,
+        treatmentMeans: treatMeans,
+        blockMeans,
+        msError: msRes,
+        dfError: dfRes,
+        replications: b,
+        anova: [
+          { fonte: 'Tratamentos', SQ: ssTreat, GL: dfTreat, QM: msTreat, F: FTreat, p: pTreat },
+          { fonte: 'Blocos', SQ: ssBlock, GL: dfBlock, QM: msBlock, F: FBlock, p: pBlock },
+          { fonte: 'Resíduo', SQ: ssRes, GL: dfRes, QM: msRes, F: null, p: null },
+          { fonte: 'Total', SQ: ssTot, GL: dfTot, QM: null, F: null, p: null }
+        ]
+      };
+    }
+
+    // -----------------------------------------------------------------------------
+    // Tabela de q crítico para Tukey (Studentized Range) - α = 0.05 e 0.01
+    // -----------------------------------------------------------------------------
+    const qTable = {
+      0.05: {
+        2:  {10: 3.00, 15: 2.90, 20: 2.86, 24: 2.84, 30: 2.82, 40: 2.80, 60: 2.79, 120: 2.77, Infinity: 2.77},
+        3:  {10: 3.58, 15: 3.46, 20: 3.40, 24: 3.38, 30: 3.35, 40: 3.33, 60: 3.31, 120: 3.29, Infinity: 3.29},
+        4:  {10: 3.93, 15: 3.79, 20: 3.72, 24: 3.69, 30: 3.66, 40: 3.63, 60: 3.61, 120: 3.59, Infinity: 3.58},
+        5:  {10: 4.17, 15: 4.01, 20: 3.93, 24: 3.90, 30: 3.86, 40: 3.83, 60: 3.80, 120: 3.78, Infinity: 3.77},
+        6:  {10: 4.34, 15: 4.17, 20: 4.09, 24: 4.05, 30: 4.01, 40: 3.98, 60: 3.95, 120: 3.92, Infinity: 3.92},
+        7:  {10: 4.47, 15: 4.29, 20: 4.20, 24: 4.16, 30: 4.12, 40: 4.09, 60: 4.06, 120: 4.03, Infinity: 4.02},
+        8:  {10: 4.58, 15: 4.39, 20: 4.30, 24: 4.26, 30: 4.22, 40: 4.18, 60: 4.15, 120: 4.12, Infinity: 4.11}
+      },
+      0.01: {
+        6:  {24: 5.24, 30: 5.18, 40: 5.11, 60: 5.05, 120: 4.99, Infinity: 4.95}
+      }
+    };
+
+    function getQCritical(alpha, k, df) {
+      if (!qTable[alpha] || !qTable[alpha][k]) {
+        const t = tInvApprox(1 - alpha / 2, df);
+        const c = 1 + 0.2 * Math.log(k);
+        return Math.sqrt(2) * t * c;
+      }
+
+      const dfKeys = Object.keys(qTable[alpha][k])
+        .filter(x => x !== 'Infinity')
+        .map(Number)
+        .sort((a, b) => a - b);
+
+      if (df >= dfKeys[dfKeys.length - 1]) {
+        return qTable[alpha][k]['Infinity'] || qTable[alpha][k][120];
+      }
+
+      if (df <= dfKeys[0]) {
+        return qTable[alpha][k][dfKeys[0]];
+      }
+
+      for (let i = 0; i < dfKeys.length - 1; i++) {
+        const d1 = dfKeys[i];
+        const d2 = dfKeys[i + 1];
+        if (df >= d1 && df <= d2) {
+          const q1 = qTable[alpha][k][d1];
+          const q2 = qTable[alpha][k][d2];
+          const frac = (df - d1) / (d2 - d1);
+          return q1 + frac * (q2 - q1);
+        }
+      }
+
+      return qTable[alpha][k][24] || qTable[alpha][k][dfKeys[0]];
+    }
+
+    // -----------------------------------------------------------------------------
+    // Agrupamento por letras SIMPLES e clássico
+    // -----------------------------------------------------------------------------
+    function assignLettersSimple(names, means, comparisons) {
+      const sorted = names.map((name, i) => ({ name, mean: means[i] }))
+        .sort((a, b) => b.mean - a.mean);
+
+      const lettersByTreatment = {};
+      sorted.forEach(item => { lettersByTreatment[item.name] = ''; });
+
+      let currentLetter = 'a';
+      lettersByTreatment[sorted[0].name] = currentLetter;
+
+      for (let i = 1; i < sorted.length; i++) {
+        const curr = sorted[i];
+        const prev = sorted[i - 1];
+
+        const comp = comparisons.find(c =>
+          (c.g1 === curr.name && c.g2 === prev.name) ||
+          (c.g1 === prev.name && c.g2 === curr.name)
+        );
+
+        if (comp && comp.significativo) {
+          currentLetter = String.fromCharCode(currentLetter.charCodeAt(0) + 1);
+        }
+
+        lettersByTreatment[curr.name] = currentLetter;
+      }
+
+      return sorted.map(item => ({
+        tratamento: item.name,
+        media: item.mean,
+        grupo: lettersByTreatment[item.name]
+      }));
+    }
+
+    // -----------------------------------------------------------------------------
+    // Tukey usando q interpolado
+    // -----------------------------------------------------------------------------
+    function tukeyHSD(names, means, msError, dfError, r, alpha) {
+      const k = names.length;
+      const qCrit = getQCritical(alpha, k, dfError);
+      const hsd = qCrit * Math.sqrt(msError / r);
+
+      const comparisons = [];
+      for (let i = 0; i < k; i++) {
+        for (let j = i + 1; j < k; j++) {
+          const diff = Math.abs(means[i] - means[j]);
+          comparisons.push({
+            g1: names[i],
+            g2: names[j],
+            media1: means[i],
+            media2: means[j],
+            diferenca: diff,
+            hsd,
+            significativo: diff > hsd
+          });
+        }
+      }
+      return { qCrit, hsd, comparisons };
+    }
+
+    function tableHtml(headers, rows) {
+      let html = '<div class="table-wrap"><table><thead><tr>';
+      headers.forEach(h => { html += `<th>${h}</th>`; });
+      html += '</tr></thead><tbody>';
+      rows.forEach(row => {
+        html += '<tr>';
+        headers.forEach(h => {
+          html += `<td>${row[h] ?? ''}</td>`;
+        });
+        html += '</tr>';
+      });
+      html += '</tbody></table></div>';
+      return html;
+    }
+
+    function renderResults(input, model, tukey, summaries, letters, cv, grandMean) {
+      const headersAnova = ['Fonte', 'SQ', 'GL', 'QM', 'F', 'p'];
+      const anovaRows = model.anova.map(r => ({
+        Fonte: r.fonte,
+        SQ: formatNum(r.SQ),
+        GL: r.GL,
+        QM: r.QM == null ? '' : formatNum(r.QM),
+        F: r.F == null ? '' : formatNum(r.F),
+        p: r.p == null ? '' : safeP(r.p)
+      }));
+
+      const summaryHeaders = ['Tratamento', 'Média', 'Desvio-padrão', 'SEM', 'IC 95%', 'Ganho % (vs melhor)', 'n'];
+      const summaryRows = summaries
+        .map(x => ({
+          Tratamento: x.tratamento,
+          Média: formatNum(x.media),
+          'Desvio-padrão': formatNum(x.desvio),
+          SEM: x.sem,
+          'IC 95%': x.ic95,
+          'Ganho % (vs melhor)': x.ganhoPercentual,
+          n: x.n
+        }))
+        .sort((a, b) => parseFloat(b['Média']) - parseFloat(a['Média']));
+
+      let html = '';
+      html += '<h3>Tabela de ANOVA</h3>';
+      html += tableHtml(headersAnova, anovaRows);
+
+      html += '<div class="metrics">';
+      html += `<div class="metric"><div class="label">Média geral</div><div class="value">${formatNum(grandMean)}</div></div>`;
+      html += `<div class="metric"><div class="label">CV (%)</div><div class="value">${cv.toFixed(2)}%</div></div>`;
+      if (tukey) {
+        html += `<div class="metric"><div class="label">QM do resíduo</div><div class="value">${formatNum(model.msError)}</div></div>`;
+        html += `<div class="metric"><div class="label">GL do erro</div><div class="value">${model.dfError}</div></div>`;
+        html += `<div class="metric"><div class="label">q crítico Tukey</div><div class="value">${formatNum(tukey.qCrit)}</div></div>`;
+        html += `<div class="metric"><div class="label">HSD de Tukey</div><div class="value">${formatNum(tukey.hsd)}</div></div>`;
+      }
+      html += '</div>';
+
+      html += '<h3>Resumo por tratamento</h3>';
+      html += tableHtml(summaryHeaders, summaryRows);
+
+      const pTreat = model.anova.find(row => row.fonte === 'Tratamentos').p;
+      if (pTreat < state.alpha && tukey) {
+        html += '<div class="message ok">Há efeito de tratamentos ao nível selecionado. O teste de Tukey foi aplicado.</div>';
+
+        const compRows = tukey.comparisons.map(c => ({
+          'Grupo 1': c.g1,
+          'Grupo 2': c.g2,
+          'Média 1': formatNum(c.media1),
+          'Média 2': formatNum(c.media2),
+          'Diferença': formatNum(c.diferenca),
+          'HSD': formatNum(c.hsd),
+          'Significativo': c.significativo ? 'Sim' : 'Não'
+        }));
+
+        html += '<h3>Comparações de Tukey</h3>';
+        html += tableHtml(['Grupo 1', 'Grupo 2', 'Média 1', 'Média 2', 'Diferença', 'HSD', 'Significativo'], compRows);
+
+        const letterRows = letters.map(l => ({
+          Tratamento: l.tratamento,
+          Média: formatNum(l.media),
+          Grupo: l.grupo
+        }));
+        html += '<h3>Grupos por letras</h3>';
+        html += tableHtml(['Tratamento', 'Média', 'Grupo'], letterRows);
+      } else {
+        html += `<div class="message warn">Não houve efeito de tratamentos ao nível de significância selecionado (p = ${safeP(pTreat)}). O Tukey não foi aplicado.</div>`;
+      }
+
+      html += '<h3>Dados no formato longo</h3>';
+      const longRows = input.longData.map(x => ({
+        Tratamento: x.tratamento,
+        Repetição: x.repeticao,
+        Bloco: x.bloco || '',
+        Resposta: formatNum(x.resposta)
+      }));
+      html += tableHtml(['Tratamento', 'Repetição', 'Bloco', 'Resposta'], longRows);
+
+      document.getElementById('resultsContent').innerHTML = html;
+    }
+
+    function analyze() {
+      try {
+        state.design = getDesign();
+        state.nTreatments = parseInt(document.getElementById('nTreatments').value, 10);
+        state.nReps = parseInt(document.getElementById('nReps').value, 10);
+        state.alpha = parseFloat(document.getElementById('alpha').value);
+
+        const input = collectInput();
+        input.longData = buildLongData(input.names, input.matrix, state.design);
+
+        let model;
+        if (state.design === 'DIC') {
+          model = anovaDIC(input.names, input.matrix);
+        } else {
+          model = anovaDBC(input.names, input.matrix);
+        }
+
+        const summaries = groupSummary(input.names, input.matrix);
+        const means = summaries.map(s => s.media);
+        const grandMean = model.grandMean;
+
+        let tukey = null;
+        let letters = null;
+        const pTreat = model.anova.find(row => row.fonte === 'Tratamentos').p;
+
+        if (pTreat < state.alpha) {
+          tukey = tukeyHSD(
+            input.names,
+            means,
+            model.msError,
+            model.dfError,
+            model.replications,
+            state.alpha
+          );
+          letters = assignLettersSimple(input.names, means, tukey.comparisons);
+        }
+
+        const cv = model.msError > 0 ? (Math.sqrt(model.msError) / grandMean * 100) : 0;
+        const bestMean = Math.max(...means);
+
+        const enhancedSummaries = summaries.map(s => {
+          const sem = Math.sqrt(model.msError / model.replications);
+          const tCrit = tInvApprox(0.975, model.dfError);
+          const icHalf = tCrit * sem;
+          return {
+            ...s,
+            ganhoPercentual: bestMean > 0 ? ((s.media - bestMean) / bestMean * 100).toFixed(1) + '%' : '—',
+            sem: sem.toFixed(6),
+            ic95: `${(s.media - icHalf).toFixed(4)} – ${(s.media + icHalf).toFixed(4)}`
+          };
+        });
+
+        document.getElementById('resultsCard').style.display = 'block';
+        showMessage('resultsMessage', 'Análise concluída com sucesso.', 'ok');
+        renderResults(input, model, tukey, enhancedSummaries, letters, cv, grandMean);
+
+      } catch (err) {
+        document.getElementById('resultsCard').style.display = 'block';
+        document.getElementById('resultsContent').innerHTML = '';
+        showMessage('resultsMessage', err.message || 'Erro ao analisar os dados.', 'err');
+      }
+    }
+
+    function logGamma(z) {
+      const p = [
+        676.5203681218851,
+        -1259.1392167224028,
+        771.32342877765313,
+        -176.61502916214059,
+        12.507343278686905,
+        -0.13857109526572012,
+        9.9843695780195716e-6,
+        1.5056327351493116e-7
+      ];
+      if (z < 0.5) {
+        return Math.log(Math.PI) - Math.log(Math.sin(Math.PI * z)) - logGamma(1 - z);
+      }
+      z -= 1;
+      let x = 0.99999999999980993;
+      for (let i = 0; i < p.length; i++) x += p[i] / (z + i + 1);
+      const t = z + p.length - 0.5;
+      return 0.9189385332046727 + (z + 0.5) * Math.log(t) - t + Math.log(x);
+    }
+
+    function betacf(a, b, x) {
+      const MAXIT = 100;
+      const EPS = 3e-12;
+      const FPMIN = 1e-30;
+      let qab = a + b;
+      let qap = a + 1;
+      let qam = a - 1;
+      let c = 1;
+      let d = 1 - qab * x / qap;
+      if (Math.abs(d) < FPMIN) d = FPMIN;
+      d = 1 / d;
+      let h = d;
+      for (let m = 1; m <= MAXIT; m++) {
+        let m2 = 2 * m;
+        let aa = m * (b - m) * x / ((qam + m2) * (a + m2));
+        d = 1 + aa * d;
+        if (Math.abs(d) < FPMIN) d = FPMIN;
+        c = 1 + aa / c;
+        if (Math.abs(c) < FPMIN) c = FPMIN;
+        d = 1 / d;
+        h *= d * c;
+        aa = -(a + m) * (qab + m) * x / ((a + m2) * (qap + m2));
+        d = 1 + aa * d;
+        if (Math.abs(d) < FPMIN) d = FPMIN;
+        c = 1 + aa / c;
+        if (Math.abs(c) < FPMIN) c = FPMIN;
+        d = 1 / d;
+        const del = d * c;
+        h *= del;
+        if (Math.abs(del - 1) < EPS) break;
+      }
+      return h;
+    }
+
+    function regularizedIncompleteBeta(x, a, b) {
+      if (x <= 0) return 0;
+      if (x >= 1) return 1;
+      const bt = Math.exp(logGamma(a + b) - logGamma(a) - logGamma(b) + a * Math.log(x) + b * Math.log(1 - x));
+      if (x < (a + 1) / (a + b + 2)) {
+        return bt * betacf(a, b, x) / a;
+      }
+      return 1 - bt * betacf(b, a, 1 - x) / b;
+    }
+
+    function fCdf(x, d1, d2) {
+      if (x <= 0) return 0;
+      const xx = (d1 * x) / (d1 * x + d2);
+      return regularizedIncompleteBeta(xx, d1 / 2, d2 / 2);
+    }
+
+    function normalInv(p) {
+      if (p <= 0 || p >= 1) throw new Error('p deve estar entre 0 e 1.');
+      const a = [-3.969683028665376e+01, 2.209460984245205e+02, -2.759285104469687e+02, 1.383577518672690e+02, -3.066479806614716e+01, 2.506628277459239e+00];
+      const b = [-5.447609879822406e+01, 1.615858368580409e+02, -1.556989798598866e+02, 6.680131188771972e+01, -1.328068155288572e+01];
+      const c = [-7.784894002430293e-03, -3.223964580411365e-01, -2.400758277161838e+00, -2.549732539343734e+00, 4.374664141464968e+00, 2.938163982698783e+00];
+      const d = [7.784695709041462e-03, 3.224671290700398e-01, 2.445134137142996e+00, 3.754408661907416e+00];
+      const plow = 0.02425;
+      const phigh = 1 - plow;
+      let q, r;
+      if (p < plow) {
+        q = Math.sqrt(-2 * Math.log(p));
+        return (((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) /
+               ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1);
+      }
+      if (phigh < p) {
+        q = Math.sqrt(-2 * Math.log(1 - p));
+        return -(((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) /
+                 ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1);
+      }
+      q = p - 0.5;
+      r = q * q;
+      return (((((a[0] * r + a[1]) * r + a[2]) * r + a[3]) * r + a[4]) * r + a[5]) * q /
+             (((((b[0] * r + b[1]) * r + b[2]) * r + b[3]) * r + b[4]) * r + 1);
+    }
+
+    function tInvApprox(p, df) {
+      if (df <= 0) throw new Error('Graus de liberdade inválidos.');
+      if (p <= 0 || p >= 1) throw new Error('p deve estar entre 0 e 1.');
+
+      const z = normalInv(p);
+      const z2 = z * z;
+      const z3 = z2 * z;
+      const z5 = z3 * z2;
+      const z7 = z5 * z2;
+      const z9 = z7 * z2;
+
+      const g1 = (z3 + z) / (4 * df);
+      const g2 = (5 * z5 + 16 * z3 + 3 * z) / (96 * df * df);
+      const g3 = (3 * z7 + 19 * z5 + 17 * z3 - 15 * z) / (384 * Math.pow(df, 3));
+      const g4 = (79 * z9 + 776 * z7 + 1482 * z5 - 1920 * z3 - 945 * z) / (92160 * Math.pow(df, 4));
+
+      return z + g1 + g2 + g3 + g4;
+    }
+
+    document.getElementById('btnGenerate').addEventListener('click', renderMatrix);
+    document.getElementById('btnAnalyze').addEventListener('click', analyze);
+    document.getElementById('btnClear').addEventListener('click', clearValues);
+    document.getElementById('btnExample').addEventListener('click', fillExample);
+    document.querySelectorAll('input[name="design"]').forEach(el => {
+      el.addEventListener('change', renderMatrix);
+    });
+
+    renderMatrix();
+  </script>
+</body>
+</html>
