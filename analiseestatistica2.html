@@ -209,8 +209,8 @@
     <div class="card">
       <h1>ANOVA e teste de Tukey</h1>
       <div class="sub">
-        Página única em HTML + JavaScript para calculo de ANOVA e Tukey <strong>DIC</strong> e <strong>DBC</strong>, com entrada manual dos dados.
-        Cada linha representa um tratamento e cada coluna representa uma repetição no DIC ou um bloco no DBC para um máximo de 8 tratamentos.
+        Página única em HTML + JavaScript para <strong>DIC</strong> e <strong>DBC</strong>, com entrada manual dos dados.
+        Cada linha representa um tratamento e cada coluna representa uma repetição no DIC ou um bloco no DBC.
       </div>
 
       <div class="grid">
@@ -227,8 +227,7 @@
         </div>
         <div>
           <label for="nReps">Número de repetições / blocos</label>
-          <input id="nReps" type="number" min="2" max="50" step="1" value="4" />}
-    .radio-group label {
+          <input id="nReps" type="number" min="2" max="50" step="1" value="4" />
         </div>
         <div>
           <label for="alpha">Nível de significância</label>
@@ -270,7 +269,6 @@
       <div class="footer-note">
         Esta implementação foi pensada para dados balanceados. O teste de Tukey usa tabela de q crítico com interpolação linear simples.
         Quando o número de tratamentos não estiver disponível na tabela, o sistema usa uma aproximação de fallback.
-        Fernando Hax, 2026.
       </div>
     </div>
   </div>
@@ -549,7 +547,10 @@
       };
     }
 
-const qTable = {
+    // -----------------------------------------------------------------------------
+    // Tabela de q crítico para Tukey (Studentized Range) - α = 0.05 e 0.01
+    // -----------------------------------------------------------------------------
+   const qTable = {
   0.05: {
     2: {
       1: 17.97, 2: 6.09, 3: 4.50, 4: 3.93, 5: 3.64, 6: 3.46, 7: 3.34, 8: 3.26, 9: 3.20, 10: 3.15,
@@ -700,89 +701,45 @@ const qTable = {
       return qTable[alpha][k][24] || qTable[alpha][k][dfKeys[0]];
     }
 
-    function assignLettersOverlapping(names, means, comparisons) {
-      const ordered = names.map((name, i) => ({ name, mean: means[i] }))
+    // -----------------------------------------------------------------------------
+    // Agrupamento por letras SIMPLES e clássico
+    // -----------------------------------------------------------------------------
+    function assignLettersSimple(names, means, comparisons) {
+      const sorted = names.map((name, i) => ({ name, mean: means[i] }))
         .sort((a, b) => b.mean - a.mean);
 
-      const trts = ordered.map(x => x.name);
-
-      const sigMap = new Map();
-      for (const c of comparisons) {
-        const key = [c.g1, c.g2].sort().join('||');
-        sigMap.set(key, !!c.significativo);
-      }
-
-      function differs(a, b) {
-        if (a === b) return false;
-        return sigMap.get([a, b].sort().join('||')) || false;
-      }
-
-      const letterCols = [];
-
-      for (const t of trts) {
-        let placedSomewhere = false;
-
-        for (const col of letterCols) {
-          const conflicts = col.some(existing => differs(t, existing));
-          if (!conflicts) {
-            col.push(t);
-            placedSomewhere = true;
-          }
-        }
-
-        if (!placedSomewhere) {
-          letterCols.push([t]);
-        }
-      }
-
-      for (const t of trts) {
-        for (const col of letterCols) {
-          if (col.includes(t)) continue;
-          const conflicts = col.some(existing => differs(t, existing));
-          if (!conflicts) {
-            col.push(t);
-          }
-        }
-      }
-
-      const normalizedCols = letterCols.map(col => [...new Set(col)]);
-
-      const uniqueCols = [];
-      for (let i = 0; i < normalizedCols.length; i++) {
-        const a = normalizedCols[i];
-        let redundant = false;
-
-        for (let j = 0; j < normalizedCols.length; j++) {
-          if (i === j) continue;
-          const b = normalizedCols[j];
-          const isSubset = a.every(x => b.includes(x));
-          if (isSubset && a.length < b.length) {
-            redundant = true;
-            break;
-          }
-        }
-
-        if (!redundant) uniqueCols.push(a);
-      }
-
-      const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
       const lettersByTreatment = {};
-      trts.forEach(t => { lettersByTreatment[t] = ''; });
+      sorted.forEach(item => { lettersByTreatment[item.name] = ''; });
 
-      uniqueCols.forEach((group, idx) => {
-        const symbol = alphabet[idx] || `a${idx + 1}`;
-        group.forEach(name => {
-          lettersByTreatment[name] += symbol;
-        });
-      });
+      let currentLetter = 'a';
+      lettersByTreatment[sorted[0].name] = currentLetter;
 
-      return ordered.map(item => ({
+      for (let i = 1; i < sorted.length; i++) {
+        const curr = sorted[i];
+        const prev = sorted[i - 1];
+
+        const comp = comparisons.find(c =>
+          (c.g1 === curr.name && c.g2 === prev.name) ||
+          (c.g1 === prev.name && c.g2 === curr.name)
+        );
+
+        if (comp && comp.significativo) {
+          currentLetter = String.fromCharCode(currentLetter.charCodeAt(0) + 1);
+        }
+
+        lettersByTreatment[curr.name] = currentLetter;
+      }
+
+      return sorted.map(item => ({
         tratamento: item.name,
         media: item.mean,
         grupo: lettersByTreatment[item.name]
       }));
     }
 
+    // -----------------------------------------------------------------------------
+    // Tukey usando q interpolado
+    // -----------------------------------------------------------------------------
     function tukeyHSD(names, means, msError, dfError, r, alpha) {
       const k = names.length;
       const qCrit = getQCritical(alpha, k, dfError);
@@ -887,23 +844,6 @@ const qTable = {
         }));
         html += '<h3>Grupos por letras</h3>';
         html += tableHtml(['Tratamento', 'Média', 'Grupo'], letterRows);
-
-        const lettersMap = {};
-        letters.forEach(l => {
-          lettersMap[l.tratamento] = l.grupo;
-        });
-
-        const orderedCompactRows = input.names.map(name => {
-          const s = summaries.find(x => x.tratamento === name);
-          const grupo = lettersMap[name] || '';
-          return {
-            Tratamento: name,
-            'Média e grupo': `${formatNum(s.media)} ${grupo}`
-          };
-        });
-
-        html += '<h3>Tratamentos na ordem informada</h3>';
-        html += tableHtml(['Tratamento', 'Média e grupo'], orderedCompactRows);
       } else {
         html += `<div class="message warn">Não houve efeito de tratamentos ao nível de significância selecionado (p = ${safeP(pTreat)}). O Tukey não foi aplicado.</div>`;
       }
@@ -954,7 +894,7 @@ const qTable = {
             model.replications,
             state.alpha
           );
-          letters = assignLettersOverlapping(input.names, means, tukey.comparisons);
+          letters = assignLettersSimple(input.names, means, tukey.comparisons);
         }
 
         const cv = model.msError > 0 ? (Math.sqrt(model.msError) / grandMean * 100) : 0;
