@@ -547,9 +547,6 @@
       };
     }
 
-    // -----------------------------------------------------------------------------
-    // Tabela de q crítico para Tukey (Studentized Range) - α = 0.05 e 0.01
-    // -----------------------------------------------------------------------------
     const qTable = {
       0.05: {
         2:  {10: 3.00, 15: 2.90, 20: 2.86, 24: 2.84, 30: 2.82, 40: 2.80, 60: 2.79, 120: 2.77, Infinity: 2.77},
@@ -599,45 +596,89 @@
       return qTable[alpha][k][24] || qTable[alpha][k][dfKeys[0]];
     }
 
-    // -----------------------------------------------------------------------------
-    // Agrupamento por letras SIMPLES e clássico
-    // -----------------------------------------------------------------------------
-    function assignLettersSimple(names, means, comparisons) {
-      const sorted = names.map((name, i) => ({ name, mean: means[i] }))
+    function assignLettersOverlapping(names, means, comparisons) {
+      const ordered = names.map((name, i) => ({ name, mean: means[i] }))
         .sort((a, b) => b.mean - a.mean);
 
-      const lettersByTreatment = {};
-      sorted.forEach(item => { lettersByTreatment[item.name] = ''; });
+      const trts = ordered.map(x => x.name);
 
-      let currentLetter = 'a';
-      lettersByTreatment[sorted[0].name] = currentLetter;
-
-      for (let i = 1; i < sorted.length; i++) {
-        const curr = sorted[i];
-        const prev = sorted[i - 1];
-
-        const comp = comparisons.find(c =>
-          (c.g1 === curr.name && c.g2 === prev.name) ||
-          (c.g1 === prev.name && c.g2 === curr.name)
-        );
-
-        if (comp && comp.significativo) {
-          currentLetter = String.fromCharCode(currentLetter.charCodeAt(0) + 1);
-        }
-
-        lettersByTreatment[curr.name] = currentLetter;
+      const sigMap = new Map();
+      for (const c of comparisons) {
+        const key = [c.g1, c.g2].sort().join('||');
+        sigMap.set(key, !!c.significativo);
       }
 
-      return sorted.map(item => ({
+      function differs(a, b) {
+        if (a === b) return false;
+        return sigMap.get([a, b].sort().join('||')) || false;
+      }
+
+      const letterCols = [];
+
+      for (const t of trts) {
+        let placedSomewhere = false;
+
+        for (const col of letterCols) {
+          const conflicts = col.some(existing => differs(t, existing));
+          if (!conflicts) {
+            col.push(t);
+            placedSomewhere = true;
+          }
+        }
+
+        if (!placedSomewhere) {
+          letterCols.push([t]);
+        }
+      }
+
+      for (const t of trts) {
+        for (const col of letterCols) {
+          if (col.includes(t)) continue;
+          const conflicts = col.some(existing => differs(t, existing));
+          if (!conflicts) {
+            col.push(t);
+          }
+        }
+      }
+
+      const normalizedCols = letterCols.map(col => [...new Set(col)]);
+
+      const uniqueCols = [];
+      for (let i = 0; i < normalizedCols.length; i++) {
+        const a = normalizedCols[i];
+        let redundant = false;
+
+        for (let j = 0; j < normalizedCols.length; j++) {
+          if (i === j) continue;
+          const b = normalizedCols[j];
+          const isSubset = a.every(x => b.includes(x));
+          if (isSubset && a.length < b.length) {
+            redundant = true;
+            break;
+          }
+        }
+
+        if (!redundant) uniqueCols.push(a);
+      }
+
+      const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
+      const lettersByTreatment = {};
+      trts.forEach(t => { lettersByTreatment[t] = ''; });
+
+      uniqueCols.forEach((group, idx) => {
+        const symbol = alphabet[idx] || `a${idx + 1}`;
+        group.forEach(name => {
+          lettersByTreatment[name] += symbol;
+        });
+      });
+
+      return ordered.map(item => ({
         tratamento: item.name,
         media: item.mean,
         grupo: lettersByTreatment[item.name]
       }));
     }
 
-    // -----------------------------------------------------------------------------
-    // Tukey usando q interpolado
-    // -----------------------------------------------------------------------------
     function tukeyHSD(names, means, msError, dfError, r, alpha) {
       const k = names.length;
       const qCrit = getQCritical(alpha, k, dfError);
@@ -742,6 +783,23 @@
         }));
         html += '<h3>Grupos por letras</h3>';
         html += tableHtml(['Tratamento', 'Média', 'Grupo'], letterRows);
+
+        const lettersMap = {};
+        letters.forEach(l => {
+          lettersMap[l.tratamento] = l.grupo;
+        });
+
+        const orderedCompactRows = input.names.map(name => {
+          const s = summaries.find(x => x.tratamento === name);
+          const grupo = lettersMap[name] || '';
+          return {
+            Tratamento: name,
+            'Média e grupo': `${formatNum(s.media)} ${grupo}`
+          };
+        });
+
+        html += '<h3>Tratamentos na ordem informada</h3>';
+        html += tableHtml(['Tratamento', 'Média e grupo'], orderedCompactRows);
       } else {
         html += `<div class="message warn">Não houve efeito de tratamentos ao nível de significância selecionado (p = ${safeP(pTreat)}). O Tukey não foi aplicado.</div>`;
       }
@@ -792,7 +850,7 @@
             model.replications,
             state.alpha
           );
-          letters = assignLettersSimple(input.names, means, tukey.comparisons);
+          letters = assignLettersOverlapping(input.names, means, tukey.comparisons);
         }
 
         const cv = model.msError > 0 ? (Math.sqrt(model.msError) / grandMean * 100) : 0;
