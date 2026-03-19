@@ -22,17 +22,20 @@
     }
 
     * { box-sizing: border-box; }
+
     body {
       margin: 0;
       font-family: Arial, Helvetica, sans-serif;
       color: var(--ink);
       background: var(--bg);
     }
+
     .container {
       max-width: 1280px;
       margin: 0 auto;
       padding: 20px;
     }
+
     .card {
       background: var(--card);
       border: 1px solid var(--line);
@@ -41,34 +44,41 @@
       box-shadow: 0 2px 10px rgba(0,0,0,0.04);
       margin-bottom: 18px;
     }
+
     h1 {
       margin: 0 0 8px;
       font-size: 30px;
     }
+
     h2 {
       margin: 0 0 14px;
       font-size: 22px;
     }
+
     h3 {
       margin: 8px 0 12px;
       font-size: 18px;
     }
+
     .sub {
       color: var(--muted);
       margin-bottom: 18px;
       line-height: 1.45;
     }
+
     .grid {
       display: grid;
       grid-template-columns: repeat(4, minmax(180px, 1fr));
       gap: 14px;
     }
+
     label {
       display: block;
       font-size: 14px;
       font-weight: 700;
       margin-bottom: 6px;
     }
+
     input[type="number"], input[type="text"], select {
       width: 100%;
       padding: 10px 12px;
@@ -77,22 +87,26 @@
       font-size: 14px;
       background: #fff;
     }
+
     .row {
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
       align-items: center;
     }
+
     .radio-group {
       display: flex;
       gap: 16px;
       align-items: center;
       padding-top: 10px;
     }
+
     .radio-group label {
       margin: 0;
       font-weight: 400;
     }
+
     button {
       border: 0;
       border-radius: 10px;
@@ -101,16 +115,25 @@
       font-weight: 700;
       cursor: pointer;
     }
+
     .btn-primary {
       background: var(--primary);
       color: #fff;
     }
-    .btn-primary:hover { background: var(--primary-2); }
+
+    .btn-primary:hover {
+      background: var(--primary-2);
+    }
+
     .btn-secondary {
       background: #e5e7eb;
       color: #111827;
     }
-    .btn-secondary:hover { background: #d1d5db; }
+
+    .btn-secondary:hover {
+      background: #d1d5db;
+    }
+
     .message {
       padding: 12px 14px;
       border-radius: 10px;
@@ -118,65 +141,78 @@
       line-height: 1.45;
       border: 1px solid transparent;
     }
+
     .message.ok {
       background: var(--ok-bg);
       color: var(--ok);
       border-color: #86efac;
     }
+
     .message.warn {
       background: var(--warn-bg);
       color: var(--warn);
       border-color: #fcd34d;
     }
+
     .message.err {
       background: var(--err-bg);
       color: var(--err);
       border-color: #fca5a5;
     }
+
     .table-wrap {
       overflow-x: auto;
       margin-top: 8px;
     }
+
     table {
       width: 100%;
       border-collapse: collapse;
       background: #fff;
       min-width: 720px;
     }
+
     th, td {
       border: 1px solid var(--line);
       padding: 8px 10px;
       text-align: center;
       font-size: 14px;
     }
+
     th {
       background: #eff6ff;
       font-weight: 700;
     }
+
     td:first-child, th:first-child {
       text-align: left;
     }
+
     .metrics {
       display: grid;
       grid-template-columns: repeat(6, minmax(140px, 1fr));
       gap: 12px;
       margin-top: 12px;
     }
+
     .metric {
       background: #f9fafb;
       border: 1px solid var(--line);
       border-radius: 12px;
       padding: 12px;
     }
+
     .metric .label {
       font-size: 12px;
       color: var(--muted);
       margin-bottom: 4px;
     }
+
     .metric .value {
       font-size: 20px;
       font-weight: 700;
     }
+
     .matrix-table input {
       width: 100%;
       min-width: 80px;
@@ -185,22 +221,31 @@
       border-radius: 8px;
       border: 1px solid var(--line);
     }
+
     .footer-note {
       color: var(--muted);
       font-size: 13px;
       line-height: 1.45;
     }
+
     @media (max-width: 900px) {
       .grid, .metrics {
         grid-template-columns: 1fr 1fr;
       }
     }
+
     @media (max-width: 640px) {
       .grid, .metrics {
         grid-template-columns: 1fr;
       }
-      h1 { font-size: 24px; }
-      h2 { font-size: 20px; }
+
+      h1 {
+        font-size: 24px;
+      }
+
+      h2 {
+        font-size: 20px;
+      }
     }
   </style>
 </head>
@@ -209,8 +254,9 @@
     <div class="card">
       <h1>ANOVA e teste de Tukey</h1>
       <div class="sub">
-        Página única em HTML + JavaScript para <strong>DIC</strong> e <strong>DBC</strong>, com entrada manual dos dados.
+        Página única em HTML + JavaScript para cálculo de ANOVA e Tukey <strong>DIC</strong> e <strong>DBC</strong>, com entrada manual dos dados.
         Cada linha representa um tratamento e cada coluna representa uma repetição no DIC ou um bloco no DBC.
+        A tabela de Tukey foi incorporada para <strong>5%</strong> de probabilidade, com suporte de até <strong>100 tratamentos</strong>.
       </div>
 
       <div class="grid">
@@ -221,19 +267,21 @@
             <label><input type="radio" name="design" value="DBC"> DBC</label>
           </div>
         </div>
+
         <div>
           <label for="nTreatments">Número de tratamentos</label>
-          <input id="nTreatments" type="number" min="2" max="30" step="1" value="4" />
+          <input id="nTreatments" type="number" min="2" max="100" step="1" value="4" />
         </div>
+
         <div>
           <label for="nReps">Número de repetições / blocos</label>
           <input id="nReps" type="number" min="2" max="50" step="1" value="4" />
         </div>
+
         <div>
           <label for="alpha">Nível de significância</label>
           <select id="alpha">
             <option value="0.05">5%</option>
-            <option value="0.01">1%</option>
           </select>
         </div>
       </div>
@@ -267,8 +315,7 @@
     <div class="card">
       <h3>Observações</h3>
       <div class="footer-note">
-        Esta implementação foi pensada para dados balanceados. O teste de Tukey usa tabela de q crítico com interpolação linear simples.
-        Quando o número de tratamentos não estiver disponível na tabela, o sistema usa uma aproximação de fallback.
+        Esta implementação foi pensada para dados balanceados. O teste de Tukey usa tabela de q crítico com interpolação linear simples baseada em valores tabulados a 5% de probabilidade. Fernando Hax, 2026.
       </div>
     </div>
   </div>
@@ -341,6 +388,11 @@
 
       if (!Number.isInteger(nT) || !Number.isInteger(nR) || nT < 2 || nR < 2) {
         showMessage('configMessage', 'Informe pelo menos 2 tratamentos e 2 repetições/blocos.', 'err');
+        return;
+      }
+
+      if (nT > 100) {
+        showMessage('configMessage', 'O número máximo de tratamentos suportado pela tabela atual é 100.', 'err');
         return;
       }
 
@@ -547,199 +599,247 @@
       };
     }
 
-    // -----------------------------------------------------------------------------
-    // Tabela de q crítico para Tukey (Studentized Range) - α = 0.05 e 0.01
-    // -----------------------------------------------------------------------------
-   const qTable = {
-  0.05: {
-    2: {
-      1: 17.97, 2: 6.09, 3: 4.50, 4: 3.93, 5: 3.64, 6: 3.46, 7: 3.34, 8: 3.26, 9: 3.20, 10: 3.15,
-      11: 3.11, 12: 3.08, 13: 3.06, 14: 3.03, 15: 3.01, 16: 3.00, 17: 2.98, 18: 2.97, 19: 2.96, 20: 2.95,
-      24: 2.92, 30: 2.89, 40: 2.86, 60: 2.83, 120: 2.80, Infinity: 2.77
-    },
-    3: {
-      1: 26.98, 2: 8.33, 3: 5.91, 4: 5.04, 5: 4.60, 6: 4.34, 7: 4.17, 8: 4.04, 9: 3.95, 10: 3.88,
-      11: 3.82, 12: 3.77, 13: 3.74, 14: 3.70, 15: 3.67, 16: 3.65, 17: 3.63, 18: 3.61, 19: 3.59, 20: 3.58,
-      24: 3.53, 30: 3.49, 40: 3.44, 60: 3.40, 120: 3.36, Infinity: 3.31
-    },
-    4: {
-      1: 32.82, 2: 9.80, 3: 6.83, 4: 5.76, 5: 5.22, 6: 4.90, 7: 4.68, 8: 4.53, 9: 4.42, 10: 4.33,
-      11: 4.26, 12: 4.20, 13: 4.15, 14: 4.11, 15: 4.08, 16: 4.05, 17: 4.02, 18: 4.00, 19: 3.98, 20: 3.96,
-      24: 3.90, 30: 3.85, 40: 3.79, 60: 3.74, 120: 3.69, Infinity: 3.63
-    },
-    5: {
-      1: 37.08, 2: 10.88, 3: 7.50, 4: 6.29, 5: 5.67, 6: 5.31, 7: 5.06, 8: 4.89, 9: 4.76, 10: 4.65,
-      11: 4.57, 12: 4.51, 13: 4.45, 14: 4.41, 15: 4.37, 16: 4.33, 17: 4.30, 18: 4.28, 19: 4.25, 20: 4.23,
-      24: 4.17, 30: 4.10, 40: 4.04, 60: 3.98, 120: 3.92, Infinity: 3.86
-    },
-    6: {
-      1: 40.41, 2: 11.74, 3: 8.04, 4: 6.71, 5: 6.03, 6: 5.63, 7: 5.36, 8: 5.17, 9: 5.02, 10: 4.91,
-      11: 4.82, 12: 4.75, 13: 4.69, 14: 4.64, 15: 4.60, 16: 4.56, 17: 4.52, 18: 4.50, 19: 4.47, 20: 4.45,
-      24: 4.37, 30: 4.30, 40: 4.23, 60: 4.16, 120: 4.10, Infinity: 4.03
-    },
-    7: {
-      1: 43.12, 2: 12.44, 3: 8.48, 4: 7.05, 5: 6.33, 6: 5.90, 7: 5.61, 8: 5.40, 9: 5.24, 10: 5.12,
-      11: 5.03, 12: 4.95, 13: 4.89, 14: 4.83, 15: 4.78, 16: 4.74, 17: 4.71, 18: 4.67, 19: 4.65, 20: 4.62,
-      24: 4.54, 30: 4.46, 40: 4.39, 60: 4.31, 120: 4.24, Infinity: 4.17
-    },
-    8: {
-      1: 45.40, 2: 13.03, 3: 8.85, 4: 7.35, 5: 6.58, 6: 6.12, 7: 5.82, 8: 5.60, 9: 5.43, 10: 5.31,
-      11: 5.20, 12: 5.12, 13: 5.05, 14: 4.99, 15: 4.94, 16: 4.90, 17: 4.86, 18: 4.82, 19: 4.79, 20: 4.77,
-      24: 4.68, 30: 4.60, 40: 4.52, 60: 4.44, 120: 4.36, Infinity: 4.29
-    },
-    9: {
-      1: 47.36, 2: 13.54, 3: 9.18, 4: 7.60, 5: 6.80, 6: 6.32, 7: 6.00, 8: 5.77, 9: 5.60, 10: 5.46,
-      11: 5.35, 12: 5.27, 13: 5.19, 14: 5.13, 15: 5.08, 16: 5.03, 17: 4.99, 18: 4.96, 19: 4.92, 20: 4.90,
-      24: 4.81, 30: 4.72, 40: 4.64, 60: 4.55, 120: 4.47, Infinity: 4.39
-    },
-    10: {
-      1: 49.07, 2: 13.99, 3: 9.46, 4: 7.83, 5: 7.00, 6: 6.49, 7: 6.16, 8: 5.92, 9: 5.74, 10: 5.60,
-      11: 5.49, 12: 5.40, 13: 5.32, 14: 5.25, 15: 5.20, 16: 5.15, 17: 5.11, 18: 5.07, 19: 5.04, 20: 5.01,
-      24: 4.92, 30: 4.82, 40: 4.74, 60: 4.65, 120: 4.56, Infinity: 4.47
-    },
-    11: {
-      1: 50.59, 2: 14.39, 3: 9.72, 4: 8.03, 5: 7.17, 6: 6.65, 7: 6.30, 8: 6.05, 9: 5.87, 10: 5.72,
-      11: 5.61, 12: 5.51, 13: 5.43, 14: 5.36, 15: 5.31, 16: 5.26, 17: 5.21, 18: 5.17, 19: 5.14, 20: 5.11,
-      24: 5.01, 30: 4.92, 40: 4.82, 60: 4.73, 120: 4.64, Infinity: 4.55
-    },
-    12: {
-      1: 51.96, 2: 14.75, 3: 9.95, 4: 8.21, 5: 7.32, 6: 6.79, 7: 6.43, 8: 6.18, 9: 5.98, 10: 5.83,
-      11: 5.71, 12: 5.62, 13: 5.53, 14: 5.46, 15: 5.40, 16: 5.35, 17: 5.31, 18: 5.27, 19: 5.23, 20: 5.20,
-      24: 5.10, 30: 5.00, 40: 4.90, 60: 4.81, 120: 4.71, Infinity: 4.62
-    },
-    13: {
-      1: 53.20, 2: 15.08, 3: 10.15, 4: 8.37, 5: 7.47, 6: 6.92, 7: 6.55, 8: 6.29, 9: 6.09, 10: 5.94,
-      11: 5.81, 12: 5.71, 13: 5.63, 14: 5.55, 15: 5.49, 16: 5.44, 17: 5.39, 18: 5.35, 19: 5.32, 20: 5.28,
-      24: 5.18, 30: 5.08, 40: 4.98, 60: 4.88, 120: 4.78, Infinity: 4.69
-    },
-    14: {
-      1: 54.33, 2: 15.33, 3: 10.35, 4: 8.53, 5: 7.60, 6: 7.03, 7: 6.66, 8: 6.39, 9: 6.19, 10: 6.03,
-      11: 5.90, 12: 5.80, 13: 5.71, 14: 5.64, 15: 5.57, 16: 5.52, 17: 5.47, 18: 5.43, 19: 5.39, 20: 5.36,
-      24: 5.25, 30: 5.15, 40: 5.04, 60: 4.94, 120: 4.84, Infinity: 4.74
-    },
-    15: {
-      1: 55.36, 2: 15.65, 3: 10.53, 4: 8.66, 5: 7.72, 6: 7.14, 7: 6.76, 8: 6.48, 9: 6.28, 10: 6.11,
-      11: 5.98, 12: 5.88, 13: 5.79, 14: 5.71, 15: 5.65, 16: 5.59, 17: 5.54, 18: 5.50, 19: 5.46, 20: 5.43,
-      24: 5.32, 30: 5.21, 40: 5.11, 60: 5.00, 120: 4.90, Infinity: 4.80
-    },
-    16: {
-      1: 56.32, 2: 15.91, 3: 10.69, 4: 8.79, 5: 7.83, 6: 7.24, 7: 6.85, 8: 6.57, 9: 6.36, 10: 6.19,
-      11: 6.06, 12: 5.95, 13: 5.86, 14: 5.79, 15: 5.72, 16: 5.66, 17: 5.61, 18: 5.57, 19: 5.53, 20: 5.49,
-      24: 5.38, 30: 5.27, 40: 5.16, 60: 5.06, 120: 4.95, Infinity: 4.85
-    },
-    17: {
-      1: 57.22, 2: 16.14, 3: 10.84, 4: 8.91, 5: 7.93, 6: 7.34, 7: 6.94, 8: 6.65, 9: 6.44, 10: 6.27,
-      11: 6.13, 12: 6.02, 13: 5.93, 14: 5.85, 15: 5.79, 16: 5.73, 17: 5.68, 18: 5.63, 19: 5.59, 20: 5.55,
-      24: 5.44, 30: 5.33, 40: 5.22, 60: 5.11, 120: 5.00, Infinity: 4.89
-    },
-    18: {
-      1: 58.04, 2: 16.37, 3: 10.98, 4: 9.03, 5: 8.03, 6: 7.43, 7: 7.02, 8: 6.73, 9: 6.51, 10: 6.34,
-      11: 6.20, 12: 6.09, 13: 6.00, 14: 5.92, 15: 5.85, 16: 5.79, 17: 5.73, 18: 5.69, 19: 5.65, 20: 5.61,
-      24: 5.49, 30: 5.38, 40: 5.27, 60: 5.15, 120: 5.04, Infinity: 4.93
-    },
-    19: {
-      1: 58.83, 2: 16.57, 3: 11.11, 4: 9.13, 5: 8.12, 6: 7.51, 7: 7.10, 8: 6.80, 9: 6.58, 10: 6.41,
-      11: 6.27, 12: 6.15, 13: 6.06, 14: 5.97, 15: 5.90, 16: 5.84, 17: 5.79, 18: 5.74, 19: 5.70, 20: 5.66,
-      24: 5.55, 30: 5.43, 40: 5.31, 60: 5.20, 120: 5.09, Infinity: 4.97
-    },
-    20: {
-      1: 59.56, 2: 16.77, 3: 11.24, 4: 9.23, 5: 8.21, 6: 7.59, 7: 7.17, 8: 6.87, 9: 6.64, 10: 6.47,
-      11: 6.33, 12: 6.21, 13: 6.11, 14: 6.03, 15: 5.96, 16: 5.90, 17: 5.84, 18: 5.79, 19: 5.75, 20: 5.71,
-      24: 5.59, 30: 5.48, 40: 5.36, 60: 5.24, 120: 5.13, Infinity: 5.01
-    },
-
-    22: {30: 5.56, 40: 5.44, 60: 5.32, 120: 5.20, Infinity: 5.08},
-    24: {30: 5.64, 40: 5.51, 60: 5.39, 120: 5.27, Infinity: 5.14},
-    26: {30: 5.71, 40: 5.58, 60: 5.45, 120: 5.33, Infinity: 5.20},
-    28: {30: 5.77, 40: 5.64, 60: 5.51, 120: 5.38, Infinity: 5.25},
-    30: {30: 5.83, 40: 5.70, 60: 5.57, 120: 5.43, Infinity: 5.30},
-    32: {30: 5.89, 40: 5.75, 60: 5.62, 120: 5.48, Infinity: 5.35},
-    34: {30: 5.94, 40: 5.80, 60: 5.66, 120: 5.53, Infinity: 5.39},
-    36: {30: 5.99, 40: 5.85, 60: 5.71, 120: 5.57, Infinity: 5.43},
-    38: {30: 6.04, 40: 5.89, 60: 5.75, 120: 5.61, Infinity: 5.46},
-    40: {30: 6.08, 40: 5.93, 60: 5.79, 120: 5.64, Infinity: 5.50},
-    50: {30: 6.27, 40: 6.11, 60: 5.96, 120: 5.80, Infinity: 5.65},
-    60: {30: 6.42, 40: 6.26, 60: 6.09, 120: 5.93, Infinity: 5.76},
-    70: {30: 6.54, 40: 6.38, 60: 6.21, 120: 6.04, Infinity: 5.86},
-    80: {30: 6.65, 40: 6.48, 60: 6.30, 120: 6.13, Infinity: 5.95},
-    90: {30: 6.74, 40: 6.57, 60: 6.39, 120: 6.21, Infinity: 6.02},
-    100: {30: 6.83, 40: 6.65, 60: 6.46, 120: 6.28, Infinity: 6.09}
-  }
-};
+    const qTable = {
+      0.05: {
+        2: {
+          1: 17.97, 2: 6.09, 3: 4.50, 4: 3.93, 5: 3.64, 6: 3.46, 7: 3.34, 8: 3.26, 9: 3.20, 10: 3.15,
+          11: 3.11, 12: 3.08, 13: 3.06, 14: 3.03, 15: 3.01, 16: 3.00, 17: 2.98, 18: 2.97, 19: 2.96, 20: 2.95,
+          24: 2.92, 30: 2.89, 40: 2.86, 60: 2.83, 120: 2.80, Infinity: 2.77
+        },
+        3: {
+          1: 26.98, 2: 8.33, 3: 5.91, 4: 5.04, 5: 4.60, 6: 4.34, 7: 4.17, 8: 4.04, 9: 3.95, 10: 3.88,
+          11: 3.82, 12: 3.77, 13: 3.74, 14: 3.70, 15: 3.67, 16: 3.65, 17: 3.63, 18: 3.61, 19: 3.59, 20: 3.58,
+          24: 3.53, 30: 3.49, 40: 3.44, 60: 3.40, 120: 3.36, Infinity: 3.31
+        },
+        4: {
+          1: 32.82, 2: 9.80, 3: 6.83, 4: 5.76, 5: 5.22, 6: 4.90, 7: 4.68, 8: 4.53, 9: 4.42, 10: 4.33,
+          11: 4.26, 12: 4.20, 13: 4.15, 14: 4.11, 15: 4.08, 16: 4.05, 17: 4.02, 18: 4.00, 19: 3.98, 20: 3.96,
+          24: 3.90, 30: 3.85, 40: 3.79, 60: 3.74, 120: 3.69, Infinity: 3.63
+        },
+        5: {
+          1: 37.08, 2: 10.88, 3: 7.50, 4: 6.29, 5: 5.67, 6: 5.31, 7: 5.06, 8: 4.89, 9: 4.76, 10: 4.65,
+          11: 4.57, 12: 4.51, 13: 4.45, 14: 4.41, 15: 4.37, 16: 4.33, 17: 4.30, 18: 4.28, 19: 4.25, 20: 4.23,
+          24: 4.17, 30: 4.10, 40: 4.04, 60: 3.98, 120: 3.92, Infinity: 3.86
+        },
+        6: {
+          1: 40.41, 2: 11.74, 3: 8.04, 4: 6.71, 5: 6.03, 6: 5.63, 7: 5.36, 8: 5.17, 9: 5.02, 10: 4.91,
+          11: 4.82, 12: 4.75, 13: 4.69, 14: 4.64, 15: 4.60, 16: 4.56, 17: 4.52, 18: 4.50, 19: 4.47, 20: 4.45,
+          24: 4.37, 30: 4.30, 40: 4.23, 60: 4.16, 120: 4.10, Infinity: 4.03
+        },
+        7: {
+          1: 43.12, 2: 12.44, 3: 8.48, 4: 7.05, 5: 6.33, 6: 5.90, 7: 5.61, 8: 5.40, 9: 5.24, 10: 5.12,
+          11: 5.03, 12: 4.95, 13: 4.89, 14: 4.83, 15: 4.78, 16: 4.74, 17: 4.71, 18: 4.67, 19: 4.65, 20: 4.62,
+          24: 4.54, 30: 4.46, 40: 4.39, 60: 4.31, 120: 4.24, Infinity: 4.17
+        },
+        8: {
+          1: 45.40, 2: 13.03, 3: 8.85, 4: 7.35, 5: 6.58, 6: 6.12, 7: 5.82, 8: 5.60, 9: 5.43, 10: 5.31,
+          11: 5.20, 12: 5.12, 13: 5.05, 14: 4.99, 15: 4.94, 16: 4.90, 17: 4.86, 18: 4.82, 19: 4.79, 20: 4.77,
+          24: 4.68, 30: 4.60, 40: 4.52, 60: 4.44, 120: 4.36, Infinity: 4.29
+        },
+        9: {
+          1: 47.36, 2: 13.54, 3: 9.18, 4: 7.60, 5: 6.80, 6: 6.32, 7: 6.00, 8: 5.77, 9: 5.60, 10: 5.46,
+          11: 5.35, 12: 5.27, 13: 5.19, 14: 5.13, 15: 5.08, 16: 5.03, 17: 4.99, 18: 4.96, 19: 4.92, 20: 4.90,
+          24: 4.81, 30: 4.72, 40: 4.64, 60: 4.55, 120: 4.47, Infinity: 4.39
+        },
+        10: {
+          1: 49.07, 2: 13.99, 3: 9.46, 4: 7.83, 5: 7.00, 6: 6.49, 7: 6.16, 8: 5.92, 9: 5.74, 10: 5.60,
+          11: 5.49, 12: 5.40, 13: 5.32, 14: 5.25, 15: 5.20, 16: 5.15, 17: 5.11, 18: 5.07, 19: 5.04, 20: 5.01,
+          24: 4.92, 30: 4.82, 40: 4.74, 60: 4.65, 120: 4.56, Infinity: 4.47
+        },
+        11: {
+          1: 50.59, 2: 14.39, 3: 9.72, 4: 8.03, 5: 7.17, 6: 6.65, 7: 6.30, 8: 6.05, 9: 5.87, 10: 5.72,
+          11: 5.61, 12: 5.51, 13: 5.43, 14: 5.36, 15: 5.31, 16: 5.26, 17: 5.21, 18: 5.17, 19: 5.14, 20: 5.11,
+          24: 5.01, 30: 4.92, 40: 4.82, 60: 4.73, 120: 4.64, Infinity: 4.55
+        },
+        12: {
+          1: 51.96, 2: 14.75, 3: 9.95, 4: 8.21, 5: 7.32, 6: 6.79, 7: 6.43, 8: 6.18, 9: 5.98, 10: 5.83,
+          11: 5.71, 12: 5.62, 13: 5.53, 14: 5.46, 15: 5.40, 16: 5.35, 17: 5.31, 18: 5.27, 19: 5.23, 20: 5.20,
+          24: 5.10, 30: 5.00, 40: 4.90, 60: 4.81, 120: 4.71, Infinity: 4.62
+        },
+        13: {
+          1: 53.20, 2: 15.08, 3: 10.15, 4: 8.37, 5: 7.47, 6: 6.92, 7: 6.55, 8: 6.29, 9: 6.09, 10: 5.94,
+          11: 5.81, 12: 5.71, 13: 5.63, 14: 5.55, 15: 5.49, 16: 5.44, 17: 5.39, 18: 5.35, 19: 5.32, 20: 5.28,
+          24: 5.18, 30: 5.08, 40: 4.98, 60: 4.88, 120: 4.78, Infinity: 4.69
+        },
+        14: {
+          1: 54.33, 2: 15.33, 3: 10.35, 4: 8.53, 5: 7.60, 6: 7.03, 7: 6.66, 8: 6.39, 9: 6.19, 10: 6.03,
+          11: 5.90, 12: 5.80, 13: 5.71, 14: 5.64, 15: 5.57, 16: 5.52, 17: 5.47, 18: 5.43, 19: 5.39, 20: 5.36,
+          24: 5.25, 30: 5.15, 40: 5.04, 60: 4.94, 120: 4.84, Infinity: 4.74
+        },
+        15: {
+          1: 55.36, 2: 15.65, 3: 10.53, 4: 8.66, 5: 7.72, 6: 7.14, 7: 6.76, 8: 6.48, 9: 6.28, 10: 6.11,
+          11: 5.98, 12: 5.88, 13: 5.79, 14: 5.71, 15: 5.65, 16: 5.59, 17: 5.54, 18: 5.50, 19: 5.46, 20: 5.43,
+          24: 5.32, 30: 5.21, 40: 5.11, 60: 5.00, 120: 4.90, Infinity: 4.80
+        },
+        16: {
+          1: 56.32, 2: 15.91, 3: 10.69, 4: 8.79, 5: 7.83, 6: 7.24, 7: 6.85, 8: 6.57, 9: 6.36, 10: 6.19,
+          11: 6.06, 12: 5.95, 13: 5.86, 14: 5.79, 15: 5.72, 16: 5.66, 17: 5.61, 18: 5.57, 19: 5.53, 20: 5.49,
+          24: 5.38, 30: 5.27, 40: 5.16, 60: 5.06, 120: 4.95, Infinity: 4.85
+        },
+        17: {
+          1: 57.22, 2: 16.14, 3: 10.84, 4: 8.91, 5: 7.93, 6: 7.34, 7: 6.94, 8: 6.65, 9: 6.44, 10: 6.27,
+          11: 6.13, 12: 6.02, 13: 5.93, 14: 5.85, 15: 5.79, 16: 5.73, 17: 5.68, 18: 5.63, 19: 5.59, 20: 5.55,
+          24: 5.44, 30: 5.33, 40: 5.22, 60: 5.11, 120: 5.00, Infinity: 4.89
+        },
+        18: {
+          1: 58.04, 2: 16.37, 3: 10.98, 4: 9.03, 5: 8.03, 6: 7.43, 7: 7.02, 8: 6.73, 9: 6.51, 10: 6.34,
+          11: 6.20, 12: 6.09, 13: 6.00, 14: 5.92, 15: 5.85, 16: 5.79, 17: 5.73, 18: 5.69, 19: 5.65, 20: 5.61,
+          24: 5.49, 30: 5.38, 40: 5.27, 60: 5.15, 120: 5.04, Infinity: 4.93
+        },
+        19: {
+          1: 58.83, 2: 16.57, 3: 11.11, 4: 9.13, 5: 8.12, 6: 7.51, 7: 7.10, 8: 6.80, 9: 6.58, 10: 6.41,
+          11: 6.27, 12: 6.15, 13: 6.06, 14: 5.97, 15: 5.90, 16: 5.84, 17: 5.79, 18: 5.74, 19: 5.70, 20: 5.66,
+          24: 5.55, 30: 5.43, 40: 5.31, 60: 5.20, 120: 5.09, Infinity: 4.97
+        },
+        20: {
+          1: 59.56, 2: 16.77, 3: 11.24, 4: 9.23, 5: 8.21, 6: 7.59, 7: 7.17, 8: 6.87, 9: 6.64, 10: 6.47,
+          11: 6.33, 12: 6.21, 13: 6.11, 14: 6.03, 15: 5.96, 16: 5.90, 17: 5.84, 18: 5.79, 19: 5.75, 20: 5.71,
+          24: 5.59, 30: 5.48, 40: 5.36, 60: 5.24, 120: 5.13, Infinity: 5.01
+        },
+        22: { 30: 5.56, 40: 5.44, 60: 5.32, 120: 5.20, Infinity: 5.08 },
+        24: { 30: 5.64, 40: 5.51, 60: 5.39, 120: 5.27, Infinity: 5.14 },
+        26: { 30: 5.71, 40: 5.58, 60: 5.45, 120: 5.33, Infinity: 5.20 },
+        28: { 30: 5.77, 40: 5.64, 60: 5.51, 120: 5.38, Infinity: 5.25 },
+        30: { 30: 5.83, 40: 5.70, 60: 5.57, 120: 5.43, Infinity: 5.30 },
+        32: { 30: 5.89, 40: 5.75, 60: 5.62, 120: 5.48, Infinity: 5.35 },
+        34: { 30: 5.94, 40: 5.80, 60: 5.66, 120: 5.53, Infinity: 5.39 },
+        36: { 30: 5.99, 40: 5.85, 60: 5.71, 120: 5.57, Infinity: 5.43 },
+        38: { 30: 6.04, 40: 5.89, 60: 5.75, 120: 5.61, Infinity: 5.46 },
+        40: { 30: 6.08, 40: 5.93, 60: 5.79, 120: 5.64, Infinity: 5.50 },
+        50: { 30: 6.27, 40: 6.11, 60: 5.96, 120: 5.80, Infinity: 5.65 },
+        60: { 30: 6.42, 40: 6.26, 60: 6.09, 120: 5.93, Infinity: 5.76 },
+        70: { 30: 6.54, 40: 6.38, 60: 6.21, 120: 6.04, Infinity: 5.86 },
+        80: { 30: 6.65, 40: 6.48, 60: 6.30, 120: 6.13, Infinity: 5.95 },
+        90: { 30: 6.74, 40: 6.57, 60: 6.39, 120: 6.21, Infinity: 6.02 },
+        100: { 30: 6.83, 40: 6.65, 60: 6.46, 120: 6.28, Infinity: 6.09 }
+      }
+    };
 
     function getQCritical(alpha, k, df) {
-      if (!qTable[alpha] || !qTable[alpha][k]) {
-        const t = tInvApprox(1 - alpha / 2, df);
-        const c = 1 + 0.2 * Math.log(k);
-        return Math.sqrt(2) * t * c;
+      if (!qTable[alpha]) {
+        throw new Error('Nível de significância não suportado pela tabela de Tukey.');
       }
 
-      const dfKeys = Object.keys(qTable[alpha][k])
+      if (!qTable[alpha][k]) {
+        throw new Error(`A tabela de Tukey incorporada não possui valores para k = ${k}. Use entre 2 e 100 tratamentos.`);
+      }
+
+      const dfEntries = qTable[alpha][k];
+      const dfKeys = Object.keys(dfEntries)
         .filter(x => x !== 'Infinity')
         .map(Number)
         .sort((a, b) => a - b);
 
       if (df >= dfKeys[dfKeys.length - 1]) {
-        return qTable[alpha][k]['Infinity'] || qTable[alpha][k][120];
+        return dfEntries['Infinity'] || dfEntries[dfKeys[dfKeys.length - 1]];
       }
 
       if (df <= dfKeys[0]) {
-        return qTable[alpha][k][dfKeys[0]];
+        return dfEntries[dfKeys[0]];
+      }
+
+      if (dfEntries[df] !== undefined) {
+        return dfEntries[df];
       }
 
       for (let i = 0; i < dfKeys.length - 1; i++) {
         const d1 = dfKeys[i];
         const d2 = dfKeys[i + 1];
         if (df >= d1 && df <= d2) {
-          const q1 = qTable[alpha][k][d1];
-          const q2 = qTable[alpha][k][d2];
+          const q1 = dfEntries[d1];
+          const q2 = dfEntries[d2];
           const frac = (df - d1) / (d2 - d1);
           return q1 + frac * (q2 - q1);
         }
       }
 
-      return qTable[alpha][k][24] || qTable[alpha][k][dfKeys[0]];
+      return dfEntries[dfKeys[0]];
     }
 
-    // -----------------------------------------------------------------------------
-    // Agrupamento por letras SIMPLES e clássico
-    // -----------------------------------------------------------------------------
-    function assignLettersSimple(names, means, comparisons) {
-      const sorted = names.map((name, i) => ({ name, mean: means[i] }))
+    function assignLettersOverlapping(names, means, comparisons) {
+      const ordered = names
+        .map((name, i) => ({ name, mean: means[i] }))
         .sort((a, b) => b.mean - a.mean);
 
-      const lettersByTreatment = {};
-      sorted.forEach(item => { lettersByTreatment[item.name] = ''; });
+      const trts = ordered.map(x => x.name);
 
-      let currentLetter = 'a';
-      lettersByTreatment[sorted[0].name] = currentLetter;
-
-      for (let i = 1; i < sorted.length; i++) {
-        const curr = sorted[i];
-        const prev = sorted[i - 1];
-
-        const comp = comparisons.find(c =>
-          (c.g1 === curr.name && c.g2 === prev.name) ||
-          (c.g1 === prev.name && c.g2 === curr.name)
-        );
-
-        if (comp && comp.significativo) {
-          currentLetter = String.fromCharCode(currentLetter.charCodeAt(0) + 1);
-        }
-
-        lettersByTreatment[curr.name] = currentLetter;
+      const sigMap = new Map();
+      for (const c of comparisons) {
+        const key = [c.g1, c.g2].sort().join('||');
+        sigMap.set(key, !!c.significativo);
       }
 
-      return sorted.map(item => ({
+      function differs(a, b) {
+        if (a === b) return false;
+        return sigMap.get([a, b].sort().join('||')) || false;
+      }
+
+      const letterCols = [];
+
+      for (const t of trts) {
+        let placedSomewhere = false;
+
+        for (const col of letterCols) {
+          const conflicts = col.some(existing => differs(t, existing));
+          if (!conflicts) {
+            col.push(t);
+            placedSomewhere = true;
+          }
+        }
+
+        if (!placedSomewhere) {
+          letterCols.push([t]);
+        }
+      }
+
+      for (const t of trts) {
+        for (const col of letterCols) {
+          if (col.includes(t)) continue;
+          const conflicts = col.some(existing => differs(t, existing));
+          if (!conflicts) {
+            col.push(t);
+          }
+        }
+      }
+
+      const normalizedCols = letterCols.map(col => [...new Set(col)]);
+
+      const uniqueCols = [];
+      for (let i = 0; i < normalizedCols.length; i++) {
+        const a = normalizedCols[i];
+        let redundant = false;
+
+        for (let j = 0; j < normalizedCols.length; j++) {
+          if (i === j) continue;
+          const b = normalizedCols[j];
+          const isSubset = a.every(x => b.includes(x));
+          if (isSubset && a.length < b.length) {
+            redundant = true;
+            break;
+          }
+        }
+
+        if (!redundant) uniqueCols.push(a);
+      }
+
+      const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
+      const lettersByTreatment = {};
+      trts.forEach(t => { lettersByTreatment[t] = ''; });
+
+      uniqueCols.forEach((group, idx) => {
+        const symbol = alphabet[idx] || `a${idx + 1}`;
+        group.forEach(name => {
+          lettersByTreatment[name] += symbol;
+        });
+      });
+
+      return ordered.map(item => ({
         tratamento: item.name,
         media: item.mean,
         grupo: lettersByTreatment[item.name]
       }));
     }
 
-    // -----------------------------------------------------------------------------
-    // Tukey usando q interpolado
-    // -----------------------------------------------------------------------------
     function tukeyHSD(names, means, msError, dfError, r, alpha) {
       const k = names.length;
       const qCrit = getQCritical(alpha, k, dfError);
@@ -844,6 +944,23 @@
         }));
         html += '<h3>Grupos por letras</h3>';
         html += tableHtml(['Tratamento', 'Média', 'Grupo'], letterRows);
+
+        const lettersMap = {};
+        letters.forEach(l => {
+          lettersMap[l.tratamento] = l.grupo;
+        });
+
+        const orderedCompactRows = input.names.map(name => {
+          const s = summaries.find(x => x.tratamento === name);
+          const grupo = lettersMap[name] || '';
+          return {
+            Tratamento: name,
+            'Média e grupo': `${formatNum(s.media)} ${grupo}`
+          };
+        });
+
+        html += '<h3>Tratamentos na ordem informada</h3>';
+        html += tableHtml(['Tratamento', 'Média e grupo'], orderedCompactRows);
       } else {
         html += `<div class="message warn">Não houve efeito de tratamentos ao nível de significância selecionado (p = ${safeP(pTreat)}). O Tukey não foi aplicado.</div>`;
       }
@@ -866,6 +983,10 @@
         state.nTreatments = parseInt(document.getElementById('nTreatments').value, 10);
         state.nReps = parseInt(document.getElementById('nReps').value, 10);
         state.alpha = parseFloat(document.getElementById('alpha').value);
+
+        if (state.nTreatments > 100) {
+          throw new Error('A tabela de Tukey atual suporta até 100 tratamentos.');
+        }
 
         const input = collectInput();
         input.longData = buildLongData(input.names, input.matrix, state.design);
@@ -894,7 +1015,7 @@
             model.replications,
             state.alpha
           );
-          letters = assignLettersSimple(input.names, means, tukey.comparisons);
+          letters = assignLettersOverlapping(input.names, means, tukey.comparisons);
         }
 
         const cv = model.msError > 0 ? (Math.sqrt(model.msError) / grandMean * 100) : 0;
