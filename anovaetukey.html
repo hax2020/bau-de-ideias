@@ -29,7 +29,7 @@
       background: var(--bg);
     }
     .container {
-      max-width: 1200px;
+      max-width: 1280px;
       margin: 0 auto;
       padding: 20px;
     }
@@ -141,7 +141,7 @@
       width: 100%;
       border-collapse: collapse;
       background: #fff;
-      min-width: 620px;
+      min-width: 720px;
     }
     th, td {
       border: 1px solid var(--line);
@@ -158,7 +158,7 @@
     }
     .metrics {
       display: grid;
-      grid-template-columns: repeat(4, minmax(160px, 1fr));
+      grid-template-columns: repeat(6, minmax(140px, 1fr));
       gap: 12px;
       margin-top: 12px;
     }
@@ -267,8 +267,8 @@
     <div class="card">
       <h3>Observações</h3>
       <div class="footer-note">
-        Esta implementação foi pensada para dados balanceados. O teste de Tukey usa uma aproximação prática para o valor crítico da distribuição studentizada.
-        Para uso acadêmico formal ou publicação, vale validar os resultados com um software estatístico de referência.
+        Esta implementação foi pensada para dados balanceados. O teste de Tukey usa tabela de q crítico com interpolação linear simples.
+        Quando o número de tratamentos não estiver disponível na tabela, o sistema usa uma aproximação de fallback.
       </div>
     </div>
   </div>
@@ -547,12 +547,103 @@
       };
     }
 
-    function tukeyHSDApprox(names, means, msError, dfError, r, alpha) {
-      const k = names.length;
-      const qCrit = approxQCrit(alpha, k, dfError);
-      const hsd = qCrit * Math.sqrt(msError / r);
-      const comparisons = [];
+    // -----------------------------------------------------------------------------
+    // Tabela de q crítico para Tukey (Studentized Range) - α = 0.05 e 0.01
+    // -----------------------------------------------------------------------------
+    const qTable = {
+      0.05: {
+        2:  {10: 3.00, 15: 2.90, 20: 2.86, 24: 2.84, 30: 2.82, 40: 2.80, 60: 2.79, 120: 2.77, Infinity: 2.77},
+        3:  {10: 3.58, 15: 3.46, 20: 3.40, 24: 3.38, 30: 3.35, 40: 3.33, 60: 3.31, 120: 3.29, Infinity: 3.29},
+        4:  {10: 3.93, 15: 3.79, 20: 3.72, 24: 3.69, 30: 3.66, 40: 3.63, 60: 3.61, 120: 3.59, Infinity: 3.58},
+        5:  {10: 4.17, 15: 4.01, 20: 3.93, 24: 3.90, 30: 3.86, 40: 3.83, 60: 3.80, 120: 3.78, Infinity: 3.77},
+        6:  {10: 4.34, 15: 4.17, 20: 4.09, 24: 4.05, 30: 4.01, 40: 3.98, 60: 3.95, 120: 3.92, Infinity: 3.92},
+        7:  {10: 4.47, 15: 4.29, 20: 4.20, 24: 4.16, 30: 4.12, 40: 4.09, 60: 4.06, 120: 4.03, Infinity: 4.02},
+        8:  {10: 4.58, 15: 4.39, 20: 4.30, 24: 4.26, 30: 4.22, 40: 4.18, 60: 4.15, 120: 4.12, Infinity: 4.11}
+      },
+      0.01: {
+        6:  {24: 5.24, 30: 5.18, 40: 5.11, 60: 5.05, 120: 4.99, Infinity: 4.95}
+      }
+    };
 
+    function getQCritical(alpha, k, df) {
+      if (!qTable[alpha] || !qTable[alpha][k]) {
+        const t = tInvApprox(1 - alpha / 2, df);
+        const c = 1 + 0.2 * Math.log(k);
+        return Math.sqrt(2) * t * c;
+      }
+
+      const dfKeys = Object.keys(qTable[alpha][k])
+        .filter(x => x !== 'Infinity')
+        .map(Number)
+        .sort((a, b) => a - b);
+
+      if (df >= dfKeys[dfKeys.length - 1]) {
+        return qTable[alpha][k]['Infinity'] || qTable[alpha][k][120];
+      }
+
+      if (df <= dfKeys[0]) {
+        return qTable[alpha][k][dfKeys[0]];
+      }
+
+      for (let i = 0; i < dfKeys.length - 1; i++) {
+        const d1 = dfKeys[i];
+        const d2 = dfKeys[i + 1];
+        if (df >= d1 && df <= d2) {
+          const q1 = qTable[alpha][k][d1];
+          const q2 = qTable[alpha][k][d2];
+          const frac = (df - d1) / (d2 - d1);
+          return q1 + frac * (q2 - q1);
+        }
+      }
+
+      return qTable[alpha][k][24] || qTable[alpha][k][dfKeys[0]];
+    }
+
+    // -----------------------------------------------------------------------------
+    // Agrupamento por letras SIMPLES e clássico
+    // -----------------------------------------------------------------------------
+    function assignLettersSimple(names, means, comparisons) {
+      const sorted = names.map((name, i) => ({ name, mean: means[i] }))
+        .sort((a, b) => b.mean - a.mean);
+
+      const lettersByTreatment = {};
+      sorted.forEach(item => { lettersByTreatment[item.name] = ''; });
+
+      let currentLetter = 'a';
+      lettersByTreatment[sorted[0].name] = currentLetter;
+
+      for (let i = 1; i < sorted.length; i++) {
+        const curr = sorted[i];
+        const prev = sorted[i - 1];
+
+        const comp = comparisons.find(c =>
+          (c.g1 === curr.name && c.g2 === prev.name) ||
+          (c.g1 === prev.name && c.g2 === curr.name)
+        );
+
+        if (comp && comp.significativo) {
+          currentLetter = String.fromCharCode(currentLetter.charCodeAt(0) + 1);
+        }
+
+        lettersByTreatment[curr.name] = currentLetter;
+      }
+
+      return sorted.map(item => ({
+        tratamento: item.name,
+        media: item.mean,
+        grupo: lettersByTreatment[item.name]
+      }));
+    }
+
+    // -----------------------------------------------------------------------------
+    // Tukey usando q interpolado
+    // -----------------------------------------------------------------------------
+    function tukeyHSD(names, means, msError, dfError, r, alpha) {
+      const k = names.length;
+      const qCrit = getQCritical(alpha, k, dfError);
+      const hsd = qCrit * Math.sqrt(msError / r);
+
+      const comparisons = [];
       for (let i = 0; i < k; i++) {
         for (let j = i + 1; j < k; j++) {
           const diff = Math.abs(means[i] - means[j]);
@@ -567,89 +658,7 @@
           });
         }
       }
-
       return { qCrit, hsd, comparisons };
-    }
-
-    function buildLetterGroups(names, means, comparisons) {
-      const ordered = names.map((name, i) => ({ name, mean: means[i] }))
-        .sort((a, b) => b.mean - a.mean);
-
-      const trts = ordered.map(x => x.name);
-
-      const sigMap = new Map();
-      for (const c of comparisons) {
-        const key = [c.g1, c.g2].sort().join('||');
-        sigMap.set(key, !!c.significativo);
-      }
-
-      function differs(a, b) {
-        if (a === b) return false;
-        return sigMap.get([a, b].sort().join('||')) || false;
-      }
-
-      const letterCols = [];
-
-      for (const t of trts) {
-        let placed = false;
-
-        for (const col of letterCols) {
-          const conflicts = col.some(existing => differs(t, existing));
-          if (!conflicts) {
-            col.push(t);
-            placed = true;
-          }
-        }
-
-        if (!placed) {
-          letterCols.push([t]);
-        }
-      }
-
-      for (const t of trts) {
-        for (const col of letterCols) {
-          if (col.includes(t)) continue;
-          const conflicts = col.some(existing => differs(t, existing));
-          if (!conflicts) {
-            col.push(t);
-          }
-        }
-      }
-
-      const normalizedCols = letterCols.map(col => [...new Set(col)]);
-
-      const uniqueCols = [];
-      for (let i = 0; i < normalizedCols.length; i++) {
-        const a = normalizedCols[i];
-        let redundant = false;
-        for (let j = 0; j < normalizedCols.length; j++) {
-          if (i === j) continue;
-          const b = normalizedCols[j];
-          const isSubset = a.every(x => b.includes(x));
-          if (isSubset && a.length < b.length) {
-            redundant = true;
-            break;
-          }
-        }
-        if (!redundant) uniqueCols.push(a);
-      }
-
-      const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
-      const lettersByTreatment = {};
-      trts.forEach(t => { lettersByTreatment[t] = ''; });
-
-      uniqueCols.forEach((group, idx) => {
-        const symbol = alphabet[idx] || `a${idx + 1}`;
-        group.forEach(name => {
-          lettersByTreatment[name] += symbol;
-        });
-      });
-
-      return ordered.map(item => ({
-        tratamento: item.name,
-        media: item.mean,
-        grupo: lettersByTreatment[item.name]
-      }));
     }
 
     function tableHtml(headers, rows) {
@@ -667,7 +676,7 @@
       return html;
     }
 
-    function renderResults(input, model, tukey, summaries, letters) {
+    function renderResults(input, model, tukey, summaries, letters, cv, grandMean) {
       const headersAnova = ['Fonte', 'SQ', 'GL', 'QM', 'F', 'p'];
       const anovaRows = model.anova.map(r => ({
         Fonte: r.fonte,
@@ -678,11 +687,15 @@
         p: r.p == null ? '' : safeP(r.p)
       }));
 
+      const summaryHeaders = ['Tratamento', 'Média', 'Desvio-padrão', 'SEM', 'IC 95%', 'Ganho % (vs melhor)', 'n'];
       const summaryRows = summaries
         .map(x => ({
           Tratamento: x.tratamento,
           Média: formatNum(x.media),
           'Desvio-padrão': formatNum(x.desvio),
+          SEM: x.sem,
+          'IC 95%': x.ic95,
+          'Ganho % (vs melhor)': x.ganhoPercentual,
           n: x.n
         }))
         .sort((a, b) => parseFloat(b['Média']) - parseFloat(a['Média']));
@@ -691,18 +704,23 @@
       html += '<h3>Tabela de ANOVA</h3>';
       html += tableHtml(headersAnova, anovaRows);
 
-      html += '<h3>Resumo por tratamento</h3>';
-      html += tableHtml(['Tratamento', 'Média', 'Desvio-padrão', 'n'], summaryRows);
-
-      const pTreat = model.anova[0].p;
-      if (pTreat < state.alpha) {
-        html += '<div class="message ok">Há efeito de tratamentos ao nível selecionado. O teste de Tukey foi aplicado.</div>';
-        html += '<div class="metrics">';
+      html += '<div class="metrics">';
+      html += `<div class="metric"><div class="label">Média geral</div><div class="value">${formatNum(grandMean)}</div></div>`;
+      html += `<div class="metric"><div class="label">CV (%)</div><div class="value">${cv.toFixed(2)}%</div></div>`;
+      if (tukey) {
         html += `<div class="metric"><div class="label">QM do resíduo</div><div class="value">${formatNum(model.msError)}</div></div>`;
         html += `<div class="metric"><div class="label">GL do erro</div><div class="value">${model.dfError}</div></div>`;
-        html += `<div class="metric"><div class="label">q crítico</div><div class="value">${formatNum(tukey.qCrit)}</div></div>`;
+        html += `<div class="metric"><div class="label">q crítico Tukey</div><div class="value">${formatNum(tukey.qCrit)}</div></div>`;
         html += `<div class="metric"><div class="label">HSD de Tukey</div><div class="value">${formatNum(tukey.hsd)}</div></div>`;
-        html += '</div>';
+      }
+      html += '</div>';
+
+      html += '<h3>Resumo por tratamento</h3>';
+      html += tableHtml(summaryHeaders, summaryRows);
+
+      const pTreat = model.anova.find(row => row.fonte === 'Tratamentos').p;
+      if (pTreat < state.alpha && tukey) {
+        html += '<div class="message ok">Há efeito de tratamentos ao nível selecionado. O teste de Tukey foi aplicado.</div>';
 
         const compRows = tukey.comparisons.map(c => ({
           'Grupo 1': c.g1,
@@ -748,9 +766,7 @@
         state.alpha = parseFloat(document.getElementById('alpha').value);
 
         const input = collectInput();
-        const summaries = groupSummary(input.names, input.matrix);
-        const longData = buildLongData(input.names, input.matrix, state.design);
-        input.longData = longData;
+        input.longData = buildLongData(input.names, input.matrix, state.design);
 
         let model;
         if (state.design === 'DIC') {
@@ -759,24 +775,45 @@
           model = anovaDBC(input.names, input.matrix);
         }
 
-        const pTreat = model.anova[0].p;
+        const summaries = groupSummary(input.names, input.matrix);
+        const means = summaries.map(s => s.media);
+        const grandMean = model.grandMean;
+
         let tukey = null;
         let letters = null;
+        const pTreat = model.anova.find(row => row.fonte === 'Tratamentos').p;
+
         if (pTreat < state.alpha) {
-          tukey = tukeyHSDApprox(
+          tukey = tukeyHSD(
             input.names,
-            summaries.map(s => s.media),
+            means,
             model.msError,
             model.dfError,
             model.replications,
             state.alpha
           );
-          letters = buildLetterGroups(input.names, summaries.map(s => s.media), tukey.comparisons);
+          letters = assignLettersSimple(input.names, means, tukey.comparisons);
         }
+
+        const cv = model.msError > 0 ? (Math.sqrt(model.msError) / grandMean * 100) : 0;
+        const bestMean = Math.max(...means);
+
+        const enhancedSummaries = summaries.map(s => {
+          const sem = Math.sqrt(model.msError / model.replications);
+          const tCrit = tInvApprox(0.975, model.dfError);
+          const icHalf = tCrit * sem;
+          return {
+            ...s,
+            ganhoPercentual: bestMean > 0 ? ((s.media - bestMean) / bestMean * 100).toFixed(1) + '%' : '—',
+            sem: sem.toFixed(6),
+            ic95: `${(s.media - icHalf).toFixed(4)} – ${(s.media + icHalf).toFixed(4)}`
+          };
+        });
 
         document.getElementById('resultsCard').style.display = 'block';
         showMessage('resultsMessage', 'Análise concluída com sucesso.', 'ok');
-        renderResults(input, model, tukey, summaries, letters);
+        renderResults(input, model, tukey, enhancedSummaries, letters, cv, grandMean);
+
       } catch (err) {
         document.getElementById('resultsCard').style.display = 'block';
         document.getElementById('resultsContent').innerHTML = '';
@@ -897,12 +934,6 @@
       const g4 = (79 * z9 + 776 * z7 + 1482 * z5 - 1920 * z3 - 945 * z) / (92160 * Math.pow(df, 4));
 
       return z + g1 + g2 + g3 + g4;
-    }
-
-    function approxQCrit(alpha, k, df) {
-      const t = tInvApprox(1 - alpha / 2, df);
-      const c = 1 + 0.2 * Math.log(k);
-      return Math.sqrt(2) * t * c;
     }
 
     document.getElementById('btnGenerate').addEventListener('click', renderMatrix);
