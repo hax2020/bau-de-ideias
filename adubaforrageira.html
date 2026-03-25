@@ -1,0 +1,1321 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculadora de Adubação Forrageira</title>
+  <style>
+    :root{
+      --bg:#f3f8f2;
+      --card:#ffffff;
+      --primary:#2e7d32;
+      --primary-dark:#1f5a23;
+      --primary-soft:#e8f5e9;
+      --border:#d8e4d7;
+      --text:#243024;
+      --muted:#66756a;
+      --accent:#f4b400;
+      --danger:#b45309;
+      --danger-bg:#fff7ed;
+      --shadow:0 12px 30px rgba(25, 60, 25, 0.10);
+      --radius:18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body{
+      margin:0;
+      font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+      background: linear-gradient(180deg, #eef7ee 0%, #f7fbf6 100%);
+      color:var(--text);
+      padding:24px;
+    }
+
+    .container{
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .hero{
+      background: linear-gradient(135deg, #2e7d32 0%, #3f9b46 100%);
+      color:#fff;
+      border-radius:24px;
+      padding:28px;
+      box-shadow: var(--shadow);
+      margin-bottom:22px;
+    }
+
+    .hero h1{
+      margin:0 0 8px 0;
+      font-size:32px;
+    }
+
+    .hero p{
+      margin:0;
+      line-height:1.6;
+      color:rgba(255,255,255,0.92);
+    }
+
+    .card{
+      background:var(--card);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:24px;
+      margin-bottom:22px;
+      border:1px solid rgba(46,125,50,0.06);
+    }
+
+    h2,h3{
+      color:var(--primary-dark);
+      margin-top:0;
+    }
+
+    .section-title{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin-bottom:16px;
+    }
+
+    .section-title .badge{
+      background:var(--primary-soft);
+      color:var(--primary-dark);
+      font-weight:700;
+      font-size:12px;
+      padding:6px 10px;
+      border-radius:999px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap:16px;
+    }
+
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:7px;
+    }
+
+    label{
+      font-weight:700;
+      font-size:14px;
+      color:#315036;
+    }
+
+    input, select{
+      width:100%;
+      padding:12px 13px;
+      border:1px solid var(--border);
+      border-radius:12px;
+      font-size:15px;
+      outline:none;
+      transition:0.2s ease;
+      background:#fff;
+      color:var(--text);
+    }
+
+    input:focus, select:focus{
+      border-color:var(--primary);
+      box-shadow:0 0 0 4px rgba(46,125,50,0.12);
+    }
+
+    .row{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .actions{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-top:22px;
+    }
+
+    button{
+      border:none;
+      border-radius:12px;
+      padding:12px 18px;
+      font-size:15px;
+      cursor:pointer;
+      font-weight:700;
+      transition:0.2s ease;
+    }
+
+    .btn-primary{
+      background:var(--primary);
+      color:white;
+    }
+
+    .btn-primary:hover{
+      background:#256528;
+      transform:translateY(-1px);
+    }
+
+    .btn-secondary{
+      background:#edf1ee;
+      color:#203122;
+    }
+
+    .btn-secondary:hover{
+      background:#e4eae5;
+    }
+
+    .btn-accent{
+      background:#1b5e20;
+      color:#fff;
+    }
+
+    .btn-accent:hover{
+      background:#124417;
+    }
+
+    .summary-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit, minmax(220px,1fr));
+      gap:14px;
+      margin-top:16px;
+    }
+
+    .summary-card{
+      background: linear-gradient(180deg, #fbfefb 0%, #f3faf3 100%);
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:16px;
+    }
+
+    .summary-card .label{
+      font-size:13px;
+      color:var(--muted);
+      margin-bottom:6px;
+    }
+
+    .summary-card .value{
+      font-size:24px;
+      font-weight:800;
+      color:var(--primary-dark);
+      line-height:1.2;
+    }
+
+    .tabs{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin:20px 0 12px;
+    }
+
+    .tab-btn{
+      background:#eef4ee;
+      color:#234025;
+      padding:10px 16px;
+      border-radius:999px;
+      border:1px solid #dbe7db;
+      font-weight:700;
+    }
+
+    .tab-btn.active{
+      background:var(--primary);
+      color:#fff;
+      border-color:var(--primary);
+    }
+
+    .tab-content{
+      display:none;
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:18px;
+      background:#fcfffc;
+    }
+
+    .tab-content.active{
+      display:block;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:14px;
+      font-size:14px;
+      overflow:hidden;
+      border-radius:12px;
+    }
+
+    th, td{
+      border:1px solid #d9e3d9;
+      padding:11px;
+      text-align:left;
+      vertical-align:top;
+    }
+
+    th{
+      background:#edf6ed;
+      color:#26442a;
+    }
+
+    .note{
+      margin-top:16px;
+      padding:16px;
+      background:var(--danger-bg);
+      border-left:5px solid #d97706;
+      border-radius:10px;
+      color:var(--danger);
+      line-height:1.6;
+    }
+
+    .ok{
+      margin-top:16px;
+      padding:16px;
+      background:#eef8ee;
+      border-left:5px solid var(--primary);
+      border-radius:10px;
+      color:#225128;
+      line-height:1.6;
+    }
+
+    .small{
+      font-size:13px;
+      color:var(--muted);
+      line-height:1.6;
+    }
+
+    .report{
+      margin-top:24px;
+      border-top:2px dashed #d7e4d7;
+      padding-top:22px;
+    }
+
+    .print-area{
+      background:#fff;
+    }
+
+    .report-header{
+      display:flex;
+      justify-content:space-between;
+      gap:16px;
+      flex-wrap:wrap;
+      margin-bottom:16px;
+      align-items:flex-start;
+    }
+
+    .report-title{
+      font-size:28px;
+      font-weight:800;
+      color:var(--primary-dark);
+    }
+
+    .chip{
+      display:inline-block;
+      background:#edf7ed;
+      color:#1f5a23;
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:700;
+      margin-right:8px;
+      margin-bottom:8px;
+      border:1px solid #d8e7d8;
+    }
+
+    .divider{
+      height:1px;
+      background:#e3ece3;
+      margin:20px 0;
+    }
+
+    .hidden{
+      display:none;
+    }
+
+    .footer{
+      margin-top:16px;
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.6;
+    }
+
+    @media print{
+      body{
+        background:#fff;
+        padding:0;
+      }
+
+      .hero,
+      .form-card,
+      .actions,
+      .tabs,
+      .tab-btn,
+      #mensagensTela{
+        display:none !important;
+      }
+
+      .container{
+        max-width:100%;
+      }
+
+      .card{
+        box-shadow:none;
+        border:none;
+        padding:0;
+        margin:0;
+      }
+
+      #resultadoCard{
+        display:block !important;
+      }
+
+      .tab-content{
+        display:block !important;
+        border:none;
+        padding:0;
+        margin-bottom:18px;
+      }
+
+      .summary-card,
+      .tab-content{
+        break-inside:avoid;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="hero">
+      <h1>Calculadora de Adubação Forrageira</h1>
+      <p>
+        Ferramenta para estimar recomendações de N, P₂O₅ e K₂O com base em matéria orgânica,
+        fósforo, potássio, argila, CTC, grupo de cultura, produtividade e destino da forragem.
+      </p>
+    </div>
+
+    <div class="card form-card">
+      <div class="section-title">
+        <h2>Dados da área</h2>
+        <span class="badge">Entrada de dados</span>
+      </div>
+
+      <div class="grid">
+        <div class="field">
+          <label for="grupo">Grupo de cultura</label>
+          <select id="grupo">
+            <option value="graminea_fria">Gramíneas de estação fria</option>
+            <option value="graminea_quente">Gramíneas de estação quente</option>
+            <option value="leguminosa_fria">Leguminosas de estação fria</option>
+            <option value="leguminosa_quente">Leguminosas de estação quente</option>
+            <option value="consorcio_fria">Consórcio gramínea + leguminosa (fria)</option>
+            <option value="consorcio_quente">Consórcio gramínea + leguminosa (quente)</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="ciclo">Ciclo</label>
+          <select id="ciclo">
+            <option value="anual">Anual</option>
+            <option value="perene">Perene</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="cultivo">Ano de cultivo</label>
+          <select id="cultivo">
+            <option value="1">1º cultivo</option>
+            <option value="2">2º cultivo</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="mo">Matéria orgânica (%)</label>
+          <input type="number" id="mo" step="0.1" min="0" value="2.1" />
+        </div>
+
+        <div class="field">
+          <label for="pSolo">P no solo (mg/dm³)</label>
+          <input type="number" id="pSolo" step="0.1" min="0" value="8" />
+        </div>
+
+        <div class="field">
+          <label for="argila">Argila (%)</label>
+          <input type="number" id="argila" step="1" min="0" max="100" value="30" />
+        </div>
+
+        <div class="field">
+          <label for="kSolo">K no solo (mg/dm³)</label>
+          <input type="number" id="kSolo" step="0.1" min="0" value="70" />
+        </div>
+
+        <div class="field">
+          <label for="ctc">CTC pH 7,0 (cmolc/dm³)</label>
+          <input type="number" id="ctc" step="0.1" min="0" value="10" />
+        </div>
+
+        <div class="field">
+          <label for="prod">Meta de produtividade (t/ha de MS)</label>
+          <input type="number" id="prod" step="0.1" min="0" value="6" />
+        </div>
+
+        <div class="field">
+          <label for="destino">Destino da forragem</label>
+          <select id="destino">
+            <option value="pastejo">Pastejo</option>
+            <option value="corte">Corte / feno / silagem</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="msRemovida">MS removida no corte (t/ha)</label>
+          <input type="number" id="msRemovida" step="0.1" min="0" value="0" />
+        </div>
+
+        <div class="field">
+          <label for="faixaN">Escolha na faixa de N</label>
+          <select id="faixaN">
+            <option value="min">Mínimo</option>
+            <option value="med" selected>Médio</option>
+            <option value="max">Máximo</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="section-title" style="margin-top:28px;">
+        <h2>Fontes dos fertilizantes</h2>
+        <span class="badge">Conversão em produto</span>
+      </div>
+
+      <div class="grid">
+        <div class="field">
+          <label for="fonteP">Fonte fosfatada de base</label>
+          <select id="fonteP">
+            <option value="map">MAP (11% N; 52% P₂O₅)</option>
+            <option value="dap">DAP (17% N; 45% P₂O₅)</option>
+            <option value="sfs">Superfosfato Simples (18% P₂O₅)</option>
+            <option value="sft">Superfosfato Triplo (41% P₂O₅)</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="fonteNPlantio">Fonte nitrogenada no plantio</label>
+          <select id="fonteNPlantio">
+            <option value="ureia">Ureia (45% N)</option>
+            <option value="sulfato_amonio">Sulfato de Amônio (20% N)</option>
+            <option value="nitrato_amonio">Nitrato de Amônio (32% N)</option>
+            <option value="nitrato_calcio">Nitrato de Cálcio (14% N)</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="fonteNCobertura">Fonte nitrogenada em cobertura</label>
+          <select id="fonteNCobertura">
+            <option value="ureia">Ureia (45% N)</option>
+            <option value="sulfato_amonio">Sulfato de Amônio (20% N)</option>
+            <option value="nitrato_amonio">Nitrato de Amônio (32% N)</option>
+            <option value="nitrato_calcio">Nitrato de Cálcio (14% N)</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="fonteK">Fonte potássica</label>
+          <select id="fonteK">
+            <option value="kcl">Cloreto de Potássio (58% K₂O)</option>
+            <option value="k2so4">Sulfato de Potássio (48% K₂O)</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="numParcelas">Parcelas da cobertura nitrogenada</label>
+          <select id="numParcelas">
+            <option value="2">2 parcelas</option>
+            <option value="3" selected>3 parcelas</option>
+            <option value="4">4 parcelas</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn-primary" onclick="calcular()">Calcular recomendação</button>
+        <button class="btn-secondary" onclick="limparFormulario()">Limpar</button>
+        <button class="btn-accent" onclick="gerarRelatorio()">Gerar relatório</button>
+        <button class="btn-secondary" onclick="window.print()">Imprimir</button>
+      </div>
+
+      <div id="mensagensTela"></div>
+    </div>
+
+    <div class="card hidden" id="resultadoCard">
+      <div class="section-title">
+        <h2>Resumo da recomendação</h2>
+        <span class="badge">Resultado</span>
+      </div>
+
+      <div id="resumoGeral" class="summary-grid"></div>
+
+      <div class="tabs">
+        <button class="tab-btn active" onclick="abrirAba(event, 'abaN')">Nitrogênio (N)</button>
+        <button class="tab-btn" onclick="abrirAba(event, 'abaP')">Fósforo (P₂O₅)</button>
+        <button class="tab-btn" onclick="abrirAba(event, 'abaK')">Potássio (K₂O)</button>
+      </div>
+
+      <div id="abaN" class="tab-content active"></div>
+      <div id="abaP" class="tab-content"></div>
+      <div id="abaK" class="tab-content"></div>
+
+      <div class="report" id="relatorioArea">
+        <div class="section-title">
+          <h2>Relatório técnico</h2>
+          <span class="badge">Pronto para impressão</span>
+        </div>
+        <div id="relatorioConteudo" class="print-area"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const N_TABLES = {
+      graminea_fria: [
+        { min: 0,   max: 1.59, label: "< 1,6% (Muito Baixo)", doseMin: 160, doseMax: 180 },
+        { min: 1.6, max: 2.5,  label: "1,6–2,5% (Baixo)",    doseMin: 140, doseMax: 160 },
+        { min: 2.6, max: 3.5,  label: "2,6–3,5% (Médio)",    doseMin: 120, doseMax: 140 },
+        { min: 3.6, max: 4.5,  label: "3,6–4,5% (Alto)",     doseMin: 100, doseMax: 120 },
+        { min: 4.51,max: 999,  label: "> 4,5% (Muito Alto)", doseMin: 80,  doseMax: 100 }
+      ],
+      graminea_quente: [
+        { min: 0,   max: 1.59, label: "< 1,6% (Muito Baixo)", doseMin: 200, doseMax: 220 },
+        { min: 1.6, max: 2.5,  label: "1,6–2,5% (Baixo)",    doseMin: 180, doseMax: 200 },
+        { min: 2.6, max: 3.5,  label: "2,6–3,5% (Médio)",    doseMin: 160, doseMax: 180 },
+        { min: 3.6, max: 4.5,  label: "3,6–4,5% (Alto)",     doseMin: 140, doseMax: 160 },
+        { min: 4.51,max: 999,  label: "> 4,5% (Muito Alto)", doseMin: 120, doseMax: 140 }
+      ]
+    };
+
+    const P_INTERPRETATION = {
+      classe1: { label: "Classe Textural 1 (>60% argila)", muitoBaixo:[0,3.0],  baixo:[3.1,6.0],  medio:[6.1,9.0],   alto:[9.1,18.0] },
+      classe2: { label: "Classe Textural 2 (41–60% argila)", muitoBaixo:[0,4.0], baixo:[4.1,8.0], medio:[8.1,12.0], alto:[12.1,24.0] },
+      classe3: { label: "Classe Textural 3 (21–40% argila)", muitoBaixo:[0,6.0], baixo:[6.1,12.0], medio:[12.1,18.0], alto:[18.1,36.0] },
+      classe4: { label: "Classe Textural 4 (≤20% argila)", muitoBaixo:[0,10.0], baixo:[10.1,20.0], medio:[20.1,30.0], alto:[30.1,60.0] }
+    };
+
+    const K_INTERPRETATION = {
+      ctc1: { label: "CTC ≤ 7,5", muitoBaixo:[0,20], baixo:[21,40], medio:[41,60], alto:[61,120] },
+      ctc2: { label: "CTC 7,6–15,0", muitoBaixo:[0,30], baixo:[31,60], medio:[61,90], alto:[91,180] },
+      ctc3: { label: "CTC 15,1–30,0", muitoBaixo:[0,40], baixo:[41,80], medio:[81,120], alto:[121,240] },
+      ctc4: { label: "CTC > 30,0", muitoBaixo:[0,45], baixo:[46,90], medio:[91,135], alto:[136,270] }
+    };
+
+    const PK_DOSES = {
+      graminea_fria: {
+        P: { muitoBaixo:[170,110], baixo:[110,90], medio:[100,60], alto:[60,60], muitoAlto:[0,60] },
+        K: { muitoBaixo:[140,100], baixo:[100,80], medio:[90,60], alto:[60,60], muitoAlto:[0,60] }
+      },
+      graminea_quente: {
+        P: { muitoBaixo:[190,130], baixo:[130,110], medio:[120,80], alto:[80,80], muitoAlto:[0,80] },
+        K: { muitoBaixo:[180,140], baixo:[140,120], medio:[130,100], alto:[100,100], muitoAlto:[0,100] }
+      },
+      leguminosa_fria: {
+        P: { muitoBaixo:[170,110], baixo:[110,90], medio:[100,60], alto:[60,60], muitoAlto:[0,60] },
+        K: { muitoBaixo:[140,100], baixo:[100,80], medio:[90,60], alto:[60,60], muitoAlto:[0,60] }
+      },
+      leguminosa_quente: {
+        P: { muitoBaixo:[170,110], baixo:[110,90], medio:[100,60], alto:[60,60], muitoAlto:[0,60] },
+        K: { muitoBaixo:[140,100], baixo:[100,80], medio:[90,60], alto:[60,60], muitoAlto:[0,60] }
+      },
+      consorcio_fria: {
+        P: { muitoBaixo:[190,130], baixo:[130,110], medio:[120,80], alto:[80,80], muitoAlto:[0,80] },
+        K: { muitoBaixo:[180,140], baixo:[140,120], medio:[130,100], alto:[100,100], muitoAlto:[0,100] }
+      },
+      consorcio_quente: {
+        P: { muitoBaixo:[190,130], baixo:[130,110], medio:[120,80], alto:[80,80], muitoAlto:[0,80] },
+        K: { muitoBaixo:[180,140], baixo:[140,120], medio:[130,100], alto:[100,100], muitoAlto:[0,100] }
+      }
+    };
+
+    const FONTES = {
+      map: { nome:"MAP", N:11, P2O5:52, K2O:0 },
+      dap: { nome:"DAP", N:17, P2O5:45, K2O:0 },
+      sfs: { nome:"Superfosfato Simples", N:0, P2O5:18, K2O:0 },
+      sft: { nome:"Superfosfato Triplo", N:0, P2O5:41, K2O:0 },
+      ureia: { nome:"Ureia", N:45, P2O5:0, K2O:0 },
+      sulfato_amonio: { nome:"Sulfato de Amônio", N:20, P2O5:0, K2O:0 },
+      nitrato_amonio: { nome:"Nitrato de Amônio", N:32, P2O5:0, K2O:0 },
+      nitrato_calcio: { nome:"Nitrato de Cálcio", N:14, P2O5:0, K2O:0 },
+      kcl: { nome:"Cloreto de Potássio", N:0, P2O5:0, K2O:58 },
+      k2so4: { nome:"Sulfato de Potássio", N:0, P2O5:0, K2O:48 }
+    };
+
+    let ultimoResultado = null;
+
+    function num(id) {
+      return parseFloat(document.getElementById(id).value);
+    }
+
+    function txt(id) {
+      return document.getElementById(id).value;
+    }
+
+    function arred(v) {
+      return Number(v || 0).toFixed(1);
+    }
+
+    function classeLabel(chave) {
+      return {
+        muitoBaixo: "Muito Baixo",
+        baixo: "Baixo",
+        medio: "Médio",
+        alto: "Alto",
+        muitoAlto: "Muito Alto"
+      }[chave] || chave;
+    }
+
+    function nomeGrupo(grupo) {
+      const nomes = {
+        graminea_fria: "Gramíneas de estação fria",
+        graminea_quente: "Gramíneas de estação quente",
+        leguminosa_fria: "Leguminosas de estação fria",
+        leguminosa_quente: "Leguminosas de estação quente",
+        consorcio_fria: "Consórcio gramínea + leguminosa (fria)",
+        consorcio_quente: "Consórcio gramínea + leguminosa (quente)"
+      };
+      return nomes[grupo] || grupo;
+    }
+
+    function getClasseTextural(argila) {
+      if (argila > 60) return "classe1";
+      if (argila >= 41) return "classe2";
+      if (argila >= 21) return "classe3";
+      return "classe4";
+    }
+
+    function getClasseCTC(ctc) {
+      if (ctc <= 7.5) return "ctc1";
+      if (ctc <= 15.0) return "ctc2";
+      if (ctc <= 30.0) return "ctc3";
+      return "ctc4";
+    }
+
+    function interpretarValor(valor, tabelaClasse) {
+      if (valor <= tabelaClasse.muitoBaixo[1]) return "muitoBaixo";
+      if (valor >= tabelaClasse.baixo[0] && valor <= tabelaClasse.baixo[1]) return "baixo";
+      if (valor >= tabelaClasse.medio[0] && valor <= tabelaClasse.medio[1]) return "medio";
+      if (valor >= tabelaClasse.alto[0] && valor <= tabelaClasse.alto[1]) return "alto";
+      return "muitoAlto";
+    }
+
+    function getDoseNPorMO(grupo, mo, faixaEscolhida) {
+      const tabela = N_TABLES[grupo];
+      if (!tabela) {
+        return {
+          classeMO: "Sem dose química principal de N",
+          nTotal: 0,
+          doseMin: 0,
+          doseMax: 0,
+          temN: false
+        };
+      }
+
+      const faixa = tabela.find(item => mo >= item.min && mo <= item.max) || tabela[tabela.length - 1];
+      let nTotal = 0;
+
+      if (faixaEscolhida === "min") nTotal = faixa.doseMin;
+      else if (faixaEscolhida === "max") nTotal = faixa.doseMax;
+      else nTotal = (faixa.doseMin + faixa.doseMax) / 2;
+
+      return {
+        classeMO: faixa.label,
+        nTotal,
+        doseMin: faixa.doseMin,
+        doseMax: faixa.doseMax,
+        temN: true
+      };
+    }
+
+    function getDoseBaseNPlantio(grupo) {
+      if (grupo === "graminea_fria") return { min:15, max:30, medio:22.5 };
+      if (grupo === "graminea_quente") return { min:20, max:30, medio:25 };
+      return { min:0, max:0, medio:0 };
+    }
+
+    function getDosePK(grupo, nutriente, classe, cultivo) {
+      const idx = cultivo === 1 ? 0 : 1;
+      return PK_DOSES[grupo][nutriente][classe][idx];
+    }
+
+    function getAjusteProdutividade(grupo, ciclo, produtividade) {
+      let extraN = 0;
+      let extraP = 0;
+      let extraK = 0;
+
+      if (grupo === "graminea_fria") {
+        const base = ciclo === "anual" ? 6 : 8;
+        const excedente = Math.max(0, produtividade - base);
+        extraN = excedente * 30;
+        extraP = excedente * 10;
+        extraK = excedente * 10;
+      }
+
+      if (grupo === "graminea_quente") {
+        const base = ciclo === "anual" ? 10 : 12;
+        const excedente = Math.max(0, produtividade - base);
+        extraN = excedente * 30;
+        extraP = excedente * 10;
+        extraK = excedente * 10;
+      }
+
+      if (grupo === "leguminosa_fria") {
+        const base = ciclo === "anual" ? 4 : 6;
+        const excedente = Math.max(0, produtividade - base);
+        extraP = excedente * 10;
+        extraK = excedente * 10;
+      }
+
+      return { extraN, extraP, extraK };
+    }
+
+    function calcularProduto(necessidade, teorPercentual) {
+      if (necessidade <= 0 || teorPercentual <= 0) return 0;
+      return (necessidade * 100) / teorPercentual;
+    }
+
+    function validarDados(dados) {
+      const erros = [];
+      if (isNaN(dados.mo) || dados.mo < 0) erros.push("Matéria orgânica inválida.");
+      if (isNaN(dados.pSolo) || dados.pSolo < 0) erros.push("Teor de P inválido.");
+      if (isNaN(dados.argila) || dados.argila < 0 || dados.argila > 100) erros.push("Argila inválida.");
+      if (isNaN(dados.kSolo) || dados.kSolo < 0) erros.push("Teor de K inválido.");
+      if (isNaN(dados.ctc) || dados.ctc <= 0) erros.push("CTC inválida.");
+      if (isNaN(dados.prod) || dados.prod < 0) erros.push("Produtividade inválida.");
+      if (isNaN(dados.msRemovida) || dados.msRemovida < 0) erros.push("MS removida inválida.");
+      return erros;
+    }
+
+    function limparFormulario() {
+      document.getElementById("grupo").value = "graminea_fria";
+      document.getElementById("ciclo").value = "anual";
+      document.getElementById("cultivo").value = "1";
+      document.getElementById("mo").value = "2.1";
+      document.getElementById("pSolo").value = "8";
+      document.getElementById("argila").value = "30";
+      document.getElementById("kSolo").value = "70";
+      document.getElementById("ctc").value = "10";
+      document.getElementById("prod").value = "6";
+      document.getElementById("destino").value = "pastejo";
+      document.getElementById("msRemovida").value = "0";
+      document.getElementById("faixaN").value = "med";
+      document.getElementById("fonteP").value = "map";
+      document.getElementById("fonteNPlantio").value = "ureia";
+      document.getElementById("fonteNCobertura").value = "ureia";
+      document.getElementById("fonteK").value = "kcl";
+      document.getElementById("numParcelas").value = "3";
+
+      document.getElementById("mensagensTela").innerHTML = "";
+      document.getElementById("resultadoCard").classList.add("hidden");
+      document.getElementById("resumoGeral").innerHTML = "";
+      document.getElementById("abaN").innerHTML = "";
+      document.getElementById("abaP").innerHTML = "";
+      document.getElementById("abaK").innerHTML = "";
+      document.getElementById("relatorioConteudo").innerHTML = "";
+      ultimoResultado = null;
+    }
+
+    function abrirAba(event, id) {
+      document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
+      document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
+      event.currentTarget.classList.add("active");
+      document.getElementById(id).classList.add("active");
+    }
+
+    function montarParcelamento(produtoNCobertura, doseNCobertura, numParcelas, fonteNome) {
+      if (doseNCobertura <= 0 || produtoNCobertura <= 0 || numParcelas <= 0) {
+        return `
+          <div class="ok">
+            Não há necessidade de parcelamento do N em cobertura neste cenário.
+          </div>
+        `;
+      }
+
+      let linhas = "";
+      const nPorParcela = doseNCobertura / numParcelas;
+      const produtoPorParcela = produtoNCobertura / numParcelas;
+
+      for (let i = 1; i <= numParcelas; i++) {
+        linhas += `
+          <tr>
+            <td>${i}ª aplicação</td>
+            <td>${arred(nPorParcela)} kg/ha de N</td>
+            <td>${arred(produtoPorParcela)} kg/ha de ${fonteNome}</td>
+            <td>Aplicar em cobertura conforme manejo e rebrota</td>
+          </tr>
+        `;
+      }
+
+      return `
+        <table>
+          <thead>
+            <tr>
+              <th>Parcela</th>
+              <th>N por aplicação</th>
+              <th>Produto por aplicação</th>
+              <th>Observação</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${linhas}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function calcular() {
+      const dados = {
+        grupo: txt("grupo"),
+        ciclo: txt("ciclo"),
+        cultivo: parseInt(txt("cultivo"), 10),
+        mo: num("mo"),
+        pSolo: num("pSolo"),
+        argila: num("argila"),
+        kSolo: num("kSolo"),
+        ctc: num("ctc"),
+        prod: num("prod"),
+        destino: txt("destino"),
+        msRemovida: num("msRemovida"),
+        faixaN: txt("faixaN"),
+        fonteP: FONTES[txt("fonteP")],
+        fonteNPlantio: FONTES[txt("fonteNPlantio")],
+        fonteNCobertura: FONTES[txt("fonteNCobertura")],
+        fonteK: FONTES[txt("fonteK")],
+        numParcelas: parseInt(txt("numParcelas"), 10)
+      };
+
+      const erros = validarDados(dados);
+      const mensagensTela = document.getElementById("mensagensTela");
+
+      if (erros.length) {
+        mensagensTela.innerHTML = `
+          <div class="note">
+            <strong>Corrija os dados antes de calcular:</strong><br>
+            ${erros.join("<br>")}
+          </div>
+        `;
+        document.getElementById("resultadoCard").classList.add("hidden");
+        return;
+      }
+
+      mensagensTela.innerHTML = "";
+
+      const classeTextural = getClasseTextural(dados.argila);
+      const classeCTC = getClasseCTC(dados.ctc);
+      const interpretacaoP = interpretarValor(dados.pSolo, P_INTERPRETATION[classeTextural]);
+      const interpretacaoK = interpretarValor(dados.kSolo, K_INTERPRETATION[classeCTC]);
+
+      const doseNInfo = getDoseNPorMO(dados.grupo, dados.mo, dados.faixaN);
+      const doseBasePlantio = getDoseBaseNPlantio(dados.grupo);
+      const ajustes = getAjusteProdutividade(dados.grupo, dados.ciclo, dados.prod);
+
+      let doseP = getDosePK(dados.grupo, "P", interpretacaoP, dados.cultivo);
+      let doseK = getDosePK(dados.grupo, "K", interpretacaoK, dados.cultivo);
+
+      doseP += ajustes.extraP;
+      doseK += ajustes.extraK;
+
+      if (dados.destino === "corte" && dados.msRemovida > 0) {
+        doseK += dados.msRemovida * 20;
+      }
+
+      let doseNTotal = doseNInfo.nTotal + ajustes.extraN;
+      let doseNPlantioAlvo = doseBasePlantio.medio;
+
+      if (!doseNInfo.temN) {
+        doseNTotal = 0;
+        doseNPlantioAlvo = 0;
+      }
+
+      if (dados.grupo.includes("leguminosa") || dados.grupo.includes("consorcio")) {
+        doseNTotal = 0;
+        doseNPlantioAlvo = 0;
+      }
+
+      const produtoP = calcularProduto(doseP, dados.fonteP.P2O5);
+      const nVindoDaFonteP = produtoP * (dados.fonteP.N / 100);
+
+      const doseNPlantioComplementar = Math.max(0, doseNPlantioAlvo - nVindoDaFonteP);
+      const doseNCobertura = Math.max(0, doseNTotal - nVindoDaFonteP - doseNPlantioComplementar);
+
+      const produtoNPlantio = calcularProduto(doseNPlantioComplementar, dados.fonteNPlantio.N);
+      const produtoNCobertura = calcularProduto(doseNCobertura, dados.fonteNCobertura.N);
+      const produtoK = calcularProduto(doseK, dados.fonteK.K2O);
+
+      const observacoes = [];
+
+      if (dados.grupo.includes("leguminosa")) {
+        observacoes.push("Para leguminosas, priorize inoculação; o uso de N mineral é apenas complementar ou emergencial.");
+      }
+
+      if (dados.grupo.includes("consorcio")) {
+        observacoes.push("Em consórcios, a principal contribuição de N tende a vir da leguminosa; ajuste o N mineral com cautela.");
+      }
+
+      if (dados.destino === "corte" && dados.msRemovida > 0) {
+        observacoes.push(`Foi acrescido ${arred(dados.msRemovida * 20)} kg/ha de K₂O pela exportação estimada no corte/feno/silagem.`);
+      }
+
+      if (nVindoDaFonteP > 0) {
+        observacoes.push(`${dados.fonteP.nome} fornece aproximadamente ${arred(nVindoDaFonteP)} kg/ha de N junto com o fósforo.`);
+      }
+
+      if (dados.grupo === "graminea_fria") {
+        observacoes.push("Para gramíneas frias, o N de base foi considerado na faixa típica de 15 a 30 kg/ha.");
+      }
+
+      if (dados.grupo === "graminea_quente") {
+        observacoes.push("Para gramíneas quentes, o N de base foi considerado na faixa típica de 20 a 30 kg/ha.");
+      }
+
+      if (doseNCobertura > 0) {
+        observacoes.push(`A cobertura nitrogenada foi dividida em ${dados.numParcelas} aplicação(ões).`);
+      }
+
+      ultimoResultado = {
+        dados,
+        classeTextural,
+        classeCTC,
+        interpretacaoP,
+        interpretacaoK,
+        doseNInfo,
+        ajustes,
+        doseP,
+        doseK,
+        doseNTotal,
+        doseNPlantioAlvo,
+        nVindoDaFonteP,
+        doseNPlantioComplementar,
+        doseNCobertura,
+        produtoP,
+        produtoNPlantio,
+        produtoNCobertura,
+        produtoK,
+        observacoes
+      };
+
+      renderizarResultado();
+    }
+
+    function renderizarResultado() {
+      if (!ultimoResultado) return;
+
+      const r = ultimoResultado;
+      document.getElementById("resultadoCard").classList.remove("hidden");
+
+      document.getElementById("resumoGeral").innerHTML = `
+        <div class="summary-card">
+          <div class="label">Classe de MO / N</div>
+          <div class="value">${r.doseNInfo.classeMO}</div>
+        </div>
+        <div class="summary-card">
+          <div class="label">Interpretação do fósforo</div>
+          <div class="value">${classeLabel(r.interpretacaoP)}</div>
+        </div>
+        <div class="summary-card">
+          <div class="label">Interpretação do potássio</div>
+          <div class="value">${classeLabel(r.interpretacaoK)}</div>
+        </div>
+        <div class="summary-card">
+          <div class="label">N total recomendado</div>
+          <div class="value">${arred(r.doseNTotal)} kg/ha</div>
+        </div>
+        <div class="summary-card">
+          <div class="label">P₂O₅ recomendado</div>
+          <div class="value">${arred(r.doseP)} kg/ha</div>
+        </div>
+        <div class="summary-card">
+          <div class="label">K₂O recomendado</div>
+          <div class="value">${arred(r.doseK)} kg/ha</div>
+        </div>
+      `;
+
+      document.getElementById("abaN").innerHTML = `
+        <h3>Nitrogênio (N)</h3>
+        <p class="small">
+          Nesta aba aparecem a necessidade total de N, o N já fornecido pela fonte fosfatada,
+          o complemento de N no plantio e a dose de cobertura com parcelamento.
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Resultado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Faixa de matéria orgânica utilizada</td>
+              <td>${r.doseNInfo.classeMO}</td>
+            </tr>
+            <tr>
+              <td>N total recomendado</td>
+              <td>${arred(r.doseNTotal)} kg/ha de N</td>
+            </tr>
+            <tr>
+              <td>N alvo no plantio</td>
+              <td>${arred(r.doseNPlantioAlvo)} kg/ha de N</td>
+            </tr>
+            <tr>
+              <td>N fornecido pela fonte fosfatada</td>
+              <td>${arred(r.nVindoDaFonteP)} kg/ha de N</td>
+            </tr>
+            <tr>
+              <td><strong>Nitrogênio complementar no plantio</strong></td>
+              <td><strong>${arred(r.doseNPlantioComplementar)} kg/ha de N</strong></td>
+            </tr>
+            <tr>
+              <td><strong>Adubo nitrogenado no plantio</strong></td>
+              <td><strong>${arred(r.produtoNPlantio)} kg/ha de ${r.dados.fonteNPlantio.nome}</strong></td>
+            </tr>
+            <tr>
+              <td>N em cobertura</td>
+              <td>${arred(r.doseNCobertura)} kg/ha de N</td>
+            </tr>
+            <tr>
+              <td>Adubo nitrogenado em cobertura</td>
+              <td>${arred(r.produtoNCobertura)} kg/ha de ${r.dados.fonteNCobertura.nome}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3 style="margin-top:20px;">Parcelamento recomendado</h3>
+        ${montarParcelamento(r.produtoNCobertura, r.doseNCobertura, r.dados.numParcelas, r.dados.fonteNCobertura.nome)}
+      `;
+
+      document.getElementById("abaP").innerHTML = `
+        <h3>Fósforo (P₂O₅)</h3>
+        <p class="small">
+          O fósforo é interpretado conforme a classe textural estimada pelo teor de argila.
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Parâmetro</th>
+              <th>Resultado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Classe textural usada</td>
+              <td>${P_INTERPRETATION[r.classeTextural].label}</td>
+            </tr>
+            <tr>
+              <td>Teor de P informado</td>
+              <td>${arred(r.dados.pSolo)} mg/dm³</td>
+            </tr>
+            <tr>
+              <td>Interpretação</td>
+              <td>${classeLabel(r.interpretacaoP)}</td>
+            </tr>
+            <tr>
+              <td>Dose final recomendada</td>
+              <td>${arred(r.doseP)} kg/ha de P₂O₅</td>
+            </tr>
+            <tr>
+              <td>Fonte escolhida</td>
+              <td>${r.dados.fonteP.nome}</td>
+            </tr>
+            <tr>
+              <td>Produto estimado</td>
+              <td>${arred(r.produtoP)} kg/ha</td>
+            </tr>
+            <tr>
+              <td>N adicional vindo da fonte de P</td>
+              <td>${arred(r.nVindoDaFonteP)} kg/ha de N</td>
+            </tr>
+          </tbody>
+        </table>
+      `;
+
+      document.getElementById("abaK").innerHTML = `
+        <h3>Potássio (K₂O)</h3>
+        <p class="small">
+          O potássio é interpretado conforme a CTC do solo. Em corte/feno/silagem, o código adiciona
+          reposição extra pela exportação estimada de K.
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Parâmetro</th>
+              <th>Resultado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Classe de CTC usada</td>
+              <td>${K_INTERPRETATION[r.classeCTC].label}</td>
+            </tr>
+            <tr>
+              <td>Teor de K informado</td>
+              <td>${arred(r.dados.kSolo)} mg/dm³</td>
+            </tr>
+            <tr>
+              <td>Interpretação</td>
+              <td>${classeLabel(r.interpretacaoK)}</td>
+            </tr>
+            <tr>
+              <td>Dose final recomendada</td>
+              <td>${arred(r.doseK)} kg/ha de K₂O</td>
+            </tr>
+            <tr>
+              <td>Fonte escolhida</td>
+              <td>${r.dados.fonteK.nome}</td>
+            </tr>
+            <tr>
+              <td>Produto estimado</td>
+              <td>${arred(r.produtoK)} kg/ha</td>
+            </tr>
+          </tbody>
+        </table>
+      `;
+    }
+
+    function gerarRelatorio() {
+      if (!ultimoResultado) {
+        document.getElementById("mensagensTela").innerHTML = `
+          <div class="note">
+            Calcule a recomendação antes de gerar o relatório.
+          </div>
+        `;
+        return;
+      }
+
+      const r = ultimoResultado;
+
+      document.getElementById("relatorioConteudo").innerHTML = `
+        <div class="report-header">
+          <div>
+            <div class="report-title">Relatório de Recomendação de Adubação</div>
+            <div class="small">
+              Documento resumido para consulta técnica e impressão.
+            </div>
+          </div>
+          <div class="small">
+            <strong>Grupo:</strong> ${nomeGrupo(r.dados.grupo)}<br>
+            <strong>Ciclo:</strong> ${r.dados.ciclo}<br>
+            <strong>Cultivo:</strong> ${r.dados.cultivo}º cultivo
+          </div>
+        </div>
+
+        <div>
+          <span class="chip">MO: ${arred(r.dados.mo)}%</span>
+          <span class="chip">P: ${arred(r.dados.pSolo)} mg/dm³</span>
+          <span class="chip">K: ${arred(r.dados.kSolo)} mg/dm³</span>
+          <span class="chip">Argila: ${arred(r.dados.argila)}%</span>
+          <span class="chip">CTC: ${arred(r.dados.ctc)}</span>
+          <span class="chip">Produtividade: ${arred(r.dados.prod)} t/ha MS</span>
+          <span class="chip">Destino: ${r.dados.destino}</span>
+        </div>
+
+        <div class="divider"></div>
+
+        <h3>1. Recomendação final</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Nutriente</th>
+              <th>Dose recomendada</th>
+              <th>Fonte</th>
+              <th>Produto estimado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Nitrogênio no plantio</td>
+              <td>${arred(r.doseNPlantioComplementar)} kg/ha de N</td>
+              <td>${r.dados.fonteNPlantio.nome}</td>
+              <td>${arred(r.produtoNPlantio)} kg/ha</td>
+            </tr>
+            <tr>
+              <td>Nitrogênio em cobertura</td>
+              <td>${arred(r.doseNCobertura)} kg/ha de N</td>
+              <td>${r.dados.fonteNCobertura.nome}</td>
+              <td>${arred(r.produtoNCobertura)} kg/ha</td>
+            </tr>
+            <tr>
+              <td>Fósforo</td>
+              <td>${arred(r.doseP)} kg/ha de P₂O₅</td>
+              <td>${r.dados.fonteP.nome}</td>
+              <td>${arred(r.produtoP)} kg/ha</td>
+            </tr>
+            <tr>
+              <td>Potássio</td>
+              <td>${arred(r.doseK)} kg/ha de K₂O</td>
+              <td>${r.dados.fonteK.nome}</td>
+              <td>${arred(r.produtoK)} kg/ha</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3 style="margin-top:20px;">2. Parcelamento do N em cobertura</h3>
+        ${montarParcelamento(r.produtoNCobertura, r.doseNCobertura, r.dados.numParcelas, r.dados.fonteNCobertura.nome)}
+
+        <h3 style="margin-top:20px;">3. Diagnóstico técnico</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Parâmetro</th>
+              <th>Resultado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Classe de MO / N</td>
+              <td>${r.doseNInfo.classeMO}</td>
+            </tr>
+            <tr>
+              <td>Classe textural usada no P</td>
+              <td>${P_INTERPRETATION[r.classeTextural].label}</td>
+            </tr>
+            <tr>
+              <td>Classe de CTC usada no K</td>
+              <td>${K_INTERPRETATION[r.classeCTC].label}</td>
+            </tr>
+            <tr>
+              <td>Interpretação do P</td>
+              <td>${classeLabel(r.interpretacaoP)}</td>
+            </tr>
+            <tr>
+              <td>Interpretação do K</td>
+              <td>${classeLabel(r.interpretacaoK)}</td>
+            </tr>
+            <tr>
+              <td>Ajuste por produtividade</td>
+              <td>
+                +${arred(r.ajustes.extraN)} kg/ha de N,
+                +${arred(r.ajustes.extraP)} kg/ha de P₂O₅,
+                +${arred(r.ajustes.extraK)} kg/ha de K₂O
+              </td>
+            </tr>
+            <tr>
+              <td>N fornecido pela fonte fosfatada</td>
+              <td>${arred(r.nVindoDaFonteP)} kg/ha de N</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3 style="margin-top:20px;">4. Observações</h3>
+        <div class="ok">
+          ${r.observacoes.length ? r.observacoes.join("<br>") : "Sem observações adicionais."}
+        </div>
+
+        <div class="footer">
+          Este relatório é um apoio técnico para estimativa de recomendação de adubação.
+          Antes da recomendação final de campo, convém revisar espécie específica, sistema de uso,
+          calagem, enxofre, micronutrientes, histórico da área e análise de solo completa.
+        </div>
+      `;
+
+      document.getElementById("mensagensTela").innerHTML = `
+        <div class="ok">
+          Relatório gerado com sucesso. Você já pode imprimir ou salvar em PDF pelo navegador.
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>
