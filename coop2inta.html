@@ -1,403 +1,1064 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz Educacional | Questões Locais</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-        }
-        h1 {
-            background-color: #4CAF50;
-            color: white;
-            padding: 20px;
-            margin: 0;
-        }
-        .setupBox, #questionBox, #scoreBox {
-            font-size: 16px;
-            border: 1px solid #000;
-            padding: 20px;
-            width: 80%;
-            max-width: 600px;
-            margin: 20px auto;
-            background-color: white;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            border-radius: 8px;
-        }
-        select, button {
-            display: block;
-            margin: 15px auto;
-            padding: 12px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            width: 80%;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-        }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            transition: background-color 0.3s;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
-        .teamBox {
-            width: 80%;
-            max-width: 600px;
-            margin: 20px auto;
-            display: flex;
-            justify-content: space-around;
-        }
-        .teamColumn {
-            text-align: center;
-            display: none;
-            padding: 15px;
-            border: 1px dashed #ccc;
-            border-radius: 8px;
-            width: 45%;
-        }
-        .teamName {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 5px;
-            color: #333;
-        }
-        .competitorName {
-            font-size: 16px;
-            margin-bottom: 10px;
-            color: #555;
-            font-style: italic;
-        }
-        #loadingMessage {
-            font-size: 18px;
-            color: #555;
-        }
-        #questionBox {
-            white-space: pre-line;
-            line-height: 1.5;
-        }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Quiz - Associações, Cooperativas e Sindicatos</title>
+<style>
+:root{
+  --bg:#0b1020;
+  --panel:#121939;
+  --ink:#eaf0ff;
+  --muted:#a9b3d5;
+  --accent:#00e1ff;
+  --accent-2:#8b5cf6;
+  --danger:#ff5b5b;
+  --success:#22c55e;
+  --gold:#f9c846;
+  --ansRed1:#b31818;
+  --ansRed2:#7f0f0f;
+  --ansShadow:rgba(0,0,0,.45);
+  --ansText:#fff3e0;
+}
+*{ box-sizing:border-box }
+html, body { height:100%; }
+body{
+  margin:0;
+  font-family: Inter, system-ui, Segoe UI, Roboto, Arial, Helvetica, sans-serif;
+  color:var(--ink);
+  background:
+    radial-gradient(1200px 600px at 10% -10%, #1c2560 0%, #0b1020 55%),
+    radial-gradient(1200px 800px at 120% 120%, #2a1040 0%, #0b1020 60%);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+  min-height:100%;
+  padding:16px;
+}
+.app{
+  width:min(1180px, 100%);
+  background:rgba(18,25,57,0.85);
+  border:2px solid var(--accent);
+  border-radius:clamp(14px, 2vw, 20px);
+  padding:clamp(12px, 2vw, 20px);
+  box-shadow:0 10px 30px rgba(0,0,0,.4);
+  display:flex;
+  flex-direction:column;
+  gap:clamp(10px, 1.6vw, 14px);
+  position:relative;
+}
+header{
+  background:linear-gradient(90deg, rgba(0,225,255,.15), transparent 30%, rgba(139,92,246,.15) 70%, transparent);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:14px;
+  padding:18px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+header .logo{
+  font-weight:900;
+  font-size:clamp(18px,2.4vw,22px);
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+header .logo .medal{font-size:24px; color:var(--gold)}
+header .sub{color:var(--muted); font-size:13px}
+.scoreboard{
+  background:#0f1533;
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:clamp(12px, 1.8vw, 14px);
+  padding:clamp(10px, 1.8vw, 12px);
+  font-weight:900;
+  width:100%;
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+  gap:10px;
+}
+@media (max-width: 920px){
+  .scoreboard{grid-template-columns:1fr 1fr;}
+}
+@media (max-width: 560px){
+  .scoreboard{grid-template-columns:1fr;}
+}
+.scoreItem{
+  background:#111a44;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:12px;
+  padding:12px;
+}
+.scoreItem .label{
+  color:var(--muted);
+  font-size:12px;
+  margin-bottom:4px;
+}
+.scoreItem .value{
+  font-size:18px;
+  color:#fff;
+}
+.scoreItem .value.gold{ color:var(--gold); }
+.layout{
+  display:grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(320px, .8fr);
+  gap:14px;
+}
+@media (max-width: 1024px){
+  .layout{grid-template-columns:1fr;}
+}
+.card{
+  background:var(--panel);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:16px;
+  box-shadow:0 6px 20px rgba(0,0,0,.35);
+}
+.play{padding:clamp(14px, 2vw, 18px)}
+.side{padding:14px; display:flex; flex-direction:column; gap:12px}
+.status{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-bottom:10px;
+}
+.meta{ color:var(--muted); font-size:12px; font-weight:700; }
+.timer{
+  width:100%;
+  background:#0f1533;
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:999px;
+  overflow:hidden;
+  height:14px;
+  position:relative;
+}
+.timer .fill{
+  height:100%;
+  width:100%;
+  background:linear-gradient(90deg, var(--accent), var(--accent-2));
+  transition: width .1s linear;
+}
+.timer .clock{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:11px;
+  color:#cfe3ff;
+  font-weight:800;
+  text-shadow:0 1px 0 rgba(0,0,0,.6);
+}
+.question{
+  background:linear-gradient(180deg,#0f1a4d,#0c1333);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:clamp(12px, 1.8vw, 14px);
+  padding:clamp(14px, 2vw, 16px);
+  font-size:clamp(15px, 1.4vw + .6rem, 20px);
+  font-weight:700;
+  line-height:1.4;
+  white-space:pre-wrap;
+}
+.answers{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-top:14px;
+}
+@media (max-width:640px){ .answers{grid-template-columns:1fr;} }
+.answers button{
+  position:relative;
+  text-align:left;
+  padding:14px 16px;
+  padding-left:62px;
+  border-radius:12px;
+  background:linear-gradient(180deg, var(--ansRed1), var(--ansRed2));
+  color:var(--ansText);
+  border:2px solid rgba(255,179,92,.75);
+  box-shadow: 0 10px 18px var(--ansShadow), inset 0 1px 0 rgba(255,255,255,.18);
+  cursor:pointer;
+  font-size:clamp(13px, 1vw + .55rem, 15px);
+  font-weight:800;
+  letter-spacing:.01em;
+  display:flex;
+  gap:12px;
+  align-items:center;
+  transition: transform .12s ease, filter .12s ease, box-shadow .12s ease;
+  min-height:clamp(56px, 7vw, 68px);
+  width:100%;
+}
+.answers button::before{
+  content:"";
+  position:absolute;
+  inset:6px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,.12);
+  pointer-events:none;
+}
+.answers button .badge{
+  position:absolute;
+  left:12px;
+  top:50%;
+  transform:translateY(-50%);
+  width:38px;
+  height:30px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(180deg, rgba(25,40,120,.95), rgba(10,18,70,.95));
+  border:2px solid rgba(255,179,92,.85);
+  border-radius:8px;
+  color:#eaf0ff;
+  font-weight:900;
+  font-size:14px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.15);
+}
+.answers button:hover{ transform:translateY(-1px); filter:brightness(1.05); }
+.answers button.correct{ background:linear-gradient(180deg, rgba(20,120,60,.95), rgba(8,70,35,.95)); border-color:rgba(249,200,70,.9); }
+.answers button.wrong{ background:linear-gradient(180deg, rgba(160,20,20,.95), rgba(90,8,8,.95)); border-color:rgba(255,91,91,.9); }
+.answers button:disabled{opacity:.95; cursor:not-allowed}
+.answers button.correct::after{ content:" ✓"; font-weight:900; margin-left:6px; }
+.answers button.wrong::after{ content:" ✕"; font-weight:900; margin-left:6px; }
+.panel{
+  background:#0f1533;
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:14px;
+  padding:14px;
+}
+.panel h3{
+  margin:0 0 10px;
+  font-size:14px;
+  color:#dbe7ff;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+}
+.teamGrid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+  gap:10px;
+}
+@media (max-width:640px){ .teamGrid{grid-template-columns:1fr;} }
+.memberList{
+  margin:0;
+  padding-left:18px;
+  color:#dce6ff;
+  line-height:1.5;
+}
+.memberCurrent{
+  color:var(--gold);
+  font-weight:900;
+}
+.controls{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+button.action{
+  appearance:none;
+  border:none;
+  cursor:pointer;
+  font-weight:900;
+  padding:12px 14px;
+  border-radius:12px;
+  color:#081018;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  box-shadow: 0 12px 26px rgba(0,0,0,.35);
+}
+button.ghost{
+  appearance:none;
+  cursor:pointer;
+  font-weight:900;
+  padding:12px 14px;
+  border-radius:12px;
+  color:var(--ink);
+  border:1px solid rgba(255,255,255,.14);
+  background:#0f1533;
+}
+button:disabled{ opacity:.55; cursor:not-allowed; }
+.startScreen{
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:16px;
+  background: radial-gradient(900px 500px at 20% 10%, rgba(28,37,96,.75), rgba(11,16,32,.92) 55%),
+              radial-gradient(900px 600px at 90% 90%, rgba(42,16,64,.75), rgba(11,16,32,.92) 60%);
+  backdrop-filter: blur(6px);
+}
+.startCard{
+  width:min(1050px, 100%);
+  max-height:min(92vh, 1100px);
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(18,25,57,0.88);
+  box-shadow:0 18px 44px rgba(0,0,0,.55);
+  overflow:auto;
+  display:grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(280px, .8fr);
+}
+@media (max-width: 900px){ .startCard{ grid-template-columns:1fr; } }
+.startLeft{ padding:clamp(14px, 2vw, 18px); display:flex; flex-direction:column; gap:12px; }
+.startRight{ background:#0f1533; border-left:1px solid rgba(255,255,255,.10); display:flex; align-items:center; justify-content:center; padding:14px; }
+@media (max-width: 900px){ .startRight{ border-left:none; border-top:1px solid rgba(255,255,255,.10); } }
+.startTitle{ font-weight:900; font-size:clamp(20px, 2.4vw, 28px); }
+.startSubtitle{ color:var(--muted); font-size:14px; line-height:1.45; }
+.startForm{ display:flex; flex-direction:column; gap:12px; }
+.formGrid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+@media (max-width:700px){ .formGrid{grid-template-columns:1fr;} }
+.field{ display:flex; flex-direction:column; gap:6px; }
+label{ font-weight:800; color:#dbe7ff; font-size:13px; }
+input, textarea, select{
+  width:100%;
+  padding:12px 12px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.14);
+  background:#0f1533;
+  color:var(--ink);
+  font-weight:700;
+  outline:none;
+}
+textarea{ min-height:150px; resize:vertical; }
+input:focus, textarea:focus, select:focus{
+  border-color: rgba(0,225,255,.7);
+  box-shadow: 0 0 0 3px rgba(0,225,255,.15);
+}
+.startActions{ display:flex; gap:10px; flex-wrap:wrap; margin-top:6px; }
+.startPreview{
+  width:100%;
+  height:100%;
+  min-height:clamp(220px, 36vh, 320px);
+  border-radius:14px;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.12);
+  background:#0b1020;
+  display:flex;
+  align-items:flex-start;
+  justify-content:flex-start;
+  padding:16px;
+  color:#b3c2ff;
+  font-weight:800;
+  line-height:1.45;
+}
+.small{ font-size:12px; color:var(--muted); }
+.resultBanner{
+  padding:14px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.1);
+  background:linear-gradient(180deg,#13204d,#0d173b);
+  font-weight:800;
+  white-space:pre-wrap;
+}
+footer{opacity:.9; font-size:12px; color:var(--muted); text-align:center}
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible{
+  outline:2px solid var(--accent);
+  outline-offset:2px;
+}
+@media (max-width: 640px){
+  body{ padding:10px; }
+  .controls{flex-direction:column;}
+  button.action, button.ghost{width:100%;}
+  .scoreItem .value{font-size:16px;}
+}
+@media (min-width: 1440px){
+  .app{ width:min(1320px, 100%); }
+  .question{ min-height:120px; }
+}
+@media (prefers-reduced-motion: reduce){
+  *{ transition:none !important; animation:none !important; }
+}
+</style>
 </head>
 <body>
-    <h1>Quiz Educacional</h1>
-
-    <div class="setupBox" id="setupBox">
-        <h2>Configuração do Quiz</h2>
-        <p>Selecione as duas equipes que irão competir.</p>
-        <label for="team1Select">Selecione a Equipe 1:</label>
-        <select id="team1Select">
-            <option value="Cooperativas">Cooperativas</option>
-            <option value="Sindicatos">Sindicatos</option>
-            <option value="Associações">Associações</option>
-        </select>
-
-        <label for="team2Select">Selecione a Equipe 2:</label>
-        <select id="team2Select">
-            <option value="Sindicatos">Sindicatos</option>
-            <option value="Cooperativas">Cooperativas</option>
-            <option value="Associações">Associações</option>
-        </select>
-
-        <button id="startQuizButton">Iniciar Quiz</button>
-        <p id="loadingMessage" style="display:none;">Carregando questões locais...</p>
-    </div>
-
-    <h2 id="themeDisplay" style="display:none;"></h2>
-    <div id="questionBox" style="display:none;" aria-live="polite">Clique em "Próxima Pergunta" para iniciar</div>
-
-    <div id="scoreBox" aria-live="polite" style="display:none;">
-        <p id="team1Score"><span id="team1Name">Equipe 1</span>: <span id="team1CorrectCount">0</span> Certas, <span id="team1WrongCount">0</span> Erradas</p>
-        <p id="team2Score"><span id="team2Name">Equipe 2</span>: <span id="team2CorrectCount">0</span> Certas, <span id="team2WrongCount">0</span> Erradas</p>
-    </div>
-
-    <div class="teamBox">
-        <div class="teamColumn" id="team1Column">
-            <div class="teamName" id="team1DisplayName"></div>
-            <div class="competitorName" id="team1CompetitorName"></div>
-            <button id="rightButton">Resposta Certa</button>
-            <button id="wrongButton">Resposta Errada</button>
+<div class="startScreen" id="startScreen" role="dialog" aria-modal="true" aria-label="Configuração inicial do quiz">
+  <div class="startCard">
+    <div class="startLeft">
+      <div class="startTitle">Quiz - Associações, Cooperativas e Sindicatos</div>
+      <div class="startSubtitle">
+        Escolha o conjunto de questões, informe o nome de cada equipe e a lista de participantes. O sistema sorteia um participante da equipe da vez para responder em cada rodada.
+      </div>
+      <form class="startForm" id="startForm">
+        <div class="field">
+          <label for="questionSet">Conjunto de questões</label>
+          <select id="questionSet" required>
+            <option value="sindicatos">Sindicatos</option>
+            <option value="associacoes">Associações</option>
+            <option value="cooperativas">Cooperativas</option>
+          </select>
+          <div class="small">Você escolhe o tema antes de iniciar o jogo.</div>
         </div>
-        <div class="teamColumn" id="team2Column">
-            <div class="teamName" id="team2DisplayName"></div>
-            <div class="competitorName" id="team2CompetitorName"></div>
-            <button id="rightButton2">Resposta Certa</button>
-            <button id="wrongButton2">Resposta Errada</button>
+        <div class="formGrid">
+          <div class="field">
+            <label for="teamAName">Nome da Equipe 1</label>
+            <input id="teamAName" type="text" maxlength="40" placeholder="Ex.: Equipe Azul" required />
+          </div>
+          <div class="field">
+            <label for="teamBName">Nome da Equipe 2</label>
+            <input id="teamBName" type="text" maxlength="40" placeholder="Ex.: Equipe Dourada" required />
+          </div>
         </div>
+        <div class="formGrid">
+          <div class="field">
+            <label for="teamAMembers">Participantes da Equipe 1</label>
+            <textarea id="teamAMembers" placeholder="Um nome por linha&#10;Ex.:&#10;Ana&#10;Bruno&#10;Carla" required></textarea>
+            <div class="small">Digite um participante por linha.</div>
+          </div>
+          <div class="field">
+            <label for="teamBMembers">Participantes da Equipe 2</label>
+            <textarea id="teamBMembers" placeholder="Um nome por linha&#10;Ex.:&#10;Diego&#10;Elisa&#10;Fábio" required></textarea>
+            <div class="small">Digite um participante por linha.</div>
+          </div>
+        </div>
+        <div class="startActions">
+          <button class="action" type="submit">Começar quiz</button>
+        </div>
+      </form>
     </div>
+    <div class="startRight">
+      <div class="startPreview" id="questionPreview">
+        <div>
+          <strong>Prévia do jogo</strong><br><br>
+          • Escolha entre 3 conjuntos de questões<br>
+          • 20 rodadas no total<br>
+          • 10 questões para cada equipe<br>
+          • Sorteio de participante a cada pergunta<br>
+          • Alternativas embaralhadas a cada rodada<br>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
-    <button id="nextQuestionButton" style="display:none;">Próxima Pergunta</button>
-    <button id="resetButton" style="display:none;">Recomeçar</button>
+<div class="app">
+  <header class="card" role="banner">
+    <div class="logo"><span class="medal">⚖</span><span id="gameTitle">Quiz</span></div>
+    <div class="sub" id="gameSubtitle">Escolha o conjunto de questões na tela inicial.</div>
+  </header>
 
-    <script>
-        const DRAW_COUNT = 10;
+  <div class="scoreboard" role="status" aria-live="polite">
+    <div class="scoreItem">
+      <div class="label">Rodada</div>
+      <div class="value" id="roundInfo">0/20</div>
+    </div>
+    <div class="scoreItem">
+      <div class="label">Equipe da vez</div>
+      <div class="value gold" id="turnTeam">Aguardando início</div>
+    </div>
+    <div class="scoreItem">
+      <div class="label">Participante sorteado</div>
+      <div class="value" id="currentPlayer">-</div>
+    </div>
+    <div class="scoreItem">
+      <div class="label">Placar</div>
+      <div class="value" id="scoreInfo">0 × 0</div>
+    </div>
+  </div>
 
-        const QUESTION_BANK = {
-        "Cooperativas": [
-                "O que é cooperativismo?\na) Uma empressa com dono único.\nb) Uma forma de organização baseada na cooperação entre pessoas.*\nc) Um tipo de governo.\nd) Um sistema de competição individual.",
-                "Como os menbros se organizam e participam das decisões dentro do cooperativismo?\na) Apenas o líder descide tudo.\nb) As decisões são tomadas por votação e participação dos membros.*\nc) Somente investidores tomam decisões.\nd) Não há organização definida.",
-                "Por que o cooperativismo é importante para a sociedade?\na) Porque aumenta a desigualdade.\nb) Porque beneficia apenas uma pessoa.\nc) Porque promove ajuda mútua e desenvolvimento coletivo.*\nd) Porque elimina o trabalho em grupo.",
-                "Em que contexto histoŕico surgiu o cooperativismo?\na) Durante a Revolução Francesa.\nb) Durante a Revolução Industrial.*\nc) Durante a Idade Média.\nd) Durante a Guerra Fria.",
-                "Qual grupo é considerado o marco inicial do Cooperativismo moderno?\na) Trabalhadores de Paris.\nb) Agricultores da Alemanha\nc) Pioneiros de Rochdale.*\nd) Comerciantes italianos.",
-                "Em que ano foi fundada a primeira cooperativa moderna pelos pioneiros?\na) 1800.\nb) 1824.\nc) 1844.*\nd) 1900.",
-                "Qual o principal objetivo do cooperativismo?\na) Obter lucro máximo para investidores.\nb) Promover o bem-estar dos associados.*\nc) Beneficiar apenas os dirigentes.\nd) Concorrer com pequenas empresas.",
-                "Um dos princípios do cooperativismo é:\na) Participação limitada dos membros.\nb) Controle por investidores externos.\nc) Gestão democrática pelos associados.*\nd) Lucro individual acima do coletivo.",
-                "Como funciona a divisão dos resultados da cooperativa?\na) Apenas os líderes recebem.\nb) E dividida conforme a participação dos associados.*\nc) Vai toda para o governo.\nd) E igual para qualquer pessoa, mesmo não sendo membro.",
-                "Qual são os princípios básicos que fundamentam o cooperativismo?\na) Lucro e competição.\nb)Individualismo e execução.\nc) Solidariedade e autogestão.*\nd)Centralização e controle.",
-                "De que maneira as cooperativas fortalecem a economia local e os direitos dos trabalhadores?\na) Criando decisão mais justas de trabalho e distribuição de renda. *\nb) Focando apenas no lucro.\nc) Aumentando a desigualdade econômica.\nd) Incentivando a desigualdade social.",
-                "Como o cooperativismo contribui para a inclusão social de populações marginalizadas?\na) Promovendo a exclusão e a desigualdade.\nb) Fortalecendo a autogestão e a autonomia econômica.*\nc) Impedindo o acesso à educação e capacitação .\nd) Focando apenas no investimento financeiro.",
-                "Sobre o funcionamento de uma cooperativa, é correto afirmar que:\na) O objtivo gera lé gerar lucro para um único dono.\nb) As decições são tomadas de forma democrática pelos cooperados.*\nc) Apenas o presidente pode tomar decosões importantes.\nd) Os lucros são distribuídos apenas para investidores externos.",
-                "Em uma cooperativa, os resultados financeiros (sobras) são:\na) Divididos apenas entre os diretores.\nb) Guardados integralmente pelo governo.\nc) Distribuídos entre os cooperados, conforme sua participação.*\nd) Entregues a empresas privadas parceiras.",
-                "Qual é o principal objetivo de uma cooperativa?\na) Obter lucro máximo para os donos da empresa, vendendo produtos caros.\nb) Oferecer benefícios e serviços para os seus associados, sem visar o lucro individual.\nc) Trabalhar apenas com produtos agrícolas, não podendo atuar em outras áreas.\nd) Ser uma empresa pública controlada pelo governo.",
-                "No Brasil, como é a estrutura de gestão de uma cooperativa?\na) Uma pessoa só manda e toma todas as decisões.\nb) As decisões são feitas sempre pelo governo federal.\nc) Segue o princípio \"um homem, um voto\", onde todos os associados têm direito igual a voto.\nd) Apenas os funcionários contratados é que podem participar das reuniões.",
-                "Quais áreas o cooperativismo atua no Brasil?\na) Apenas na agricultura.\nb) Apenas na área de saúde.\nc) Agricultura, crédito financeiro, saúde, energia, transporte e consumo.\nd) Somente na produção de veículos e máquinas.",
-                "Um dos princípios básicos das cooperativas é:\na) Competição entre os membros.\nb) Participação livre e voluntária.*\nc) Controle por grandes empresas.\nd) Foco exclusivo no lucro individual.",
-                "Um dos principais desafios enfrentados pelas cooperativas é?\na) A falta de participação dos membros nas decisões.*\nb) O excesso de lucro distribuído entre os associados.\nc) A ausencia de legislação específica.\nd) O apoio financeiro ilimitado do governo.",
-                "A dificuldade de acesso a crédito pelas cooperativas ocorre principalmente por:\na) Falta de interesse dos cooperados.\nb) Exigencia e garantias impostas por instituições financeiras.*\nc) Excesso de recursos disponíveis no mercado.\nd) Baixa produção agrícola.",
-                "A gestão das cooperativas pode ser um desafio quando?\na) Há organização e planejamentos eficientes.\nb) Existe comunicação clara entre os membros.\nc) Ocorre falta de qualificação dos gestores.*\nd) Os objetivos são bem definidos.",
-                "Qual das opções abaixo representa uma vantagem econômica direta para o associado de uma cooperativa de crédito ou de produção?\nA) Distribuição de lucros baseada apenas no capital investido.\nB) Taxas de juros mais elevadas para garantir a sustentabilidade.\nC) Acesso facilitado a serviços financeiros e taxas menores.\nD) Centralização das decisões na figura do gerente.",
-                "O cooperativismo não busca apenas o benefício individual, mas também o coletivo. Qual das alternativas melhor descreve essa vantagem social ou comunitária?\nA) Foco exclusivo na competitividade agressiva do mercado.\nB) Reinvestimento dos resultados na própria cooperativa e desenvolvimento da comunidade local.*\nC) Isenção de qualquer tipo de responsabilidade social.\nD) Limitação de associados para garantir a exclusividade.",
-                "Como funciona a gestão democrática nas cooperativas?\nA) Cada associado tem direito a um voto e as decisões devem ser tomadas em assembleia.*\nB) Votos são proporcionais ao número de cotas-partes de cada um e as decisões são tomadas na assembleia.\nC) Apenas a diretoria eleita tem direito a voto nas assembleias.\nD) Somente os associados com maior colaboração tem direito ao voto.",
-                "De acordo com os princípios do cooperativismo, como funciona o direito de voto dos associados?\nA) Cada associado tem direito a um voto, independentemente do capital.*\nB) O voto depende do valor investido.\nC) Apenas a diretoria pode votar.\nD) A diretoria escolhe os associados que terão o direito ao voto.",
-                "Segundo a legislação cooperativista brasileira, qual é uma responsabilidade dos associados?\nA) Não participar das assembleias.\nB) Cumprir o estatuto e contribuir para o funcionamento da cooperativa.*\nC) Cumprir o estatuto e não participar das assembleias.\nD) Delegar todas as decisões ao presidente.",
-                "Qual é o principal benefício econômico do cooperativismo agrícola para os produtores rurais?\na) Aumentou individual da produção de terras.\nb) Compra seletiva de insumos a preços mais baixos e acesso a mercados em escala. *\nc) Redução de impostos para grandes propriedades.\nd) Eliminação total de riscos climáticos.",
-                "Qual é a participação aproximada das cooperativas agropecuárias na produção agrícola brasileira?\na) 10%\nb) 25%\nc) 40%*\nd) 70%",
-                "Qual é um desafio enfrentado pelo cooperativismo agrícola?\na) Falta de cooperativa agrícola .\nb) Burocracia e necessidade de qualificação gerencial .*\nc) Excesso de produção em todas as regiões.\nd) Ausência de políticas públicas de apoio."
-        ],
-        "Sindicatos": [
-                "A formação dos sindicatos está diretamente ligada a qual contexto histórico?\nA) Organização das guildas medievais urbanas\nB) Consolidação dos Estados modernos europeus\nC) Transformações produtivas da Revolução Industrial*\nD) Expansão tecnológica da Era Digital global",
-                "O surgimento dos sindicatos ocorreu principalmente em função de qual necessidade social?\nA) Ampliação da competitividade entre empresas industriais\nB) União de trabalhadores frente à exploração laboral*\nC) Criação de políticas públicas pelo Estado moderno\nD) Desenvolvimento tecnológico nas linhas de produção",
-                "Qual é a função central dos sindicatos nas relações de trabalho?\nA) Gerenciar diretamente a produção das empresas\nB) Representar interesses coletivos da categoria*\nC) Elaborar leis trabalhistas de forma independente\nD) Oferecer vagas de emprego aos trabalhadores",
-                "Qual direito exemplifica conquistas obtidas por mobilização sindical?\nA) Aumento das cargas tributárias empresariais\nB) Ampliação irrestrita da jornada de trabalho\nC) Garantia de férias remuneradas anuais*\nD) Redução da produtividade industrial geral",
-                "A negociação coletiva pode ser definida como:\nA) Estabelecimento unilateral de regras governamentais\nB) Acordo individual entre trabalhador e empregador\nC) Intervenção direta do Estado nos contratos privados\nD) Pactuação entre representantes de ambas as partes*",
-                "Após a reforma trabalhista de 2017, a contribuição sindical tornou-se:\nA) Obrigatória para todas as categorias profissionais\nB) Facultativa conforme decisão individual*\nC) Exclusiva para entidades patronais organizadas\nD) Extinta de forma definitiva na legislação",
-                "O princípio da unicidade sindical estabelece que:\nA) Podem existir vários sindicatos por categoria local\nB) Trabalhadores devem se vincular a partidos políticos\nC) Existe apenas um sindicato por base territorial*\nD) Sindicatos devem atuar junto com empresas privadas",
-                "Além das questões trabalhistas, os sindicatos atuam em quais pautas sociais?\nA) Privatização de serviços públicos essenciais\nB) Igualdade social e preservação ambiental*\nC) Campanhas eleitorais obrigatórias nacionais\nD) Controle direto da produção industrial",
-                "Qual é um dos principais desafios atuais enfrentados pelos sindicatos?\nA) Excesso de trabalhadores sindicalizados ativos\nB) Retorno ao modelo artesanal de produção\nC) Redução de filiados e mudanças no trabalho*\nD) Proibição de manifestações por lei federal",
-                "O contexto que impulsionou os sindicatos modernos foi:\nA) Retorno ao modelo artesanal tradicional\nB) Condições precárias da Revolução Industrial*\nC) Criação da CLT no Brasil contemporâneo\nD) Estabilidade econômica do século XVIII",
-                "Qual instrumento fortalece o equilíbrio entre trabalhadores e empresas?\nA) Serviços médicos oferecidos pelo sindicato\nB) Financiamento por contribuições obrigatórias\nC) Acordos coletivos sobre condições de trabalho*\nD) Cursos técnicos voltados à qualificação",
-                "Qual mudança ocorreu no financiamento sindical após 2017?\nA) Aumento progressivo da contribuição anual\nB) Proibição de arrecadação por entidades sindicais\nC) Substituição por financiamento estatal direto\nD) Transformação da contribuição em facultativa*",
-                "Quando não há acordo nas negociações, os sindicatos podem:\nA) Encerrar definitivamente suas atividades\nB) Utilizar apenas meios digitais de comunicação\nC) Organizar paralisações e mobilizações*\nD) Transferir decisões ao governo federal",
-                "Qual apoio individual pode ser oferecido aos trabalhadores?\nA) Aquisição de bens materiais subsidiados\nB) Assistência jurídica em conflitos trabalhistas*\nC) Criação de empresas vinculadas ao sindicato\nD) Controle governamental de salários",
-                "Como os sindicatos influenciam a economia?\nA) Reduzindo a produção industrial nacional\nB) Elevando o poder de compra dos trabalhadores*\nC) Diminuindo o número de empregos formais\nD) Regulando o comércio internacional",
-                "Qual benefício é frequentemente oferecido aos associados?\nA) Participação nos lucros das empresas privadas\nB) Acesso a cursos de qualificação profissional*\nC) Isenção total de impostos governamentais\nD) Garantia permanente de emprego",
-                "No sistema sindical, as federações são:\nA) Empresas responsáveis por gerir sindicatos\nB) Órgãos estatais de fiscalização trabalhista\nC) Entidades que agrupam sindicatos similares*\nD) Associações exclusivas de empregadores",
-                "A modernização sindical é necessária para:\nA) Substituir completamente a legislação vigente\nB) Concorrer diretamente com empresas privadas\nC) Adaptar-se às mudanças do mercado de trabalho*\nD) Eliminar a participação dos trabalhadores",
-                "Qual é uma função educativa dos sindicatos?\nA) Oferecer ensino formal obrigatório nacional\nB) Informar sobre direitos e deveres trabalhistas*\nC) Substituir instituições escolares públicas\nD) Criar políticas educacionais governamentais",
-                "A greve é considerada legítima porque:\nA) Substitui qualquer negociação entre partes\nB) É obrigatória em conflitos trabalhistas\nC) Atua como forma de pressão coletiva*\nD) Elimina o diálogo entre empregador e empregado",
-                "Além da economia, os sindicatos influenciam:\nA) Apenas a dimensão cultural da sociedade\nB) Somente o desenvolvimento tecnológico\nC) Esferas sociais e políticas amplas*\nD) Exclusivamente o setor empresarial",
-                "As confederações têm como função:\nA) Representar trabalhadores na base local\nB) Coordenar entidades em nível nacional*\nC) Fiscalizar leis dentro das empresas\nD) Organizar ações regionais diretas",
-                "A participação dos trabalhadores fortalece os sindicatos porque:\nA) Aumenta apenas a arrecadação financeira\nB) Amplia sua legitimidade e atuação*\nC) Substitui decisões governamentais\nD) Reduz conflitos entre empregadores",
-                "Qual papel social os sindicatos exercem?\nA) Controle direto da economia nacional\nB) Promoção da cidadania e inclusão social*\nC) Administração de grandes empresas privadas\nD) Organização exclusiva de eventos culturais",
-                "Como a tecnologia impacta os sindicatos atualmente?\nA) Torna sua existência desnecessária\nB) Elimina todos os empregos formais\nC) Exige adaptação a novas realidades*\nD) Impede negociações coletivas",
-                "Como os sindicatos podem atrair trabalhadores jovens?\nA) Ignorando transformações do mercado\nB) Incentivando participação e informação*\nC) Reduzindo serviços oferecidos\nD) Evitando uso de ferramentas digitais",
-                "A transparência tornou-se essencial após 2017 porque:\nA) A contribuição tornou-se obrigatória\nB) Sindicatos passaram a gerir empresas\nC) A contribuição passou a ser opcional*\nD) Entidades perderam funções legais",
-                "A concentração de trabalhadores nas fábricas gerou:\nA) Redução da produção industrial\nB) Melhoria imediata das condições\nC) Problemas sociais e trabalhistas*\nD) Fim da organização coletiva",
-                "Qual é a função das assembleias sindicais?\nA) Cumprir apenas exigências burocráticas\nB) Centralizar decisões nos líderes\nC) Promover debate e decisão coletiva*\nD) Substituir negociações coletivas",
-                "Os sindicatos são importantes para a democracia porque:\nA) Substituem o papel do governo\nB) Representam interesses coletivos sociais*\nC) Controlam processos eleitorais\nD) Eliminam conflitos entre classes"
-        ],
-        "Associações": [
-                "A associação surge principalmente da necessidade de:\nA) Competir no mercado\nB) Organizar pessoas com interesses comuns*\nC) Criar empresas\nD) Controlar trabalhadores",
-                "A ação coletiva permite:\nA) Resultados menores\nB) Substituir o governo\nC) Alcançar objetivos difíceis individualmente*\nD) Evitar organização",
-                "Mesmo gerando recursos, a associação:\nA) Divide entre membros\nB) Reinveste nos objetivos*\nC) Entrega ao governo\nD) Usa apenas para lucro",
-                "A estabilidade significa:\nA) Não mudar regras\nB) Existir organizada ao longo do tempo*\nC) Não crescer\nD) Não ter gestão",
-                "A ausência de lucro não impede:\nA) Existência\nB) Atividade econômica*\nC) Organização\nD) Participação",
-                "O objetivo comum serve para:\nA) Controlar membros\nB) Direcionar ações*\nC) Gerar lucro\nD) Evitar regras",
-                "Como pessoa jurídica pode:\nA) Apenas existir\nB) Ter direitos e deveres*\nC) Não ter obrigações\nD) Ser informal",
-                "Reunião de fundação serve para:\nA) Registrar\nB) Discutir e aprovar criação*\nC) Eleger conselho\nD) Gerar recursos",
-                "Estatuto define:\nA) Lucros\nB) Regras internas*\nC) Salários\nD) Impostos",
-                "Diretoria:\nA) Fiscaliza\nB) Executa e administra*\nC) Cria leis\nD) Governa",
-                "Registro em cartório permite:\nA) Ganhar dinheiro\nB) Existência legal*\nC) Evitar regras\nD) Não prestar contas",
-                "Associações educacionais:\nA) Comércio\nB) Ensino e capacitação*\nC) Indústria\nD) Política",
-                "Associações comunitárias:\nA) Empresas\nB) Bairros e grupos sociais*\nC) Exportação\nD) Tecnologia",
-                "Associações profissionais:\nA) Empresas\nB) Categoria profissional*\nC) Governo\nD) Estudantes",
-                "Participação nas decisões:\nA) Direito do associado*\nB) Governo\nC) Diretoria\nD) Inexistente",
-                "Respeitar estatuto:\nA) Opcional\nB) Dever*\nC) Governo\nD) Fiscal",
-                "Assembleia geral:\nA) Financeiro\nB) Decisões importantes*\nC) Execução\nD) Registro",
-                "Diretoria executa decisões da:\nA) Governo\nB) Empresas\nC) Assembleia*\nD) Fiscal",
-                "Conselho fiscal:\nA) Lucro\nB) Transparência financeira*\nC) Crescimento\nD) Política",
-                "Transparência serve para:\nA) Evitar participação\nB) Gerar desconfiança\nC) Confiança dos membros*\nD) Reduzir regras",
-                "Doações e eventos:\nA) Obrigação\nB) Fontes de recursos*\nC) Gastos\nD) Penalidades",
-                "Diferença das empresas:\nA) Organização\nB) Não lucrativa*\nC) Pessoas\nD) Dinheiro",
-                "Fundações:\nA) Pessoas\nB) Patrimônio*\nC) Lucro\nD) Governo",
-                "Sindicatos:\nA) Cultura\nB) Categoria profissional*\nC) Educação\nD) Saúde",
-                "Cooperativas:\nA) Assistência\nB) Divisão de resultados*\nC) Cultura\nD) Política",
-                "Associações fortalecem:\nA) Individualismo\nB) Comunidade*\nC) Competição\nD) Lucro",
-                "Contribuem para:\nA) Exclusão\nB) Inclusão social*\nC) Isolamento\nD) Desorganização",
-                "No campo político:\nA) Menos participação\nB) Representatividade*\nC) Lucro\nD) Controle",
-                "Benefício:\nA) Perda de tempo\nB) Desenvolvimento social*\nC) Isolamento\nD) Nada",
-                "Rede de contatos:\nA) Isolamento\nB) Conexões*\nC) Falta interação\nD) Controle",
-                "Desafio:\nA) Excesso participação\nB) Falta recursos*\nC) Muito lucro\nD) Nenhum",
-                "Outro desafio:\nA) Gestão fácil\nB) Baixa participação*\nC) Excesso organização\nD) Falta regras",
-                "Boa gestão:\nA) Desorganização\nB) Planejamento*\nC) Sorte\nD) Poucas regras",
-                "Compromisso coletivo:\nA) Individualismo\nB) Participação ativa*\nC) Isolamento\nD) Irresponsável",
-                "Bem administrada:\nA) Não funciona\nB) Mudanças positivas*\nC) Prejuízo\nD) Evita participação",
-                "Papel social:\nA) Lucro\nB) Cidadania*\nC) Controle\nD) Evitar mudanças"
-        ]
+  <main class="layout" role="main">
+    <section class="play card" aria-live="polite">
+      <div class="status">
+        <div class="controls">
+          <button class="action" id="nextBtn" type="button" disabled>Próxima questão</button>
+          <button class="ghost" id="restartBtn" type="button">Recomeçar</button>
+        </div>
+        <div class="meta"><span id="qpos">Questão 0/20</span></div>
+      </div>
+
+      <div class="timer" aria-label="Tempo restante">
+        <div class="fill" id="tfill"></div>
+        <div class="clock" id="tclock">30s</div>
+      </div>
+
+      <div id="question" class="question" role="heading" aria-level="2">Preencha as equipes para iniciar.</div>
+      <div id="qmeta" class="meta"></div>
+      <div id="answers" class="answers" role="group" aria-label="Alternativas de resposta"></div>
+      <div id="resultBanner" class="resultBanner" style="display:none;"></div>
+    </section>
+
+    <aside class="side card" aria-label="Painel lateral">
+      <div class="panel">
+        <h3>Equipes</h3>
+        <div class="teamGrid">
+          <div>
+            <div class="meta" id="teamALabel">Equipe 1</div>
+            <div class="value" id="teamAScore" style="font-weight:900; margin:4px 0 8px;">0 ponto(s)</div>
+            <ol class="memberList" id="teamAList"></ol>
+          </div>
+          <div>
+            <div class="meta" id="teamBLabel">Equipe 2</div>
+            <div class="value" id="teamBScore" style="font-weight:900; margin:4px 0 8px;">0 ponto(s)</div>
+            <ol class="memberList" id="teamBList"></ol>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Resumo da rodada</h3>
+        <div class="small" id="roundSummary">Quando o quiz começar, aqui aparecerão a equipe sorteada para a vez, o participante escolhido e o resultado da resposta.</div>
+      </div>
+
+      <div class="panel">
+        <h3>Regras</h3>
+        <div class="small" id="rulesText">
+          • As equipes se alternam até completar 10 perguntas cada.<br>
+          • Cada pergunta sorteia um participante da equipe da vez.<br>
+          • Resposta correta vale 1 ponto para a equipe.<br>
+          • O banco usa as questões do tema escolhido.
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <footer>Professor Fernando Hax.</footer>
+</div>
+
+<script>
+const shuffle = arr => arr.map(v => [Math.random(), v]).sort((a,b) => a[0]-b[0]).map(v => v[1]);
+const labels = ["A", "B", "C", "D"];
+const TIME_PER_Q = 30000;
+const QUESTIONS_PER_TEAM = 10;
+const TOTAL_ROUNDS = QUESTIONS_PER_TEAM * 2;
+
+const QUESTION_SETS = {
+  sindicatos: {
+    title: "Quiz Sindicatos",
+    subtitle: "Modo em equipes com sorteio de participante e perguntas sobre sindicatos.",
+    preview: [
+      "• Tema: sindicatos",
+      "• 20 rodadas no total",
+      "• 10 questões para cada equipe",
+      "• Sorteio de participante a cada pergunta",
+      "• Alternativas embaralhadas a cada rodada"
+    ],
+    bank: [
+      { id:1, q:"A formação dos sindicatos está diretamente ligada a qual contexto histórico?", options:["Organização das guildas medievais urbanas","Consolidação dos Estados modernos europeus","Transformações produtivas da Revolução Industrial","Expansão tecnológica da Era Digital global"], a:2 },
+      { id:2, q:"O surgimento dos sindicatos ocorreu principalmente em função de qual necessidade social?", options:["Ampliação da competitividade entre empresas industriais","União de trabalhadores frente à exploração laboral","Criação de políticas públicas pelo Estado moderno","Desenvolvimento tecnológico nas linhas de produção"], a:1 },
+      { id:3, q:"Qual é a função central dos sindicatos nas relações de trabalho?", options:["Gerenciar diretamente a produção das empresas","Representar interesses coletivos da categoria","Elaborar leis trabalhistas de forma independente","Oferecer vagas de emprego aos trabalhadores"], a:1 },
+      { id:4, q:"Qual direito exemplifica conquistas obtidas por mobilização sindical?", options:["Aumento das cargas tributárias empresariais","Ampliação irrestrita da jornada de trabalho","Garantia de férias remuneradas anuais","Redução da produtividade industrial geral"], a:2 },
+      { id:5, q:"A negociação coletiva pode ser definida como:", options:["Estabelecimento unilateral de regras governamentais","Acordo individual entre trabalhador e empregador","Intervenção direta do Estado nos contratos privados","Pactuação entre representantes de ambas as partes"], a:3 },
+      { id:6, q:"Após a reforma trabalhista de 2017, a contribuição sindical tornou-se:", options:["Obrigatória para todas as categorias profissionais","Facultativa conforme decisão individual","Exclusiva para entidades patronais organizadas","Extinta de forma definitiva na legislação"], a:1 },
+      { id:7, q:"O princípio da unicidade sindical estabelece que:", options:["Podem existir vários sindicatos por categoria local","Trabalhadores devem se vincular a partidos políticos","Existe apenas um sindicato por base territorial","Sindicatos devem atuar junto com empresas privadas"], a:2 },
+      { id:8, q:"Além das questões trabalhistas, os sindicatos atuam em quais pautas sociais?", options:["Privatização de serviços públicos essenciais","Igualdade social e preservação ambiental","Campanhas eleitorais obrigatórias nacionais","Controle direto da produção industrial"], a:1 },
+      { id:9, q:"Qual é um dos principais desafios atuais enfrentados pelos sindicatos?", options:["Excesso de trabalhadores sindicalizados ativos","Retorno ao modelo artesanal de produção","Redução de filiados e mudanças no trabalho","Proibição de manifestações por lei federal"], a:2 },
+      { id:10, q:"O contexto que impulsionou os sindicatos modernos foi:", options:["Retorno ao modelo artesanal tradicional","Condições precárias da Revolução Industrial","Criação da CLT no Brasil contemporâneo","Estabilidade econômica do século XVIII"], a:1 },
+      { id:11, q:"Qual instrumento fortalece o equilíbrio entre trabalhadores e empresas?", options:["Serviços médicos oferecidos pelo sindicato","Financiamento por contribuições obrigatórias","Acordos coletivos sobre condições de trabalho","Cursos técnicos voltados à qualificação"], a:2 },
+      { id:12, q:"Qual mudança ocorreu no financiamento sindical após 2017?", options:["Aumento progressivo da contribuição anual","Proibição de arrecadação por entidades sindicais","Substituição por financiamento estatal direto","Transformação da contribuição em facultativa"], a:3 },
+      { id:13, q:"Quando não há acordo nas negociações, os sindicatos podem:", options:["Encerrar definitivamente suas atividades","Utilizar apenas meios digitais de comunicação","Organizar paralisações e mobilizações","Transferir decisões ao governo federal"], a:2 },
+      { id:14, q:"Qual apoio individual pode ser oferecido aos trabalhadores?", options:["Aquisição de bens materiais subsidiados","Assistência jurídica em conflitos trabalhistas","Criação de empresas vinculadas ao sindicato","Controle governamental de salários"], a:1 },
+      { id:15, q:"Como os sindicatos influenciam a economia?", options:["Reduzindo a produção industrial nacional","Elevando o poder de compra dos trabalhadores","Diminuindo o número de empregos formais","Regulando o comércio internacional"], a:1 },
+      { id:16, q:"Qual benefício é frequentemente oferecido aos associados?", options:["Participação nos lucros das empresas privadas","Acesso a cursos de qualificação profissional","Isenção total de impostos governamentais","Garantia permanente de emprego"], a:1 },
+      { id:17, q:"No sistema sindical, as federações são:", options:["Empresas responsáveis por gerir sindicatos","Órgãos estatais de fiscalização trabalhista","Entidades que agrupam sindicatos similares","Associações exclusivas de empregadores"], a:2 },
+      { id:18, q:"A modernização sindical é necessária para:", options:["Substituir completamente a legislação vigente","Concorrer diretamente com empresas privadas","Adaptar-se às mudanças do mercado de trabalho","Eliminar a participação dos trabalhadores"], a:2 },
+      { id:19, q:"Qual é uma função educativa dos sindicatos?", options:["Oferecer ensino formal obrigatório nacional","Informar sobre direitos e deveres trabalhistas","Substituir instituições escolares públicas","Criar políticas educacionais governamentais"], a:1 },
+      { id:20, q:"A greve é considerada legítima porque:", options:["Substitui qualquer negociação entre partes","É obrigatória em conflitos trabalhistas","Atua como forma de pressão coletiva","Elimina o diálogo entre empregador e empregado"], a:2 },
+      { id:21, q:"Além da economia, os sindicatos influenciam:", options:["Apenas a dimensão cultural da sociedade","Somente o desenvolvimento tecnológico","Esferas sociais e políticas amplas","Exclusivamente o setor empresarial"], a:2 },
+      { id:22, q:"As confederações têm como função:", options:["Representar trabalhadores na base local","Coordenar entidades em nível nacional","Fiscalizar leis dentro das empresas","Organizar ações regionais diretas"], a:1 },
+      { id:23, q:"A participação dos trabalhadores fortalece os sindicatos porque:", options:["Aumenta apenas a arrecadação financeira","Amplia sua legitimidade e atuação","Substitui decisões governamentais","Reduz conflitos entre empregadores"], a:1 },
+      { id:24, q:"Qual papel social os sindicatos exercem?", options:["Controle direto da economia nacional","Promoção da cidadania e inclusão social","Administração de grandes empresas privadas","Organização exclusiva de eventos culturais"], a:1 },
+      { id:25, q:"Como a tecnologia impacta os sindicatos atualmente?", options:["Torna sua existência desnecessária","Elimina todos os empregos formais","Exige adaptação a novas realidades","Impede negociações coletivas"], a:2 },
+      { id:26, q:"Como os sindicatos podem atrair trabalhadores jovens?", options:["Ignorando transformações do mercado","Incentivando participação e informação","Reduzindo serviços oferecidos","Evitando uso de ferramentas digitais"], a:1 },
+      { id:27, q:"A transparência tornou-se essencial após 2017 porque:", options:["A contribuição tornou-se obrigatória","Sindicatos passaram a gerir empresas","A contribuição passou a ser opcional","Entidades perderam funções legais"], a:2 },
+      { id:28, q:"A concentração de trabalhadores nas fábricas gerou:", options:["Redução da produção industrial","Melhoria imediata das condições","Problemas sociais e trabalhistas","Fim da organização coletiva"], a:2 },
+      { id:29, q:"Qual é a função das assembleias sindicais?", options:["Cumprir apenas exigências burocráticas","Centralizar decisões nos líderes","Promover debate e decisão coletiva","Substituir negociações coletivas"], a:2 },
+      { id:30, q:"Os sindicatos são importantes para a democracia porque:", options:["Substituem o papel do governo","Representam interesses coletivos sociais","Controlam processos eleitorais","Eliminam conflitos entre classes"], a:1 }
+    ]
+  },
+
+  associacoes: {
+    title: "Quiz Associações",
+    subtitle: "Modo em equipes com sorteio de participante e perguntas sobre associações.",
+    preview: [
+      "• Tema: associações",
+      "• 20 rodadas no total",
+      "• 10 questões para cada equipe",
+      "• Sorteio de participante a cada pergunta",
+      "• Alternativas embaralhadas a cada rodada"
+    ],
+    bank: [
+      { id:1, q:"O que é uma associação?", options:["Uma empresa criada para gerar lucro entre os sócios","Uma entidade pública controlada pelo governo","Uma entidade privada sem fins lucrativos formada por pessoas com objetivos comuns","Um grupo informal sem regras definidas"], a:2 },
+      { id:2, q:"Qual é uma das principais características de uma associação?", options:["Distribuição de lucros entre os associados","Reinvestimento dos recursos na própria associação","Obrigação de gerar lucro anual","Funcionamento sem necessidade de regras"], a:1 },
+      { id:3, q:"Qual é um dos passos para criar uma associação?", options:["Registrar a empresa na bolsa de valores","Criar um estatuto social com regras da entidade","Definir preço dos produtos vendidos","Contratar funcionários obrigatoriamente"], a:1 },
+      { id:4, q:"Qual é a principal característica das associações?", options:["Distribuir lucros entre os participantes","Ter fins econômicos obrigatórios","Não ter finalidade lucrativa","Ser formada apenas por empresas"], a:2 },
+      { id:5, q:"O que é o estatuto de uma associação?", options:["Um documento financeiro","Um conjunto de regras que organiza a associação","Uma lei criada pelo governo","Um contrato de trabalho"], a:1 },
+      { id:6, q:"Qual é o objetivo das associações de produtores?", options:["Apenas exportar produtos","Melhorar a produção e aumentar a renda coletiva","Trabalhar individualmente","Criar leis para o governo"], a:1 },
+      { id:7, q:"Qual é o primeiro passo para criar uma associação?", options:["Registrar no cartório","Criar o CNPJ","Reunir pessoas interessadas","Eleger a diretoria"], a:2 },
+      { id:8, q:"O que é o Estatuto Social?", options:["Um documento financeiro da associação","Um contrato de venda","Um documento com regras e funcionamento da associação","Um cadastro na Receita Federal"], a:2 },
+      { id:9, q:"Quando a associação passa a existir legalmente?", options:["Após a reunião inicial","Após a aprovação do nome","Após o registro em cartório","Após a eleição da diretoria"], a:2 },
+      { id:10, q:"O que é o estatuto social de uma associação?", options:["Um contrato de trabalho entre associados","Um documento que define as regras e funcionamento da associação","Um registro financeiro da entidade","Um tipo de imposto obrigatório"], a:1 },
+      { id:11, q:"Qual é a importância do estatuto social?", options:["Apenas cumprir uma formalidade sem utilidade prática","Servir somente para guardar dados dos associados","Garantir organização, segurança jurídica e evitar conflitos","Substituir a diretoria da associação"], a:2 },
+      { id:12, q:"Como o estatuto social pode ser alterado?", options:["Apenas pelo presidente, sem consulta","Por decisão individual de qualquer associado","Em assembleia, com aprovação dos associados e registro em cartório","Não pode ser alterado depois de criado"], a:2 },
+      { id:13, q:"A divisão entre Assembleia Geral, Diretoria e Conselho Fiscal tem como principal finalidade:", options:["Reduzir a participação dos associados nas decisões.","Estabelecer equilíbrio entre decisão, execução e fiscalização.","Transferir todas as responsabilidades para a diretoria.","Evitar a criação de regras formais."], a:1 },
+      { id:14, q:"O estatuto social contribui para a segurança jurídica da associação porque:", options:["Substitui as leis vigentes.","Define regras internas e orienta o funcionamento da entidade.","Elimina a necessidade de prestação de contas.","Dispensa a participação dos associados."], a:1 },
+      { id:15, q:"A atuação do Conselho Fiscal fortalece a credibilidade da associação principalmente por:", options:["Coordenar projetos sociais.","Garantir transparência na gestão financeira.","Eleger os membros da diretoria.","Representar juridicamente a associação."], a:1 },
+      { id:16, q:"Sobre as associações, assinale a alternativa correta:", options:["Possuem finalidade lucrativa e distribuem lucros entre os associados.","São formadas apenas por empresas com fins econômicos.","São pessoas jurídicas de direito privado sem finalidade lucrativa.","Não possuem personalidade jurídica."], a:2 },
+      { id:17, q:"Qual das alternativas apresenta corretamente as etapas de criação de uma associação?", options:["Registro direto e início das atividades.","Manifestação de vontade, estatuto, assembleia de fundação e registro.","Apenas elaboração do estatuto.","Criação por uma única pessoa."], a:1 },
+      { id:18, q:"Em caso de dissolução da associação, o patrimônio deve:", options:["Ser dividido entre os associados.","Ser doado a qualquer pessoa física.","Ser destinado ao governo obrigatoriamente.","Ser destinado a outra entidade com finalidade semelhante."], a:3 },
+      { id:19, q:"De acordo com o conteúdo, qual é o principal objetivo da captação de recursos em uma associação?", options:["Gerar lucro para dividir entre os associados","Garantir que a associação consiga se manter e realizar seus objetivos","Enriquecer a diretoria da associação","Substituir o trabalho dos conselhos profissionais"], a:1 },
+      { id:20, q:"Para que uma associação possa captar recursos de forma correta, o que ela precisa ter obrigatoriamente?", options:["Apenas um grupo de pessoas interessadas","Somente um nome e uma ideia de projeto","Registro em cartório, estatuto aprovado e CNPJ ativo","Divulgação em redes sociais"], a:2 },
+      { id:21, q:"Segundo o texto, como deve ser o uso do dinheiro captado pela associação?", options:["Pode ser usado livremente pelos associados","Deve ser usado apenas para benefícios pessoais da diretoria","Pode ser dividido entre os membros no final do ano","Deve ser usado com responsabilidade, transparência e para os objetivos da associação"], a:3 },
+      { id:22, q:"Sobre o associativismo, é correto afirmar que:", options:["Serve apenas para fins econômicos e lucro entre os membros.","É a reunião de pessoas ou organizações com objetivos comuns, podendo ser formal ou informal, e sem fins econômicos.","Não exige estatuto ou formalização legal para funcionar corretamente.","Somente pessoas jurídicas podem participar de associações."], a:1 },
+      { id:23, q:"Qual é a função do estatuto em uma associação?", options:["Garantir que apenas o presidente da associação tome todas as decisões.","Definir as regras internas, direitos e deveres dos associados, a organização da diretoria e fontes de recursos.","Servir apenas como documento histórico, sem efeito legal.","Impedir a entrada de novos associados de forma permanente."], a:1 },
+      { id:24, q:"Sobre a formalização de uma associação, é correto afirmar que:", options:["Não é necessário registrar a ata de assembleia nem o estatuto para obter personalidade jurídica.","Apenas é necessário ter uma lista de membros, sem registro em cartório ou CNPJ.","Para adquirir personalidade jurídica, é necessário registrar a ata da assembleia de fundação, o estatuto, obter CNPJ e, quando houver funcionários, cumprir obrigações trabalhistas e previdenciárias.","A formalização impede que a associação tenha liberdade de atuação ou direitos iguais entre os membros."], a:2 },
+      { id:25, q:"Segundo o texto, qual é um dos principais erros cometidos na criação do estatuto de uma associação?", options:["Não registrar a associação em cartório.","Criar uma estrutura simples demais.","Inserir muitos cargos e órgãos que não funcionam na prática.","Deixar a diretoria com total autonomia."], a:2 },
+      { id:26, q:"Quais são as instâncias consideradas básicas e suficientes para a maioria das associações?", options:["Presidência, Conselho Consultivo e Tesouraria.","Assembleia Geral, Diretoria Executiva e, quando necessário, Conselho Fiscal.","Diretoria Administrativa, Conselho Deliberativo e Secretaria.","Assembleia Geral, Conselho Consultivo e Conselho Deliberativo."], a:1 },
+      { id:27, q:"Por que é importante que o estatuto reflita a realidade da associação?", options:["Para diminuir o número de associados.","Para facilitar o cumprimento das regras e garantir segurança jurídica.","Para aumentar a burocracia interna.","Para evitar reuniões e assembleias."], a:1 }
+    ]
+  },
+
+  cooperativas: {
+    title: "Quiz Cooperativismo",
+    subtitle: "Modo em equipes com sorteio de participante e perguntas sobre cooperativismo.",
+    preview: [
+      "• Tema: cooperativas",
+      "• 20 rodadas no total",
+      "• 10 questões para cada equipe",
+      "• Sorteio de participante a cada pergunta",
+      "• Alternativas embaralhadas a cada rodada"
+    ],
+    bank: [
+      { id:1, q:"Quais dos seguintes itens não é um dos 7 princípios do cooperativismo?", options:["Adesão voluntária e livre","Gestão democrática","Busca pelo lucro máximo para acionistas","Interesse pela comunidade"], a:2 },
+      { id:2, q:"Em relação ao destino dos resultados:", options:["Distribuição proporcional ao capital investido","Foco no bem-estar dos membros","Foco no lucro para acionistas","Resultados vão para o governo"], a:1 },
+      { id:3, q:"Quais valores são fundamentais no cooperativismo?", options:["Competitividade e individualismo","Ajuda mútua, responsabilidade, democracia e solidariedade","Autoritarismo e hierarquia","Lucro e poder"], a:1 },
+      { id:4, q:"O que significa adesão livre e voluntária?", options:["Apenas pessoas ricas podem participar","Entrada limitada por indicação","Qualquer pessoa pode participar","Só funcionários podem participar"], a:2 },
+      { id:5, q:"Como funciona a gestão democrática?", options:["Quem investe mais vota mais","Apenas o presidente decide","Cada membro tem direito a um voto","Só fundadores votam"], a:2 },
+      { id:6, q:"O que é intercooperação?", options:["Competição entre cooperativas","Cooperação entre cooperativas","Venda ao exterior","Controle do governo"], a:1 },
+      { id:7, q:"Sobre o cooperativismo:", options:["Foco no lucro individual","Associação com gestão democrática","Controle por investidores externos","Sistema hierárquico"], a:1 },
+      { id:8, q:"Na gestão cooperativista:", options:["Voto proporcional ao capital","Apenas fundadores decidem","Cada membro tem um voto","Diretoria decide tudo"], a:2 },
+      { id:9, q:"Análise:\nI. Atende necessidades dos membros\nII. Promove competição interna\nIII. Distribuição proporcional", options:["Apenas I","I e II","I e III","I, II e III"], a:2 },
+      { id:10, q:"Qual é o papel das assembleias gerais?", options:["Apenas informar","Principal órgão de decisão","Definir regras","Substituir administradores"], a:1 },
+      { id:11, q:"A participação econômica envolve:", options:["Apenas receber lucros","Capital + divisão de sobras","Investimento do governo","Pagamento de taxas"], a:1 },
+      { id:12, q:"Por que fiscalizar a cooperativa?", options:["Substituir administradores","Impedir novos membros","Garantir transparência","Reduzir investimentos"], a:2 },
+      { id:13, q:"Cooperativas agropecuárias:", options:["Saúde","Moradia","Produção rural","Educação"], a:2 },
+      { id:14, q:"Cooperativas de crédito:", options:["Produção de bens","Serviços financeiros","Moradia","Transporte"], a:1 },
+      { id:15, q:"Cooperativas de trabalho:", options:["Consumidores","Profissionais juntos","Saúde","Agricultura"], a:1 },
+      { id:16, q:"Modelo Raiffeisen:", options:["Grande capital","Comunidades rurais e confiança","Lucro para governo","Empresários urbanos"], a:1 },
+      { id:17, q:"Modelo Luzzatti:", options:["Sem capital","Pequeno capital e trabalhadores","Latifundiários","Multinacionais"], a:1 },
+      { id:18, q:"Lei nº 4.595/1964:", options:["Extinção das cooperativas","Autonomia total","Fiscalização pelo Banco Central","Banco privado"], a:2 },
+      { id:19, q:"Uma vantagem do cooperativismo:", options:["Concentração de renda","Divisão justa dos resultados","Sem participação","Lucro só para fundadores"], a:1 },
+      { id:20, q:"O cooperativismo contribui para a economia local porque:", options:["Diminui empregos","Gera renda","Impede crescimento","Centraliza ganhos"], a:1 },
+      { id:21, q:"A gestão cooperativa é:", options:["Autoritária","Democrática","Individual","Hierárquica"], a:1 },
+      { id:22, q:"O cooperativismo fortalece o comércio local porque:", options:["Proíbe compras externas","Reinveste na comunidade","Não paga impostos","Controla preços"], a:1 },
+      { id:23, q:"Quando produtores se unem:", options:["Perdem autonomia","Ganham poder de negociação","Ganham menos","São proibidos de vender"], a:1 },
+      { id:24, q:"O interesse pela comunidade significa:", options:["Lucro dos diretores","Investimento social","Fechar cooperativa","Obrigar membros"], a:1 },
+      { id:25, q:"Qual é a principal função de uma cooperativa para seus membros?", options:["Gerar lucro apenas para investidores","Atender às necessidades dos cooperados","Controlar o mercado","Substituir o governo"], a:1 },
+      { id:26, q:"O capital social em uma cooperativa é:", options:["Dinheiro do governo","Recursos dos cooperados","Lucro obrigatório","Taxa de imposto"], a:1 },
+      { id:27, q:"O princípio da autonomia significa:", options:["Dependência do governo","Controle externo","Gestão independente","Controle de um líder"], a:2 },
+      { id:28, q:"Cooperativas se diferenciam porque:", options:["Não possuem organização","São controladas externamente","Focam no coletivo","Não distribuem resultados"], a:2 },
+      { id:29, q:"A participação dos cooperados é importante porque:", options:["Não tem importância","Serve para pagar taxas","Garante decisões democráticas","Substitui a gestão"], a:2 },
+      { id:30, q:"Gestão participativa significa:", options:["Decisão individual","Participação de todos","Controle externo","Ausência de regras"], a:1 },
+      { id:31, q:"O cooperativismo é sustentável porque:", options:["Explora recursos","Foca só no lucro","Valoriza o desenvolvimento","Ignora o ambiente"], a:2 },
+      { id:32, q:"Solidariedade em cooperativas é:", options:["Competição","Ajuda mútua","Lucro individual","Controle"], a:1 },
+      { id:33, q:"As sobras de uma cooperativa são:", options:["Para o governo","Divididas entre cooperados","Para administradores","Descartadas"], a:1 },
+      { id:34, q:"O objetivo principal do cooperativismo é:", options:["Acumular riqueza","Promover o bem-estar coletivo","Controlar empresas","Substituir o mercado"], a:1 }
+    ]
+  }
 };
 
-        const COMPETITOR_BANK = {
-            "Cooperativas": ["Competidor 1", "Competidor 2", "Competidor 3", "Competidor 4", "Competidor 5"],
-            "Sindicatos": ["Competidor 1", "Competidor 2", "Competidor 3", "Competidor 4", "Competidor 5"],
-            "Associações": ["Competidor 1", "Competidor 2", "Competidor 3", "Competidor 4", "Competidor 5"]
-        };
+const startScreen = document.getElementById('startScreen');
+const startForm = document.getElementById('startForm');
+const questionSetSelect = document.getElementById('questionSet');
+const teamANameInput = document.getElementById('teamAName');
+const teamBNameInput = document.getElementById('teamBName');
+const teamAMembersInput = document.getElementById('teamAMembers');
+const teamBMembersInput = document.getElementById('teamBMembers');
+const gameTitleEl = document.getElementById('gameTitle');
+const gameSubtitleEl = document.getElementById('gameSubtitle');
+const questionPreviewEl = document.getElementById('questionPreview');
+const questionEl = document.getElementById('question');
+const qMetaEl = document.getElementById('qmeta');
+const answersEl = document.getElementById('answers');
+const qPosEl = document.getElementById('qpos');
+const roundInfoEl = document.getElementById('roundInfo');
+const turnTeamEl = document.getElementById('turnTeam');
+const currentPlayerEl = document.getElementById('currentPlayer');
+const scoreInfoEl = document.getElementById('scoreInfo');
+const resultBannerEl = document.getElementById('resultBanner');
+const roundSummaryEl = document.getElementById('roundSummary');
+const nextBtn = document.getElementById('nextBtn');
+const restartBtn = document.getElementById('restartBtn');
+const tfill = document.getElementById('tfill');
+const tclock = document.getElementById('tclock');
+const teamALabel = document.getElementById('teamALabel');
+const teamBLabel = document.getElementById('teamBLabel');
+const teamAScore = document.getElementById('teamAScore');
+const teamBScore = document.getElementById('teamBScore');
+const teamAList = document.getElementById('teamAList');
+const teamBList = document.getElementById('teamBList');
 
-        let allQuestions = [];
-        let drawnQuestions = [];
+let state = null;
+let tStart = 0;
+let tRemain = TIME_PER_Q;
+let tTick = null;
+let isTiming = false;
 
-        let team1Comps = [];
-        let team2Comps = [];
-        let pool1 = [];
-        let pool2 = [];
+function parseMembers(value){
+  return value.split(/\n+/).map(v => v.trim()).filter(Boolean);
+}
 
-        let currentTeam = 0;
-        let team1Correct = 0, team1Wrong = 0;
-        let team2Correct = 0, team2Wrong = 0;
+function buildQuestionDeck(bank){
+  if(bank.length < TOTAL_ROUNDS){
+    throw new Error(`O conjunto selecionado possui apenas ${bank.length} questões. São necessárias pelo menos ${TOTAL_ROUNDS}.`);
+  }
+  return shuffle(bank).slice(0, TOTAL_ROUNDS).map(q => ({ ...q, options:[...q.options] }));
+}
 
-        const startBtn = document.getElementById('startQuizButton');
-        const nextBtn = document.getElementById('nextQuestionButton');
-        const resetBtn = document.getElementById('resetButton');
-        const loadingMsg = document.getElementById('loadingMessage');
-        const setupBox = document.getElementById('setupBox');
+function applySetTheme(setKey){
+  const selected = QUESTION_SETS[setKey] || QUESTION_SETS.sindicatos;
+  gameTitleEl.textContent = selected.title;
+  gameSubtitleEl.textContent = selected.subtitle;
+  questionPreviewEl.innerHTML = `<div><strong>Prévia do jogo</strong><br><br>${selected.preview.join('<br>')}</div>`;
+}
 
-        startBtn.addEventListener('click', () => {
-            const team1SheetName = document.getElementById('team1Select').value;
-            const team2SheetName = document.getElementById('team2Select').value;
+function initGame(config){
+  const selectedSet = QUESTION_SETS[config.questionSet];
+  state = {
+    questionSet: config.questionSet,
+    questionSetTitle: selectedSet.title,
+    teams: [
+      {
+        name: config.teamAName,
+        members: config.teamAMembers,
+        drawPool: shuffle([...config.teamAMembers]),
+        score:0,
+        asked:0,
+        currentPlayer:""
+      },
+      {
+        name: config.teamBName,
+        members: config.teamBMembers,
+        drawPool: shuffle([...config.teamBMembers]),
+        score:0,
+        asked:0,
+        currentPlayer:""
+      }
+    ],
+    deck: buildQuestionDeck(selectedSet.bank),
+    round: 0,
+    currentTeamIndex: 0,
+    currentQuestion: null,
+    awaitingNext: false,
+    finished: false
+  };
 
-            if (team1SheetName === team2SheetName) {
-                alert('Por favor, selecione equipes diferentes.');
-                return;
-            }
+  applySetTheme(config.questionSet);
+  updateTeamPanels();
+  updateTopInfo();
+  resultBannerEl.style.display = 'none';
+  nextBtn.disabled = true;
+  nextBtn.textContent = 'Próxima questão';
+  renderNextQuestion();
+}
 
-            loadingMsg.style.display = 'block';
-            startBtn.disabled = true;
+function updateTeamPanels(){
+  teamALabel.textContent = state ? state.teams[0].name : 'Equipe 1';
+  teamBLabel.textContent = state ? state.teams[1].name : 'Equipe 2';
+  teamAScore.textContent = state ? `${state.teams[0].score} ponto(s) · ${state.teams[0].asked}/10 questão(ões)` : '0 ponto(s)';
+  teamBScore.textContent = state ? `${state.teams[1].score} ponto(s) · ${state.teams[1].asked}/10 questão(ões)` : '0 ponto(s)';
+  renderMemberList(teamAList, state ? state.teams[0] : null);
+  renderMemberList(teamBList, state ? state.teams[1] : null);
+}
 
-            team1Comps = [...COMPETITOR_BANK[team1SheetName]];
-            team2Comps = [...COMPETITOR_BANK[team2SheetName]];
-            allQuestions = [
-                ...QUESTION_BANK[team1SheetName],
-                ...QUESTION_BANK[team2SheetName]
-            ];
+function renderMemberList(target, team){
+  target.innerHTML = '';
+  if(!team) return;
+  team.members.forEach(name => {
+    const li = document.createElement('li');
+    li.textContent = name;
+    if(team.currentPlayer === name) li.classList.add('memberCurrent');
+    target.appendChild(li);
+  });
+}
 
-            loadingMsg.style.display = 'none';
+function pickNextTeamIndex(){
+  const aDone = state.teams[0].asked >= QUESTIONS_PER_TEAM;
+  const bDone = state.teams[1].asked >= QUESTIONS_PER_TEAM;
+  if(aDone && bDone) return -1;
+  if(aDone) return 1;
+  if(bDone) return 0;
+  return state.round % 2 === 0 ? 0 : 1;
+}
 
-            if (team1Comps.length === 0 || team2Comps.length === 0 || allQuestions.length < DRAW_COUNT) {
-                alert(`Não foi possível carregar dados suficientes. Verifique as questões e competidores.`);
-                startBtn.disabled = false;
-                return;
-            }
+function pickNextPlayer(team){
+  if(!team.drawPool || team.drawPool.length === 0){
+    team.drawPool = shuffle([...team.members]);
+  }
+  return team.drawPool.shift();
+}
 
-            startGame(team1SheetName, team2SheetName);
-        });
+function renderNextQuestion(){
+  if(!state || state.finished) return;
 
-        function startGame(t1Name, t2Name) {
-            pool1 = [...team1Comps];
-            pool2 = [...team2Comps];
-            let questionPool = [...allQuestions];
+  const nextTeamIndex = pickNextTeamIndex();
+  if(nextTeamIndex === -1){
+    endGame();
+    return;
+  }
 
-            drawnQuestions = [];
-            while (drawnQuestions.length < DRAW_COUNT && questionPool.length > 0) {
-                const idx = Math.floor(Math.random() * questionPool.length);
-                drawnQuestions.push(questionPool.splice(idx, 1)[0]);
-            }
+  state.currentTeamIndex = nextTeamIndex;
+  const team = state.teams[nextTeamIndex];
+  team.currentPlayer = pickNextPlayer(team);
+  state.currentQuestion = state.deck[state.round];
+  state.awaitingNext = false;
 
-            setupBox.style.display = 'none';
-            document.getElementById('themeDisplay').innerText = `Quiz: ${t1Name} vs ${t2Name}`;
-            document.getElementById('themeDisplay').style.display = 'block';
+  const mixed = shuffle(
+    state.currentQuestion.options.map((text, idx) => ({
+      text,
+      isCorrect: idx === state.currentQuestion.a
+    }))
+  );
 
-            document.getElementById('team1Name').innerText = t1Name;
-            document.getElementById('team2Name').innerText = t2Name;
-            document.getElementById('scoreBox').style.display = 'block';
-            document.getElementById('questionBox').style.display = 'block';
+  state.currentQuestion.mixed = mixed;
+  state.currentQuestion.correctIndex = mixed.findIndex(opt => opt.isCorrect);
 
-            nextBtn.style.display = 'block';
-            resetBtn.style.display = 'block';
+  questionEl.textContent = state.currentQuestion.q;
+  qMetaEl.textContent = `${state.questionSetTitle} · Questão original #${state.currentQuestion.id}`;
+  resultBannerEl.style.display = 'none';
+  resultBannerEl.textContent = '';
+  answersEl.innerHTML = '';
 
-            currentTeam = 2;
-            nextBtn.disabled = true;
-            drawQuestion();
-        }
+  mixed.forEach((opt, idx) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.innerHTML = `<span class="badge">${labels[idx]}</span><span>${opt.text}</span>`;
+    btn.addEventListener('click', () => selectAnswer(idx, btn));
+    answersEl.appendChild(btn);
+  });
 
-        function drawQuestion() {
-            if (drawnQuestions.length === 0) {
-                document.getElementById('questionBox').innerText = 'PERGUNTAS FINALIZADAS!';
-                nextBtn.style.display = 'none';
-                document.getElementById('team1Column').style.display = 'none';
-                document.getElementById('team2Column').style.display = 'none';
-                return;
-            }
+  roundSummaryEl.textContent = `Tema: ${state.questionSetTitle}. Vez da equipe ${team.name}. Participante sorteado: ${team.currentPlayer}.`;
+  updateTeamPanels();
+  updateTopInfo();
+  nextBtn.disabled = true;
+  nextBtn.textContent = 'Próxima questão';
+  resetTimer();
+  startTimer();
+}
 
-            currentTeam = currentTeam === 1 ? 2 : 1;
-            const question = drawnQuestions.pop();
-            document.getElementById('questionBox').innerText = question;
+function updateTopInfo(){
+  if(!state){
+    roundInfoEl.textContent = '0/20';
+    turnTeamEl.textContent = 'Aguardando início';
+    currentPlayerEl.textContent = '-';
+    scoreInfoEl.textContent = '0 × 0';
+    qPosEl.textContent = 'Questão 0/20';
+    return;
+  }
 
-            let comp;
-            if (currentTeam === 1) {
-                if (pool1.length === 0) pool1 = [...team1Comps];
-                const idx = Math.floor(Math.random() * pool1.length);
-                comp = pool1.splice(idx, 1)[0];
-                showColumn(1, comp);
-            } else {
-                if (pool2.length === 0) pool2 = [...team2Comps];
-                const idx = Math.floor(Math.random() * pool2.length);
-                comp = pool2.splice(idx, 1)[0];
-                showColumn(2, comp);
-            }
-        }
+  roundInfoEl.textContent = `${state.round}/${TOTAL_ROUNDS}`;
+  turnTeamEl.textContent = state.teams[state.currentTeamIndex]?.name || '-';
+  currentPlayerEl.textContent = state.teams[state.currentTeamIndex]?.currentPlayer || '-';
+  scoreInfoEl.textContent = `${state.teams[0].score} × ${state.teams[1].score}`;
+  qPosEl.textContent = `Questão ${Math.min(state.round + 1, TOTAL_ROUNDS)}/${TOTAL_ROUNDS}`;
+}
 
-        function showColumn(team, comp) {
-            document.getElementById('team1Column').style.display = 'none';
-            document.getElementById('team2Column').style.display = 'none';
-            const col = document.getElementById(`team${team}Column`);
-            col.style.display = 'block';
-            document.getElementById(`team${team}DisplayName`).innerText = document.getElementById(`team${team}Name`).innerText;
-            document.getElementById(`team${team}CompetitorName`).innerText = `Competidor: ${comp}`;
-        }
+function selectAnswer(idx, btn){
+  if(!state || state.finished || state.awaitingNext) return;
 
-        document.getElementById('rightButton').addEventListener('click', () => answer(1, true));
-        document.getElementById('wrongButton').addEventListener('click', () => answer(1, false));
-        document.getElementById('rightButton2').addEventListener('click', () => answer(2, true));
-        document.getElementById('wrongButton2').addEventListener('click', () => answer(2, false));
+  stopTimer();
 
-        function answer(team, correct) {
-            const rightBtn = document.getElementById(team === 1 ? 'rightButton' : 'rightButton2');
-            const wrongBtn = document.getElementById(team === 1 ? 'wrongButton' : 'wrongButton2');
+  const buttons = Array.from(answersEl.querySelectorAll('button'));
+  buttons.forEach(b => b.disabled = true);
 
-            if (team === 1) {
-                correct ? team1Correct++ : team1Wrong++;
-                document.getElementById('team1CorrectCount').innerText = team1Correct;
-                document.getElementById('team1WrongCount').innerText = team1Wrong;
-            } else {
-                correct ? team2Correct++ : team2Wrong++;
-                document.getElementById('team2CorrectCount').innerText = team2Correct;
-                document.getElementById('team2WrongCount').innerText = team2Wrong;
-            }
+  const team = state.teams[state.currentTeamIndex];
+  const correctIndex = state.currentQuestion.correctIndex;
+  const isCorrect = idx === correctIndex;
 
-            rightBtn.disabled = true;
-            wrongBtn.disabled = true;
-            nextBtn.disabled = false;
-        }
+  if(isCorrect){
+    btn.classList.add('correct');
+    team.score += 1;
+    resultBannerEl.textContent = `Resposta correta. ${team.currentPlayer} marcou 1 ponto para ${team.name}.`;
+  } else {
+    btn.classList.add('wrong');
+    if(buttons[correctIndex]) buttons[correctIndex].classList.add('correct');
+    resultBannerEl.textContent = `Resposta incorreta. A alternativa correta era ${labels[correctIndex]}. ${team.name} não pontuou nesta rodada.`;
+  }
 
-        nextBtn.addEventListener('click', () => {
-            document.getElementById('rightButton').disabled = false;
-            document.getElementById('wrongButton').disabled = false;
-            document.getElementById('rightButton2').disabled = false;
-            document.getElementById('wrongButton2').disabled = false;
-            nextBtn.disabled = true;
-            drawQuestion();
-        });
+  team.asked += 1;
+  state.round += 1;
+  state.awaitingNext = true;
+  resultBannerEl.style.display = 'block';
+  roundSummaryEl.textContent = `${team.name} respondeu com ${team.currentPlayer}. Resultado: ${isCorrect ? 'acertou' : 'errou'}.`;
+  updateTeamPanels();
+  updateTopInfo();
 
-        resetBtn.addEventListener('click', () => window.location.reload());
-    </script>
+  if(state.round >= TOTAL_ROUNDS || (state.teams[0].asked >= QUESTIONS_PER_TEAM && state.teams[1].asked >= QUESTIONS_PER_TEAM)){
+    nextBtn.disabled = false;
+    nextBtn.textContent = 'Ver resultado final';
+  } else {
+    nextBtn.disabled = false;
+    nextBtn.textContent = 'Próxima questão';
+  }
+}
+
+function timeOutLose(){
+  if(!state || state.finished || state.awaitingNext) return;
+
+  const buttons = Array.from(answersEl.querySelectorAll('button'));
+  buttons.forEach(b => b.disabled = true);
+
+  const correctBtn = buttons[state.currentQuestion.correctIndex];
+  if(correctBtn) correctBtn.classList.add('correct');
+
+  const team = state.teams[state.currentTeamIndex];
+  team.asked += 1;
+  state.round += 1;
+  state.awaitingNext = true;
+
+  resultBannerEl.style.display = 'block';
+  resultBannerEl.textContent = `Tempo encerrado. ${team.currentPlayer} não respondeu a tempo. A alternativa correta era ${labels[state.currentQuestion.correctIndex]}.`;
+  roundSummaryEl.textContent = `${team.name} perdeu a rodada por tempo esgotado.`;
+
+  updateTeamPanels();
+  updateTopInfo();
+
+  if(state.round >= TOTAL_ROUNDS || (state.teams[0].asked >= QUESTIONS_PER_TEAM && state.teams[1].asked >= QUESTIONS_PER_TEAM)){
+    nextBtn.disabled = false;
+    nextBtn.textContent = 'Ver resultado final';
+  } else {
+    nextBtn.disabled = false;
+    nextBtn.textContent = 'Próxima questão';
+  }
+}
+
+function endGame(){
+  state.finished = true;
+  stopTimer();
+  answersEl.innerHTML = '';
+
+  const [teamA, teamB] = state.teams;
+  let finalText = `Fim do quiz - ${state.questionSetTitle}.\n\n${teamA.name}: ${teamA.score} ponto(s)\n${teamB.name}: ${teamB.score} ponto(s)\n\n`;
+
+  if(teamA.score > teamB.score){
+    finalText += `Equipe vencedora: ${teamA.name}`;
+  } else if(teamB.score > teamA.score){
+    finalText += `Equipe vencedora: ${teamB.name}`;
+  } else {
+    finalText += `Resultado final: empate`;
+  }
+
+  questionEl.textContent = finalText;
+  qMetaEl.textContent = `As ${TOTAL_ROUNDS} rodadas foram concluídas.`;
+  resultBannerEl.style.display = 'none';
+  nextBtn.disabled = true;
+  nextBtn.textContent = 'Quiz encerrado';
+  updateTopInfo();
+}
+
+function resetTimer(){
+  tRemain = TIME_PER_Q;
+  updateTimerUI(1, Math.ceil(tRemain/1000));
+}
+
+function startTimer(){
+  if(isTiming) return;
+  isTiming = true;
+  tStart = performance.now();
+
+  const tick = (now) => {
+    if(!isTiming) return;
+    const elapsed = now - tStart;
+    const left = Math.max(0, tRemain - elapsed);
+    const pct = left / TIME_PER_Q;
+    updateTimerUI(pct, Math.ceil(left/1000));
+
+    if(left <= 0){
+      stopTimer();
+      timeOutLose();
+    } else {
+      tTick = requestAnimationFrame(tick);
+    }
+  };
+
+  tTick = requestAnimationFrame(tick);
+}
+
+function stopTimer(reset = false){
+  if(tTick) cancelAnimationFrame(tTick);
+  if(isTiming){
+    const now = performance.now();
+    const elapsed = now - tStart;
+    tRemain = Math.max(0, tRemain - elapsed);
+  }
+  isTiming = false;
+
+  if(reset){
+    tRemain = TIME_PER_Q;
+    updateTimerUI(1, Math.ceil(tRemain/1000));
+  }
+}
+
+function updateTimerUI(pct, secs){
+  tfill.style.width = `${Math.max(0, Math.min(1, pct)) * 100}%`;
+  tclock.textContent = `${secs}s`;
+  tfill.style.background = secs <= 5
+    ? 'linear-gradient(90deg, var(--danger), #ff9d5b)'
+    : 'linear-gradient(90deg, var(--accent), var(--accent-2))';
+}
+
+startForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+
+  const questionSet = questionSetSelect.value;
+  const teamAName = teamANameInput.value.trim();
+  const teamBName = teamBNameInput.value.trim();
+  const teamAMembers = parseMembers(teamAMembersInput.value);
+  const teamBMembers = parseMembers(teamBMembersInput.value);
+
+  if(!teamAName || !teamBName){
+    alert('Informe o nome das duas equipes.');
+    return;
+  }
+
+  if(teamAMembers.length === 0 || teamBMembers.length === 0){
+    alert('Informe pelo menos um participante em cada equipe.');
+    return;
+  }
+
+  try {
+    startScreen.style.display = 'none';
+    initGame({ questionSet, teamAName, teamBName, teamAMembers, teamBMembers });
+  } catch (err) {
+    alert(err.message || 'Não foi possível iniciar o quiz.');
+  }
+});
+
+nextBtn.addEventListener('click', () => {
+  if(!state) return;
+
+  if(state.round >= TOTAL_ROUNDS || (state.teams[0].asked >= QUESTIONS_PER_TEAM && state.teams[1].asked >= QUESTIONS_PER_TEAM)){
+    endGame();
+  } else {
+    renderNextQuestion();
+  }
+});
+
+restartBtn.addEventListener('click', () => {
+  stopTimer(true);
+  state = null;
+  startScreen.style.display = 'flex';
+  questionEl.textContent = 'Preencha as equipes para iniciar.';
+  qMetaEl.textContent = '';
+  answersEl.innerHTML = '';
+  resultBannerEl.style.display = 'none';
+  roundSummaryEl.textContent = 'Quando o quiz começar, aqui aparecerão a equipe sorteada para a vez, o participante escolhido e o resultado da resposta.';
+  nextBtn.disabled = true;
+  nextBtn.textContent = 'Próxima questão';
+  applySetTheme(questionSetSelect.value);
+  updateTopInfo();
+  updateTeamPanels();
+  setTimeout(() => teamANameInput.focus(), 30);
+});
+
+questionSetSelect.addEventListener('change', () => {
+  applySetTheme(questionSetSelect.value);
+});
+
+applySetTheme(questionSetSelect.value);
+setTimeout(() => teamANameInput.focus(), 30);
+</script>
 </body>
 </html>
