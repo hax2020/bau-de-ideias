@@ -1,762 +1,592 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Quiz - Classes de Solo</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Quiz de Solos</title>
 
 <style>
-
-:root{
-  --bg:#0b1020;
-  --panel:#121939;
-  --ink:#eaf0ff;
-  --muted:#a9b3d5;
-  --accent:#00e1ff;
-  --accent2:#8b5cf6;
-  --success:#16a34a;
-  --danger:#dc2626;
-}
-
 *{
-  box-sizing:border-box;
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, Helvetica, sans-serif;
 }
 
 body{
-  margin:0;
-  font-family:Arial, Helvetica, sans-serif;
-  background:
-    radial-gradient(circle at top left,#1c2560,#0b1020 60%);
-  color:var(--ink);
-  min-height:100vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  padding:20px;
+    background:linear-gradient(135deg,#10194d,#1f2f8f);
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+    color:white;
 }
 
-.app{
-  width:min(1000px,100%);
-  background:rgba(18,25,57,.95);
-  border:2px solid var(--accent);
-  border-radius:20px;
-  padding:24px;
+.quiz-container{
+    width:100%;
+    max-width:750px;
+    background:#111b5a;
+    border:3px solid #00d4ff;
+    border-radius:25px;
+    padding:30px;
+    box-shadow:0 0 30px rgba(0,0,0,0.4);
 }
 
-header{
-  margin-bottom:20px;
+h1{
+    text-align:center;
+    margin-bottom:10px;
+    font-size:2rem;
 }
 
-.logo{
-  font-size:30px;
-  font-weight:900;
+.subtitulo{
+    text-align:center;
+    opacity:0.8;
+    margin-bottom:25px;
 }
 
-.sub{
-  color:var(--muted);
+.topo{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+    gap:10px;
+    flex-wrap:wrap;
 }
 
-.scoreboard{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-  gap:12px;
-  margin-bottom:20px;
+.info-box{
+    background:#0c1448;
+    padding:12px 18px;
+    border-radius:15px;
+    font-weight:bold;
 }
 
-.scoreItem{
-  background:#0f1533;
-  border-radius:14px;
-  padding:14px;
+.progresso{
+    width:100%;
+    height:16px;
+    background:#0c1448;
+    border-radius:20px;
+    overflow:hidden;
+    margin-bottom:25px;
 }
 
-.label{
-  color:var(--muted);
-  font-size:12px;
+.progresso-barra{
+    height:100%;
+    width:0%;
+    background:linear-gradient(90deg,#00d4ff,#7d5fff);
+    transition:0.4s;
 }
 
-.value{
-  font-size:22px;
-  font-weight:900;
+.pergunta{
+    font-size:1.5rem;
+    font-weight:bold;
+    margin-bottom:25px;
+    line-height:1.4;
 }
 
-.question{
-  background:#0f1a4d;
-  border-radius:16px;
-  padding:20px;
-  font-size:24px;
-  font-weight:700;
-  line-height:1.4;
+.alternativas{
+    display:flex;
+    flex-direction:column;
+    gap:15px;
 }
 
-.answers{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:14px;
-  margin-top:20px;
+.alternativa{
+    background:#b30000;
+    border:none;
+    color:white;
+    padding:18px;
+    border-radius:15px;
+    cursor:pointer;
+    font-size:1rem;
+    font-weight:bold;
+    transition:0.3s;
 }
 
-@media(max-width:700px){
-  .answers{
-    grid-template-columns:1fr;
-  }
+.alternativa:hover{
+    transform:scale(1.02);
 }
 
-.answers button{
-  border:none;
-  border-radius:14px;
-  padding:18px;
-  background:#7f0f0f;
-  color:white;
-  font-size:16px;
-  font-weight:700;
-  cursor:pointer;
-  transition:.2s;
+.correta{
+    background:#00a86b !important;
 }
 
-.answers button:hover{
-  transform:translateY(-2px);
+.errada{
+    background:#444 !important;
 }
 
-.answers button.correct{
-  background:var(--success);
+.botoes{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-top:25px;
 }
 
-.answers button.wrong{
-  background:var(--danger);
+.botao{
+    flex:1;
+    padding:15px;
+    border:none;
+    border-radius:14px;
+    cursor:pointer;
+    font-weight:bold;
+    font-size:1rem;
+    transition:0.3s;
 }
 
-.timer{
-  width:100%;
-  height:18px;
-  background:#0f1533;
-  border-radius:999px;
-  overflow:hidden;
-  margin:18px 0;
-  position:relative;
+.proximo{
+    background:linear-gradient(90deg,#00d4ff,#7d5fff);
+    color:white;
 }
 
-.fill{
-  height:100%;
-  width:100%;
-  background:linear-gradient(90deg,var(--accent),var(--accent2));
+.ajuda{
+    background:#ff9800;
+    color:white;
 }
 
-.clock{
-  position:absolute;
-  inset:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:12px;
-  font-weight:900;
+.botao:disabled{
+    opacity:0.5;
+    cursor:not-allowed;
 }
 
-.controls{
-  margin-top:20px;
+.resultado{
+    text-align:center;
 }
 
-button.action{
-  border:none;
-  border-radius:12px;
-  padding:14px 20px;
-  font-weight:900;
-  cursor:pointer;
-  background:linear-gradient(90deg,var(--accent),var(--accent2));
+.resultado h2{
+    font-size:2rem;
+    margin-bottom:20px;
 }
 
-.resultBanner{
-  margin-top:18px;
-  padding:14px;
-  border-radius:12px;
-  background:#13204d;
-  display:none;
+.resultado p{
+    font-size:1.3rem;
+    margin-bottom:20px;
 }
 
-.startScreen{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.88);
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  z-index:999;
+.reiniciar{
+    background:linear-gradient(90deg,#00d4ff,#7d5fff);
+    color:white;
+    border:none;
+    padding:15px 30px;
+    border-radius:15px;
+    cursor:pointer;
+    font-size:1rem;
+    font-weight:bold;
 }
 
-.startCard{
-  width:min(500px,100%);
-  background:#121939;
-  padding:30px;
-  border-radius:20px;
-}
+@media(max-width:600px){
 
-.field{
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-  margin-bottom:20px;
-}
+    .pergunta{
+        font-size:1.2rem;
+    }
 
-input{
-  padding:14px;
-  border:none;
-  border-radius:12px;
-  background:#0f1533;
-  color:white;
-}
+    .alternativa{
+        font-size:0.95rem;
+    }
 
-footer{
-  margin-top:20px;
-  text-align:center;
-  color:var(--muted);
 }
-
 </style>
 </head>
 
 <body>
 
-<div class="startScreen" id="startScreen">
+<div class="quiz-container">
 
-  <div class="startCard">
+    <h1>🌱 Quiz de Solos</h1>
+    <div class="subtitulo">
+        10 perguntas sorteadas aleatoriamente
+    </div>
 
-    <h1>Quiz - Classes de Solo</h1>
+    <div id="quiz">
 
-    <form id="startForm">
+        <div class="topo">
+            <div class="info-box" id="contador">
+                Questão 1/10
+            </div>
 
-      <div class="field">
-        <label>Nome do jogador</label>
-        <input
-          id="playerName"
-          type="text"
-          placeholder="Digite seu nome"
-          required
-        >
-      </div>
+            <div class="info-box" id="pontuacao">
+                Pontos: 0
+            </div>
+        </div>
 
-      <button class="action" type="submit">
-        Começar Quiz
-      </button>
+        <div class="progresso">
+            <div class="progresso-barra" id="barra"></div>
+        </div>
 
-    </form>
+        <div class="pergunta" id="pergunta"></div>
 
-  </div>
+        <div class="alternativas" id="alternativas"></div>
 
-</div>
+        <div class="botoes">
+            <button class="botao ajuda" id="eliminarBtn">
+                Eliminar 2 alternativas
+            </button>
 
-<div class="app">
+            <button class="botao ajuda" id="pularBtn">
+                Pular pergunta
+            </button>
 
-<header>
+            <button class="botao proximo" id="proximoBtn" disabled>
+                Próxima questão
+            </button>
+        </div>
 
-  <div class="logo">
-    🌱 Quiz - Classes de Solo
-  </div>
-
-  <div class="sub">
-    Quiz individual sobre classificação dos solos
-  </div>
-
-</header>
-
-<div class="scoreboard">
-
-  <div class="scoreItem">
-    <div class="label">Questão</div>
-    <div class="value" id="qpos">0/13</div>
-  </div>
-
-  <div class="scoreItem">
-    <div class="label">Jogador</div>
-    <div class="value" id="playerInfo">-</div>
-  </div>
-
-  <div class="scoreItem">
-    <div class="label">Pontuação</div>
-    <div class="value" id="scoreInfo">0</div>
-  </div>
-
-</div>
-
-<div class="timer">
-
-  <div class="fill" id="tfill"></div>
-
-  <div class="clock" id="tclock">
-    30s
-  </div>
-
-</div>
-
-<div class="question" id="question">
-  Digite seu nome para iniciar.
-</div>
-
-<div class="answers" id="answers"></div>
-
-<div class="resultBanner" id="resultBanner"></div>
-
-<div class="controls">
-
-  <button class="action" id="nextBtn" disabled>
-    Próxima questão
-  </button>
-
-</div>
-
-<footer>
-  Professor Fernando Hax
-</footer>
+    </div>
 
 </div>
 
 <script>
 
-const QUESTIONS = [
+const bancoQuestoes = [
 
 {
-q:"O ARGISSOLO é caracterizado por:",
-options:[
-"Solo muito úmido, com água parada.",
-"Solo com muita argila embaixo, podendo ter acidez ou alumínio.",
-"Solo formado por material orgânico.",
-"Solo muito jovem e sem camadas."
+pergunta:"Qual solo é caracterizado por possuir muita argila nas camadas inferiores?",
+alternativas:[
+"A) Cambissolo",
+"B) Argissolo",
+"C) Neossolo",
+"D) Gleissolo"
 ],
-a:1
+correta:"B) Argissolo"
 },
 
 {
-q:"O CAMBISSOLO pode ser definido como:",
-options:[
-"Solo jovem, pouco desenvolvido.",
-"Solo profundo e muito intemperizado.",
-"Solo que racha quando seca.",
-"Solo rico em matéria orgânica."
+pergunta:"O Cambissolo é considerado:",
+alternativas:[
+"A) Muito fértil",
+"B) Muito profundo",
+"C) Jovem e pouco desenvolvido",
+"D) Rico em matéria orgânica"
 ],
-a:0
+correta:"C) Jovem e pouco desenvolvido"
 },
 
 {
-q:"O CHERNOSSOLO possui como principal característica:",
-options:[
-"Solo arenoso e seco.",
-"Solo com água parada.",
-"Solo escuro, fértil, com bastante argila e cálcio.",
-"Solo endurecido em profundidade."
+pergunta:"Qual solo é escuro, fértil e rico em cálcio?",
+alternativas:[
+"A) Chernossolo",
+"B) Planossolo",
+"C) Organossolo",
+"D) Espodossolo"
 ],
-a:2
+correta:"A) Chernossolo"
 },
 
 {
-q:"O ESPODOSSOLO apresenta:",
-options:[
-"Acúmulo de matéria orgânica ou alumínio embaixo.",
-"Grande quantidade de cálcio.",
-"Camadas pouco desenvolvidas.",
-"Rochas superficiais."
+pergunta:"Qual solo apresenta excesso de umidade e água parada?",
+alternativas:[
+"A) Gleissolo",
+"B) Nitossolo",
+"C) Latossolo",
+"D) Vertissolo"
 ],
-a:0
+correta:"A) Gleissolo"
 },
 
 {
-q:"O GLEISSOLO é um solo:",
-options:[
-"Muito seco e rachado.",
-"Muito úmido, com água parada.",
-"Rico em cálcio e argila.",
-"Formado apenas por areia."
+pergunta:"O Latossolo é conhecido por ser:",
+alternativas:[
+"A) Raso e pedregoso",
+"B) Muito jovem",
+"C) Profundo e muito intemperizado",
+"D) Rico em enxofre"
 ],
-a:1
+correta:"C) Profundo e muito intemperizado"
 },
 
 {
-q:"O LATOSSOLO é conhecido por ser:",
-options:[
-"Muito raso e pedregoso.",
-"Rico em matéria orgânica.",
-"Bem profundo e muito intemperizado.",
-"Jovem e pouco desenvolvido."
+pergunta:"O Neossolo pode ser definido como:",
+alternativas:[
+"A) Solo extremamente fértil",
+"B) Solo muito jovem sem camadas bem formadas",
+"C) Solo preto rico em cálcio",
+"D) Solo que racha na seca"
 ],
-a:2
+correta:"B) Solo muito jovem sem camadas bem formadas"
 },
 
 {
-q:"O LUVISSOLO apresenta:",
-options:[
-"Pouca argila e poucos nutrientes.",
-"Muita argila embaixo e riqueza em nutrientes.",
-"Grande quantidade de água parada.",
-"Formação orgânica superficial."
+pergunta:"O Organossolo é formado principalmente por:",
+alternativas:[
+"A) Calcário",
+"B) Areia",
+"C) Restos de plantas e matéria orgânica",
+"D) Laterita"
 ],
-a:1
+correta:"C) Restos de plantas e matéria orgânica"
 },
 
 {
-q:"O NEOSSOLO caracteriza-se por:",
-options:[
-"Solo profundo e fértil.",
-"Solo muito jovem, sem camadas bem formadas.",
-"Solo rico em cálcio.",
-"Solo com excesso de umidade."
+pergunta:"O Vertissolo é conhecido por:",
+alternativas:[
+"A) Possuir muita matéria orgânica",
+"B) Rachar muito quando seca",
+"C) Ser extremamente arenoso",
+"D) Ser salino"
 ],
-a:1
+correta:"B) Rachar muito quando seca"
 },
 
 {
-q:"O NITOSSOLO é um:",
-options:[
-"Solo profundo, com argila bem misturada.",
-"Solo com crostas endurecidas.",
-"Solo arenoso e seco.",
-"Solo com muita matéria orgânica."
+pergunta:"Qual Neossolo possui muitas pedrinhas?",
+alternativas:[
+"A) Quartzarênico",
+"B) Litólico",
+"C) Regolítico",
+"D) Flúvico"
 ],
-a:0
+correta:"C) Regolítico"
 },
 
 {
-q:"O ORGANOSSOLO é formado principalmente por:",
-options:[
-"Argila e cálcio.",
-"Rochas vulcânicas.",
-"Material orgânico, como restos de plantas.",
-"Areia fina."
+pergunta:"O Neossolo Quartzarênico apresenta:",
+alternativas:[
+"A) Solo escuro",
+"B) Areia branca pura",
+"C) Argila vermelha",
+"D) Laterita dura"
 ],
-a:2
+correta:"B) Areia branca pura"
 },
 
 {
-q:"O PLANOSSOLO possui:",
-options:[
-"Camada que dificulta a passagem da água.",
-"Grande quantidade de cálcio.",
-"Excesso de matéria orgânica.",
-"Rochas superficiais endurecidas."
+pergunta:"O Planossolo Nátrico apresenta:",
+alternativas:[
+"A) Crostas brancas de sal",
+"B) Cor preta intensa",
+"C) Muitas pedras",
+"D) Água parada permanente"
 ],
-a:0
+correta:"A) Crostas brancas de sal"
 },
 
 {
-q:"O PLINTOSSOLO é um solo que:",
-options:[
-"Permanece sempre úmido.",
-"Racha muito quando seca.",
-"Endurece quando seca, formando crostas.",
-"Não possui argila."
+pergunta:"O Gleissolo Sálico ocorre em:",
+alternativas:[
+"A) Regiões montanhosas",
+"B) Mangues salgados",
+"C) Campos secos",
+"D) Áreas vulcânicas"
 ],
-a:2
+correta:"B) Mangues salgados"
 },
 
 {
-q:"O VERTISSOLO apresenta como característica principal:",
-options:[
-"Grande profundidade e intemperismo.",
-"Formação orgânica intensa.",
-"Solo que racha muito quando seca.",
-"Água parada constante."
+pergunta:"O Espodossolo Ferri-Humilúvico possui:",
+alternativas:[
+"A) Apenas faixas vermelhas",
+"B) Apenas faixas escuras",
+"C) Faixas escuras e vermelhas juntas",
+"D) Crostas de laterita"
 ],
-a:2
+correta:"C) Faixas escuras e vermelhas juntas"
+},
+
+{
+pergunta:"O Cambissolo Húmico possui:",
+alternativas:[
+"A) Solo com terra preta por cima",
+"B) Solo branco puro",
+"C) Crostas endurecidas",
+"D) Excesso de sal"
+],
+correta:"A) Solo com terra preta por cima"
+},
+
+{
+pergunta:"O Plintossolo Pétrico possui:",
+alternativas:[
+"A) Areia branca",
+"B) Crosta de laterita dura",
+"C) Água parada",
+"D) Excesso de matéria orgânica"
+],
+correta:"B) Crosta de laterita dura"
 }
 
 ];
 
-const TIME = 30;
+let questoes = [];
+let indice = 0;
+let pontos = 0;
+let respondeu = false;
 
-const labels = ["A","B","C","D"];
+let usouEliminar = false;
+let usouPular = false;
 
-const shuffle = arr =>
-  [...arr]
-  .sort(() => Math.random() - 0.5);
+const perguntaEl = document.getElementById("pergunta");
+const alternativasEl = document.getElementById("alternativas");
+const contadorEl = document.getElementById("contador");
+const pontuacaoEl = document.getElementById("pontuacao");
+const barraEl = document.getElementById("barra");
 
-const startScreen =
-  document.getElementById('startScreen');
+const proximoBtn = document.getElementById("proximoBtn");
+const eliminarBtn = document.getElementById("eliminarBtn");
+const pularBtn = document.getElementById("pularBtn");
 
-const startForm =
-  document.getElementById('startForm');
-
-const playerNameInput =
-  document.getElementById('playerName');
-
-const questionEl =
-  document.getElementById('question');
-
-const answersEl =
-  document.getElementById('answers');
-
-const resultBanner =
-  document.getElementById('resultBanner');
-
-const qpos =
-  document.getElementById('qpos');
-
-const playerInfo =
-  document.getElementById('playerInfo');
-
-const scoreInfo =
-  document.getElementById('scoreInfo');
-
-const nextBtn =
-  document.getElementById('nextBtn');
-
-const tfill =
-  document.getElementById('tfill');
-
-const tclock =
-  document.getElementById('tclock');
-
-let state = null;
-
-let timer = null;
-
-let timeLeft = TIME;
-
-function startGame(name){
-
-  state = {
-    player:name,
-    score:0,
-    round:0,
-
-    questions: shuffle(
-      QUESTIONS.map(q => ({...q}))
-    )
-  };
-
-  startScreen.style.display = 'none';
-
-  renderQuestion();
+function embaralhar(array){
+    return array.sort(() => Math.random() - 0.5);
 }
 
-function updateInfo(){
+function iniciarQuiz(){
 
-  qpos.textContent =
-    `${Math.min(state.round + 1, QUESTIONS.length)}/${QUESTIONS.length}`;
+    questoes = embaralhar([...bancoQuestoes]).slice(0,10);
 
-  playerInfo.textContent =
-    state.player;
+    questoes.forEach(q => {
+        q.alternativas = embaralhar(q.alternativas);
+    });
 
-  scoreInfo.textContent =
-    `${state.score} ponto(s)`;
+    indice = 0;
+    pontos = 0;
+    respondeu = false;
+
+    usouEliminar = false;
+    usouPular = false;
+
+    eliminarBtn.disabled = false;
+    pularBtn.disabled = false;
+
+    mostrarQuestao();
 }
 
-function renderQuestion(){
+function mostrarQuestao(){
 
-  if(state.round >= QUESTIONS.length){
+    respondeu = false;
 
-    endGame();
+    proximoBtn.disabled = true;
 
-    return;
-  }
+    const questao = questoes[indice];
 
-  resetTimer();
+    contadorEl.innerHTML = `Questão ${indice+1}/10`;
 
-  resultBanner.style.display = 'none';
+    pontuacaoEl.innerHTML = `Pontos: ${pontos}`;
 
-  const q =
-    state.questions[state.round];
+    barraEl.style.width = `${((indice)/10)*100}%`;
 
-  questionEl.textContent =
-    q.q;
+    perguntaEl.innerHTML = questao.pergunta;
 
-  answersEl.innerHTML = '';
+    alternativasEl.innerHTML = "";
 
-  const mixedOptions =
-    shuffle(
-      q.options.map((text,index)=>({
-        text,
-        correct:index===q.a
-      }))
-    );
+    questao.alternativas.forEach(alternativa => {
 
-  q.mixedOptions =
-    mixedOptions;
+        const btn = document.createElement("button");
 
-  q.correctIndex =
-    mixedOptions.findIndex(
-      opt => opt.correct
-    );
+        btn.classList.add("alternativa");
 
-  mixedOptions.forEach((opt,idx)=>{
+        btn.innerHTML = alternativa;
 
-    const btn =
-      document.createElement('button');
+        btn.onclick = () => verificarResposta(btn, alternativa);
 
-    btn.innerHTML =
-      `<strong>${labels[idx]}</strong> - ${opt.text}`;
+        alternativasEl.appendChild(btn);
 
-    btn.onclick =
-      ()=>selectAnswer(idx);
+    });
 
-    answersEl.appendChild(btn);
-
-  });
-
-  nextBtn.disabled = true;
-
-  updateInfo();
-
-  startTimer();
 }
 
-function selectAnswer(index){
+function verificarResposta(botao, resposta){
 
-  stopTimer();
+    if(respondeu) return;
 
-  const q =
-    state.questions[state.round];
+    respondeu = true;
 
-  const buttons =
-    [...answersEl.querySelectorAll('button')];
+    const correta = questoes[indice].correta;
 
-  buttons.forEach(
-    b=>b.disabled=true
-  );
+    const botoes = document.querySelectorAll(".alternativa");
 
-  const correct =
-    index === q.correctIndex;
+    botoes.forEach(btn => {
 
-  if(correct){
+        if(btn.innerHTML === correta){
+            btn.classList.add("correta");
+        }else{
+            btn.classList.add("errada");
+        }
 
-    buttons[index]
-      .classList.add('correct');
+        btn.disabled = true;
+    });
 
-    state.score++;
-
-    resultBanner.textContent =
-      'Resposta correta!';
-
-  } else {
-
-    buttons[index]
-      .classList.add('wrong');
-
-    buttons[q.correctIndex]
-      .classList.add('correct');
-
-    resultBanner.textContent =
-      'Resposta incorreta.';
-
-  }
-
-  resultBanner.style.display =
-    'block';
-
-  state.round++;
-
-  updateInfo();
-
-  nextBtn.disabled = false;
-}
-
-function timeOut(){
-
-  stopTimer();
-
-  const q =
-    state.questions[state.round];
-
-  const buttons =
-    [...answersEl.querySelectorAll('button')];
-
-  buttons.forEach(
-    b=>b.disabled=true
-  );
-
-  buttons[q.correctIndex]
-    .classList.add('correct');
-
-  resultBanner.style.display =
-    'block';
-
-  resultBanner.textContent =
-    'Tempo encerrado!';
-
-  state.round++;
-
-  updateInfo();
-
-  nextBtn.disabled = false;
-}
-
-function endGame(){
-
-  stopTimer();
-
-  questionEl.textContent =
-    `Fim do quiz!\n\n${state.player} fez ${state.score} ponto(s) de ${QUESTIONS.length}.`;
-
-  answersEl.innerHTML = '';
-
-  resultBanner.style.display =
-    'none';
-
-  nextBtn.disabled = true;
-}
-
-function startTimer(){
-
-  timeLeft = TIME;
-
-  timer = setInterval(()=>{
-
-    timeLeft--;
-
-    tclock.textContent =
-      `${timeLeft}s`;
-
-    tfill.style.width =
-      `${(timeLeft/TIME)*100}%`;
-
-    if(timeLeft <= 0){
-
-      timeOut();
-
+    if(resposta === correta){
+        pontos++;
+        pontuacaoEl.innerHTML = `Pontos: ${pontos}`;
     }
 
-  },1000);
+    proximoBtn.disabled = false;
 }
 
-function stopTimer(){
+proximoBtn.addEventListener("click", () => {
 
-  clearInterval(timer);
-}
+    indice++;
 
-function resetTimer(){
-
-  stopTimer();
-
-  timeLeft = TIME;
-
-  tclock.textContent =
-    `${TIME}s`;
-
-  tfill.style.width =
-    '100%';
-}
-
-nextBtn.onclick = ()=>{
-
-  renderQuestion();
-
-};
-
-startForm.addEventListener('submit',(e)=>{
-
-  e.preventDefault();
-
-  const name =
-    playerNameInput.value.trim();
-
-  if(!name){
-
-    alert('Digite seu nome.');
-
-    return;
-  }
-
-  startGame(name);
+    if(indice < 10){
+        mostrarQuestao();
+    }else{
+        mostrarResultado();
+    }
 
 });
+
+function mostrarResultado(){
+
+    barraEl.style.width = "100%";
+
+    document.getElementById("quiz").innerHTML = `
+
+        <div class="resultado">
+
+            <h2>🎉 Quiz Finalizado!</h2>
+
+            <p>Você acertou <strong>${pontos}</strong> de 10 questões.</p>
+
+            <button class="reiniciar" onclick="location.reload()">
+                Jogar novamente
+            </button>
+
+        </div>
+
+    `;
+}
+
+eliminarBtn.addEventListener("click", () => {
+
+    if(usouEliminar) return;
+
+    usouEliminar = true;
+
+    eliminarBtn.disabled = true;
+
+    const correta = questoes[indice].correta;
+
+    const botoes = [...document.querySelectorAll(".alternativa")];
+
+    const erradas = botoes.filter(btn => btn.innerHTML !== correta);
+
+    const embaralhadas = embaralhar(erradas).slice(0,2);
+
+    embaralhadas.forEach(btn => {
+        btn.style.visibility = "hidden";
+        btn.disabled = true;
+    });
+
+});
+
+pularBtn.addEventListener("click", () => {
+
+    if(usouPular) return;
+
+    usouPular = true;
+
+    pularBtn.disabled = true;
+
+    indice++;
+
+    if(indice < 10){
+        mostrarQuestao();
+    }else{
+        mostrarResultado();
+    }
+
+});
+
+iniciarQuiz();
 
 </script>
 
 </body>
 </html>
-```
