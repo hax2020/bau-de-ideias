@@ -1,0 +1,763 @@
+```html id="v3k7mz"
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz - Classes de Solo</title>
+
+<style>
+
+:root{
+  --bg:#0b1020;
+  --panel:#121939;
+  --ink:#eaf0ff;
+  --muted:#a9b3d5;
+  --accent:#00e1ff;
+  --accent2:#8b5cf6;
+  --success:#16a34a;
+  --danger:#dc2626;
+}
+
+*{
+  box-sizing:border-box;
+}
+
+body{
+  margin:0;
+  font-family:Arial, Helvetica, sans-serif;
+  background:
+    radial-gradient(circle at top left,#1c2560,#0b1020 60%);
+  color:var(--ink);
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:20px;
+}
+
+.app{
+  width:min(1000px,100%);
+  background:rgba(18,25,57,.95);
+  border:2px solid var(--accent);
+  border-radius:20px;
+  padding:24px;
+}
+
+header{
+  margin-bottom:20px;
+}
+
+.logo{
+  font-size:30px;
+  font-weight:900;
+}
+
+.sub{
+  color:var(--muted);
+}
+
+.scoreboard{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:12px;
+  margin-bottom:20px;
+}
+
+.scoreItem{
+  background:#0f1533;
+  border-radius:14px;
+  padding:14px;
+}
+
+.label{
+  color:var(--muted);
+  font-size:12px;
+}
+
+.value{
+  font-size:22px;
+  font-weight:900;
+}
+
+.question{
+  background:#0f1a4d;
+  border-radius:16px;
+  padding:20px;
+  font-size:24px;
+  font-weight:700;
+  line-height:1.4;
+}
+
+.answers{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+  margin-top:20px;
+}
+
+@media(max-width:700px){
+  .answers{
+    grid-template-columns:1fr;
+  }
+}
+
+.answers button{
+  border:none;
+  border-radius:14px;
+  padding:18px;
+  background:#7f0f0f;
+  color:white;
+  font-size:16px;
+  font-weight:700;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.answers button:hover{
+  transform:translateY(-2px);
+}
+
+.answers button.correct{
+  background:var(--success);
+}
+
+.answers button.wrong{
+  background:var(--danger);
+}
+
+.timer{
+  width:100%;
+  height:18px;
+  background:#0f1533;
+  border-radius:999px;
+  overflow:hidden;
+  margin:18px 0;
+  position:relative;
+}
+
+.fill{
+  height:100%;
+  width:100%;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+}
+
+.clock{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:12px;
+  font-weight:900;
+}
+
+.controls{
+  margin-top:20px;
+}
+
+button.action{
+  border:none;
+  border-radius:12px;
+  padding:14px 20px;
+  font-weight:900;
+  cursor:pointer;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+}
+
+.resultBanner{
+  margin-top:18px;
+  padding:14px;
+  border-radius:12px;
+  background:#13204d;
+  display:none;
+}
+
+.startScreen{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.88);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  z-index:999;
+}
+
+.startCard{
+  width:min(500px,100%);
+  background:#121939;
+  padding:30px;
+  border-radius:20px;
+}
+
+.field{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  margin-bottom:20px;
+}
+
+input{
+  padding:14px;
+  border:none;
+  border-radius:12px;
+  background:#0f1533;
+  color:white;
+}
+
+footer{
+  margin-top:20px;
+  text-align:center;
+  color:var(--muted);
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="startScreen" id="startScreen">
+
+  <div class="startCard">
+
+    <h1>Quiz - Classes de Solo</h1>
+
+    <form id="startForm">
+
+      <div class="field">
+        <label>Nome do jogador</label>
+        <input
+          id="playerName"
+          type="text"
+          placeholder="Digite seu nome"
+          required
+        >
+      </div>
+
+      <button class="action" type="submit">
+        Começar Quiz
+      </button>
+
+    </form>
+
+  </div>
+
+</div>
+
+<div class="app">
+
+<header>
+
+  <div class="logo">
+    🌱 Quiz - Classes de Solo
+  </div>
+
+  <div class="sub">
+    Quiz individual sobre classificação dos solos
+  </div>
+
+</header>
+
+<div class="scoreboard">
+
+  <div class="scoreItem">
+    <div class="label">Questão</div>
+    <div class="value" id="qpos">0/13</div>
+  </div>
+
+  <div class="scoreItem">
+    <div class="label">Jogador</div>
+    <div class="value" id="playerInfo">-</div>
+  </div>
+
+  <div class="scoreItem">
+    <div class="label">Pontuação</div>
+    <div class="value" id="scoreInfo">0</div>
+  </div>
+
+</div>
+
+<div class="timer">
+
+  <div class="fill" id="tfill"></div>
+
+  <div class="clock" id="tclock">
+    30s
+  </div>
+
+</div>
+
+<div class="question" id="question">
+  Digite seu nome para iniciar.
+</div>
+
+<div class="answers" id="answers"></div>
+
+<div class="resultBanner" id="resultBanner"></div>
+
+<div class="controls">
+
+  <button class="action" id="nextBtn" disabled>
+    Próxima questão
+  </button>
+
+</div>
+
+<footer>
+  Professor Fernando Hax
+</footer>
+
+</div>
+
+<script>
+
+const QUESTIONS = [
+
+{
+q:"O ARGISSOLO é caracterizado por:",
+options:[
+"Solo muito úmido, com água parada.",
+"Solo com muita argila embaixo, podendo ter acidez ou alumínio.",
+"Solo formado por material orgânico.",
+"Solo muito jovem e sem camadas."
+],
+a:1
+},
+
+{
+q:"O CAMBISSOLO pode ser definido como:",
+options:[
+"Solo jovem, pouco desenvolvido.",
+"Solo profundo e muito intemperizado.",
+"Solo que racha quando seca.",
+"Solo rico em matéria orgânica."
+],
+a:0
+},
+
+{
+q:"O CHERNOSSOLO possui como principal característica:",
+options:[
+"Solo arenoso e seco.",
+"Solo com água parada.",
+"Solo escuro, fértil, com bastante argila e cálcio.",
+"Solo endurecido em profundidade."
+],
+a:2
+},
+
+{
+q:"O ESPODOSSOLO apresenta:",
+options:[
+"Acúmulo de matéria orgânica ou alumínio embaixo.",
+"Grande quantidade de cálcio.",
+"Camadas pouco desenvolvidas.",
+"Rochas superficiais."
+],
+a:0
+},
+
+{
+q:"O GLEISSOLO é um solo:",
+options:[
+"Muito seco e rachado.",
+"Muito úmido, com água parada.",
+"Rico em cálcio e argila.",
+"Formado apenas por areia."
+],
+a:1
+},
+
+{
+q:"O LATOSSOLO é conhecido por ser:",
+options:[
+"Muito raso e pedregoso.",
+"Rico em matéria orgânica.",
+"Bem profundo e muito intemperizado.",
+"Jovem e pouco desenvolvido."
+],
+a:2
+},
+
+{
+q:"O LUVISSOLO apresenta:",
+options:[
+"Pouca argila e poucos nutrientes.",
+"Muita argila embaixo e riqueza em nutrientes.",
+"Grande quantidade de água parada.",
+"Formação orgânica superficial."
+],
+a:1
+},
+
+{
+q:"O NEOSSOLO caracteriza-se por:",
+options:[
+"Solo profundo e fértil.",
+"Solo muito jovem, sem camadas bem formadas.",
+"Solo rico em cálcio.",
+"Solo com excesso de umidade."
+],
+a:1
+},
+
+{
+q:"O NITOSSOLO é um:",
+options:[
+"Solo profundo, com argila bem misturada.",
+"Solo com crostas endurecidas.",
+"Solo arenoso e seco.",
+"Solo com muita matéria orgânica."
+],
+a:0
+},
+
+{
+q:"O ORGANOSSOLO é formado principalmente por:",
+options:[
+"Argila e cálcio.",
+"Rochas vulcânicas.",
+"Material orgânico, como restos de plantas.",
+"Areia fina."
+],
+a:2
+},
+
+{
+q:"O PLANOSSOLO possui:",
+options:[
+"Camada que dificulta a passagem da água.",
+"Grande quantidade de cálcio.",
+"Excesso de matéria orgânica.",
+"Rochas superficiais endurecidas."
+],
+a:0
+},
+
+{
+q:"O PLINTOSSOLO é um solo que:",
+options:[
+"Permanece sempre úmido.",
+"Racha muito quando seca.",
+"Endurece quando seca, formando crostas.",
+"Não possui argila."
+],
+a:2
+},
+
+{
+q:"O VERTISSOLO apresenta como característica principal:",
+options:[
+"Grande profundidade e intemperismo.",
+"Formação orgânica intensa.",
+"Solo que racha muito quando seca.",
+"Água parada constante."
+],
+a:2
+}
+
+];
+
+const TIME = 30;
+
+const labels = ["A","B","C","D"];
+
+const shuffle = arr =>
+  [...arr]
+  .sort(() => Math.random() - 0.5);
+
+const startScreen =
+  document.getElementById('startScreen');
+
+const startForm =
+  document.getElementById('startForm');
+
+const playerNameInput =
+  document.getElementById('playerName');
+
+const questionEl =
+  document.getElementById('question');
+
+const answersEl =
+  document.getElementById('answers');
+
+const resultBanner =
+  document.getElementById('resultBanner');
+
+const qpos =
+  document.getElementById('qpos');
+
+const playerInfo =
+  document.getElementById('playerInfo');
+
+const scoreInfo =
+  document.getElementById('scoreInfo');
+
+const nextBtn =
+  document.getElementById('nextBtn');
+
+const tfill =
+  document.getElementById('tfill');
+
+const tclock =
+  document.getElementById('tclock');
+
+let state = null;
+
+let timer = null;
+
+let timeLeft = TIME;
+
+function startGame(name){
+
+  state = {
+    player:name,
+    score:0,
+    round:0,
+
+    questions: shuffle(
+      QUESTIONS.map(q => ({...q}))
+    )
+  };
+
+  startScreen.style.display = 'none';
+
+  renderQuestion();
+}
+
+function updateInfo(){
+
+  qpos.textContent =
+    `${Math.min(state.round + 1, QUESTIONS.length)}/${QUESTIONS.length}`;
+
+  playerInfo.textContent =
+    state.player;
+
+  scoreInfo.textContent =
+    `${state.score} ponto(s)`;
+}
+
+function renderQuestion(){
+
+  if(state.round >= QUESTIONS.length){
+
+    endGame();
+
+    return;
+  }
+
+  resetTimer();
+
+  resultBanner.style.display = 'none';
+
+  const q =
+    state.questions[state.round];
+
+  questionEl.textContent =
+    q.q;
+
+  answersEl.innerHTML = '';
+
+  const mixedOptions =
+    shuffle(
+      q.options.map((text,index)=>({
+        text,
+        correct:index===q.a
+      }))
+    );
+
+  q.mixedOptions =
+    mixedOptions;
+
+  q.correctIndex =
+    mixedOptions.findIndex(
+      opt => opt.correct
+    );
+
+  mixedOptions.forEach((opt,idx)=>{
+
+    const btn =
+      document.createElement('button');
+
+    btn.innerHTML =
+      `<strong>${labels[idx]}</strong> - ${opt.text}`;
+
+    btn.onclick =
+      ()=>selectAnswer(idx);
+
+    answersEl.appendChild(btn);
+
+  });
+
+  nextBtn.disabled = true;
+
+  updateInfo();
+
+  startTimer();
+}
+
+function selectAnswer(index){
+
+  stopTimer();
+
+  const q =
+    state.questions[state.round];
+
+  const buttons =
+    [...answersEl.querySelectorAll('button')];
+
+  buttons.forEach(
+    b=>b.disabled=true
+  );
+
+  const correct =
+    index === q.correctIndex;
+
+  if(correct){
+
+    buttons[index]
+      .classList.add('correct');
+
+    state.score++;
+
+    resultBanner.textContent =
+      'Resposta correta!';
+
+  } else {
+
+    buttons[index]
+      .classList.add('wrong');
+
+    buttons[q.correctIndex]
+      .classList.add('correct');
+
+    resultBanner.textContent =
+      'Resposta incorreta.';
+
+  }
+
+  resultBanner.style.display =
+    'block';
+
+  state.round++;
+
+  updateInfo();
+
+  nextBtn.disabled = false;
+}
+
+function timeOut(){
+
+  stopTimer();
+
+  const q =
+    state.questions[state.round];
+
+  const buttons =
+    [...answersEl.querySelectorAll('button')];
+
+  buttons.forEach(
+    b=>b.disabled=true
+  );
+
+  buttons[q.correctIndex]
+    .classList.add('correct');
+
+  resultBanner.style.display =
+    'block';
+
+  resultBanner.textContent =
+    'Tempo encerrado!';
+
+  state.round++;
+
+  updateInfo();
+
+  nextBtn.disabled = false;
+}
+
+function endGame(){
+
+  stopTimer();
+
+  questionEl.textContent =
+    `Fim do quiz!\n\n${state.player} fez ${state.score} ponto(s) de ${QUESTIONS.length}.`;
+
+  answersEl.innerHTML = '';
+
+  resultBanner.style.display =
+    'none';
+
+  nextBtn.disabled = true;
+}
+
+function startTimer(){
+
+  timeLeft = TIME;
+
+  timer = setInterval(()=>{
+
+    timeLeft--;
+
+    tclock.textContent =
+      `${timeLeft}s`;
+
+    tfill.style.width =
+      `${(timeLeft/TIME)*100}%`;
+
+    if(timeLeft <= 0){
+
+      timeOut();
+
+    }
+
+  },1000);
+}
+
+function stopTimer(){
+
+  clearInterval(timer);
+}
+
+function resetTimer(){
+
+  stopTimer();
+
+  timeLeft = TIME;
+
+  tclock.textContent =
+    `${TIME}s`;
+
+  tfill.style.width =
+    '100%';
+}
+
+nextBtn.onclick = ()=>{
+
+  renderQuestion();
+
+};
+
+startForm.addEventListener('submit',(e)=>{
+
+  e.preventDefault();
+
+  const name =
+    playerNameInput.value.trim();
+
+  if(!name){
+
+    alert('Digite seu nome.');
+
+    return;
+  }
+
+  startGame(name);
+
+});
+
+</script>
+
+</body>
+</html>
+```
