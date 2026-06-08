@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Show do Macronutriente — Quem Quer Ser um Técnico em Agricultura Milionário?</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #FFD700;
+    --gold-light: #FFE857;
+    --gold-dark: #B8860B;
+    --blue-deep: #0A0E2A;
+    --blue-mid: #0D1B4B;
+    --blue-bright: #1E3A8A;
+    --teal: #00C9B1;
+    --teal-dark: #007A6B;
+    --red: #FF4444;
+    --green: #22C55E;
+    --white: #F0F4FF;
+    --gray: #7B8DB0;
+    --correct: #22C55E;
+    --wrong: #FF4444;
+    --lifeline: #00C9B1;
+  }
+ 
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+ 
+  body {
+    background: var(--blue-deep);
+    color: var(--white);
+    font-family: 'Rajdhani', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow-x: hidden;
+  }
+ 
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 0%, rgba(30,58,138,0.6) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 20% 80%, rgba(0,201,177,0.1) 0%, transparent 50%),
+      radial-gradient(ellipse 50% 50% at 80% 50%, rgba(255,215,0,0.05) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+ 
+  /* Stars */
+  .stars {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+  .star {
+    position: absolute;
+    width: 2px; height: 2px;
+    background: white;
+    border-radius: 50%;
+    opacity: 0;
+    animation: twinkle var(--dur) var(--delay) infinite;
+  }
+  @keyframes twinkle {
+    0%, 100% { opacity: 0; }
+    50% { opacity: var(--op); }
+  }
+ 
+  #app {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 860px;
+    padding: 24px 16px;
+  }
+ 
+  /* INTRO SCREEN */
+  #intro-screen {
+    text-align: center;
+    padding: 40px 20px;
+  }
+ 
+  .logo-badge {
+    display: inline-block;
+    background: conic-gradient(from 0deg, var(--gold), var(--gold-light), var(--gold), var(--gold-dark), var(--gold));
+    padding: 3px;
+    border-radius: 50%;
+    margin-bottom: 24px;
+    animation: rotateBadge 8s linear infinite;
+  }
+  @keyframes rotateBadge {
+    from { filter: hue-rotate(0deg); }
+    to { filter: hue-rotate(30deg); }
+  }
+  .logo-inner {
+    background: var(--blue-deep);
+    border-radius: 50%;
+    width: 140px; height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 64px;
+  }
+ 
+  h1 {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(1.4rem, 5vw, 2.4rem);
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 50%, var(--gold-dark) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 0.04em;
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+  .subtitle {
+    font-size: 1.1rem;
+    color: var(--teal);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 32px;
+  }
+ 
+  .rules-box {
+    background: rgba(255,215,0,0.05);
+    border: 1px solid rgba(255,215,0,0.2);
+    border-radius: 16px;
+    padding: 24px 32px;
+    margin-bottom: 32px;
+    text-align: left;
+  }
+  .rules-box h3 {
+    color: var(--gold);
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 0.9rem;
+    margin-bottom: 16px;
+    letter-spacing: 0.1em;
+  }
+  .rules-box ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .rules-box li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 1rem;
+    color: rgba(240,244,255,0.85);
+    line-height: 1.4;
+  }
+  .rules-box li .icon { font-size: 1.3rem; flex-shrink: 0; margin-top: 1px; }
+ 
+  .btn-start {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--gold-dark) 0%, var(--gold) 50%, var(--gold-light) 100%);
+    color: var(--blue-deep);
+    border: none;
+    padding: 18px 56px;
+    border-radius: 60px;
+    cursor: pointer;
+    letter-spacing: 0.08em;
+    box-shadow: 0 0 40px rgba(255,215,0,0.4), 0 4px 24px rgba(0,0,0,0.4);
+    transition: all 0.3s;
+    text-transform: uppercase;
+  }
+  .btn-start:hover {
+    transform: translateY(-3px) scale(1.04);
+    box-shadow: 0 0 60px rgba(255,215,0,0.6), 0 8px 32px rgba(0,0,0,0.4);
+  }
+  .btn-start:active { transform: translateY(0) scale(0.98); }
+ 
+  /* GAME SCREEN */
+  #game-screen { display: none; }
+ 
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+ 
+  .question-counter {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 0.75rem;
+    color: var(--gold);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+ 
+  .prize-display {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 1.1rem;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+ 
+  /* Prize ladder */
+  .prize-ladder {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    max-width: 320px;
+  }
+  .prize-step {
+    font-size: 0.65rem;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--gray);
+    font-weight: 600;
+    transition: all 0.4s;
+  }
+  .prize-step.current {
+    background: rgba(255,215,0,0.15);
+    border-color: var(--gold);
+    color: var(--gold);
+    animation: pulsePrize 1.5s infinite;
+  }
+  .prize-step.done {
+    background: rgba(34,197,94,0.15);
+    border-color: var(--green);
+    color: var(--green);
+  }
+  @keyframes pulsePrize {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255,215,0,0.4); }
+    50% { box-shadow: 0 0 12px 2px rgba(255,215,0,0.2); }
+  }
+ 
+  /* Lifelines */
+  .lifelines {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 24px;
+  }
+  .lifeline-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    background: rgba(0,201,177,0.1);
+    border: 2px solid rgba(0,201,177,0.5);
+    border-radius: 12px;
+    padding: 12px 20px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-family: 'Rajdhani', sans-serif;
+    color: var(--teal);
+  }
+  .lifeline-btn:hover:not(:disabled) {
+    background: rgba(0,201,177,0.2);
+    border-color: var(--teal);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,201,177,0.2);
+  }
+  .lifeline-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    filter: grayscale(1);
+    transform: none;
+  }
+  .lifeline-btn .ll-icon { font-size: 1.8rem; }
+  .lifeline-btn .ll-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+ 
+  /* Question card */
+  .question-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,215,0,0.2);
+    border-radius: 20px;
+    padding: 32px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(12px);
+  }
+  .question-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+ 
+  .question-num-label {
+    font-size: 0.72rem;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+ 
+  .question-text {
+    font-size: clamp(1rem, 2.5vw, 1.22rem);
+    line-height: 1.6;
+    font-weight: 500;
+    color: var(--white);
+  }
+ 
+  /* Options */
+  .options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  @media (max-width: 560px) {
+    .options-grid { grid-template-columns: 1fr; }
+  }
+ 
+  .option-btn {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: rgba(13,27,75,0.7);
+    border: 2px solid rgba(255,215,0,0.25);
+    border-radius: 14px;
+    padding: 16px 20px;
+    cursor: pointer;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--white);
+    text-align: left;
+    transition: all 0.25s;
+    backdrop-filter: blur(6px);
+    line-height: 1.4;
+  }
+  .option-btn:hover:not(:disabled):not(.eliminated) {
+    background: rgba(255,215,0,0.1);
+    border-color: var(--gold);
+    transform: translateX(4px);
+    box-shadow: 0 4px 20px rgba(255,215,0,0.15);
+  }
+  .option-btn .opt-letter {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: rgba(255,215,0,0.15);
+    border: 2px solid rgba(255,215,0,0.4);
+    color: var(--gold);
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    transition: all 0.25s;
+  }
+  .option-btn:hover:not(:disabled):not(.eliminated) .opt-letter {
+    background: var(--gold);
+    color: var(--blue-deep);
+  }
+ 
+  .option-btn.selected {
+    background: rgba(255,215,0,0.15);
+    border-color: var(--gold);
+    animation: pulseOption 0.6s ease;
+  }
+  @keyframes pulseOption {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+  }
+  .option-btn.correct {
+    background: rgba(34,197,94,0.2) !important;
+    border-color: var(--correct) !important;
+    color: var(--correct);
+  }
+  .option-btn.correct .opt-letter {
+    background: var(--correct);
+    border-color: var(--correct);
+    color: white;
+  }
+  .option-btn.wrong {
+    background: rgba(255,68,68,0.2) !important;
+    border-color: var(--wrong) !important;
+    color: var(--wrong);
+  }
+  .option-btn.wrong .opt-letter {
+    background: var(--wrong);
+    border-color: var(--wrong);
+    color: white;
+  }
+  .option-btn.eliminated {
+    opacity: 0.15;
+    pointer-events: none;
+    text-decoration: line-through;
+  }
+  .option-btn:disabled { cursor: default; }
+ 
+  /* Feedback overlay */
+  .feedback-banner {
+    display: none;
+    text-align: center;
+    padding: 16px;
+    border-radius: 12px;
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 1rem;
+    letter-spacing: 0.08em;
+    margin-bottom: 20px;
+    animation: slideDown 0.4s ease;
+  }
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .feedback-banner.show { display: block; }
+  .feedback-banner.correct-fb {
+    background: rgba(34,197,94,0.15);
+    border: 1px solid var(--correct);
+    color: var(--correct);
+  }
+  .feedback-banner.wrong-fb {
+    background: rgba(255,68,68,0.15);
+    border: 1px solid var(--wrong);
+    color: var(--wrong);
+  }
+ 
+  .btn-next {
+    display: none;
+    margin: 0 auto;
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+    color: var(--blue-deep);
+    border: none;
+    padding: 14px 44px;
+    border-radius: 40px;
+    cursor: pointer;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    box-shadow: 0 4px 20px rgba(255,215,0,0.3);
+    transition: all 0.3s;
+  }
+  .btn-next.show { display: block; }
+  .btn-next:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(255,215,0,0.45);
+  }
+ 
+  /* END SCREEN */
+  #end-screen {
+    display: none;
+    text-align: center;
+    padding: 40px 20px;
+  }
+  .trophy { font-size: 80px; margin-bottom: 16px; animation: tropheySpin 1s ease; display: block; }
+  @keyframes tropheySpin {
+    0% { transform: scale(0) rotate(-30deg); opacity: 0; }
+    70% { transform: scale(1.15) rotate(5deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0deg); }
+  }
+  .end-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(1.5rem, 6vw, 2.8rem);
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+  }
+  .end-prize {
+    font-size: 2.4rem;
+    font-weight: 700;
+    color: var(--teal);
+    margin-bottom: 4px;
+  }
+  .end-score {
+    font-size: 1.1rem;
+    color: var(--gray);
+    margin-bottom: 32px;
+  }
+  .end-msg {
+    font-size: 1.1rem;
+    color: rgba(240,244,255,0.8);
+    line-height: 1.6;
+    max-width: 480px;
+    margin: 0 auto 32px;
+  }
+  .btn-restart {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    background: transparent;
+    color: var(--gold);
+    border: 2px solid var(--gold);
+    padding: 14px 44px;
+    border-radius: 40px;
+    cursor: pointer;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: all 0.3s;
+  }
+  .btn-restart:hover {
+    background: rgba(255,215,0,0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 0 30px rgba(255,215,0,0.2);
+  }
+ 
+  /* Animations */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-in { animation: fadeIn 0.5s ease forwards; }
+ 
+  /* Confetti */
+  .confetti-piece {
+    position: fixed;
+    width: 10px; height: 10px;
+    opacity: 0;
+    animation: confettiFall var(--dur) var(--delay) ease-in forwards;
+    z-index: 100;
+    border-radius: 2px;
+  }
+  @keyframes confettiFall {
+    0% { opacity: 1; transform: translateY(-20px) rotate(0deg); }
+    100% { opacity: 0; transform: translateY(100vh) rotate(720deg); }
+  }
+ 
+  /* Sound indicator */
+  .sound-hint {
+    font-size: 0.7rem;
+    color: var(--gray);
+    text-align: center;
+    margin-top: 16px;
+    letter-spacing: 0.05em;
+  }
+</style>
+</head>
+<body>
+ 
+<div class="stars" id="stars"></div>
+ 
+<div id="app">
+ 
+  <!-- INTRO -->
+  <div id="intro-screen">
+    <div class="logo-badge">
+      <div class="logo-inner">🌱</div>
+    </div>
+    <h1>Quem Quer Ser um Agrônomo Milionário?</h1>
+    <p class="subtitle">Show do Nutriente</p>
+ 
+    <div class="rules-box">
+      <h3>📋 Como Jogar</h3>
+      <ul>
+        <li><span class="icon">🔟</span> <span>10 questões sorteadas sobre nutrição de plantas — N, P, K, Ca, Mg e S</span></li>
+        <li><span class="icon">🏆</span> <span>Acumule pontos respondendo corretamente. Erre e o jogo acaba!</span></li>
+        <li><span class="icon">⏭️</span> <span><strong style="color:var(--teal)">Pular:</strong> Passe uma questão sem penalidade (1× por jogo)</span></li>
+        <li><span class="icon">❌</span> <span><strong style="color:var(--teal)">Eliminar 2:</strong> Remove duas alternativas erradas (1× por jogo)</span></li>
+        <li><span class="icon">⚡</span> <span>Responda com atenção — não há limite de tempo, mas cada erro é eliminatório!</span></li>
+      </ul>
+    </div>
+ 
+    <button class="btn-start" onclick="startGame()">▶ Iniciar Jogo</button>
+  </div>
+ 
+  <!-- GAME -->
+  <div id="game-screen">
+    <div class="top-bar">
+      <div>
+        <div class="question-counter" id="q-counter">Questão 1 de 10</div>
+        <div class="prize-display" id="prize-display">R$ 0</div>
+      </div>
+      <div class="prize-ladder" id="prize-ladder"></div>
+    </div>
+ 
+    <div class="lifelines">
+      <button class="lifeline-btn" id="ll-skip" onclick="useSkip()">
+        <span class="ll-icon">⏭️</span>
+        <span class="ll-label">Pular</span>
+      </button>
+      <button class="lifeline-btn" id="ll-elim" onclick="useEliminate()">
+        <span class="ll-icon">✂️</span>
+        <span class="ll-label">Eliminar 2</span>
+      </button>
+    </div>
+ 
+    <div class="question-card animate-in" id="question-card">
+      <div class="question-num-label" id="q-label">Questão 1</div>
+      <div class="question-text" id="question-text"></div>
+    </div>
+ 
+    <div class="options-grid" id="options-grid"></div>
+ 
+    <div class="feedback-banner" id="feedback-banner"></div>
+    <button class="btn-next" id="btn-next" onclick="nextQuestion()">Próxima Questão →</button>
+ 
+    <p class="sound-hint">Tema: Macro e Micronutrientes Essenciais</p>
+  </div>
+ 
+  <!-- END -->
+  <div id="end-screen">
+    <span class="trophy" id="end-trophy">🏆</span>
+    <div class="end-title" id="end-title">Parabéns!</div>
+    <div class="end-prize" id="end-prize">R$ 0</div>
+    <div class="end-score" id="end-score">0 de 10 corretas</div>
+    <p class="end-msg" id="end-msg"></p>
+    <button class="btn-restart" onclick="startGame()">🔄 Jogar Novamente</button>
+  </div>
+ 
+</div>
+ 
+<script>
+// ===================== DATA =====================
+const PRIZES = [
+  'R$ 1.000', 'R$ 2.000', 'R$ 3.000', 'R$ 5.000', 'R$ 10.000',
+  'R$ 30.000', 'R$ 50.000', 'R$ 100.000', 'R$ 500.000', 'R$ 1.000.000'
+];
+ 
+const ALL_QUESTIONS = [
+  // NITROGÊNIO — 10 questões
+  {
+    q: "Qual nutriente é fundamental para a formação de aminoácidos, proteínas, enzimas, DNA e RNA nas plantas?",
+    correct: "Nitrogênio (N)",
+    wrong: ["Fósforo (P)", "Potássio (K)", "Cálcio (Ca)"]
+  },
+  {
+    q: "A deficiência de nitrogênio nas plantas causa, principalmente, amarelecimento em quais folhas?",
+    correct: "Folhas mais velhas",
+    wrong: ["Folhas mais novas", "Folhas intermediárias", "Apenas brotações"]
+  },
+  {
+    q: "O excesso de nitrogênio nas plantas tende a produzir qual efeito indesejável?",
+    correct: "Crescimento exagerado da parte aérea e maior suscetibilidade a pragas",
+    wrong: ["Arroxeamento das folhas antigas", "Amarelecimento entre as nervuras", "Colapso do pecíolo das folhas novas"]
+  },
+  {
+    q: "Qual processo natural contribui para o fornecimento de nitrogênio às plantas sem a necessidade de fertilizantes industriais?",
+    correct: "Fixação biológica de nitrogênio",
+    wrong: ["Fotossíntese", "Volatilização do enxofre", "Mineralização do cálcio"]
+  },
+  {
+    q: "O nitrogênio é classificado como nutriente de alta mobilidade na planta. O que isso implica quanto à manifestação dos sintomas de deficiência?",
+    correct: "Os sintomas aparecem primeiro nas folhas mais velhas, pois o nutriente é redistribuído para as partes novas",
+    wrong: ["Os sintomas aparecem primeiro nas folhas jovens, pois há menor demanda nas antigas", "Os sintomas se manifestam simultaneamente em toda a planta", "Não há sintomas visíveis nas folhas, apenas na raiz"]
+  },
+  {
+    q: "Qual das seguintes fontes NÃO é uma fonte primária de nitrogênio para as plantas?",
+    correct: "Rochas fosfatadas",
+    wrong: ["Matéria orgânica do solo", "Fertilizantes nitrogenados", "Chuvas com descargas elétricas"]
+  },
+  {
+    q: "O nitrogênio participa diretamente de qual importante processo metabólico relacionado à captação de luz solar pelas plantas?",
+    correct: "Fotossíntese",
+    wrong: ["Absorção de cálcio", "Transporte de açúcares", "Formação da parede celular"]
+  },
+  {
+    q: "Qual é o símbolo químico do nitrogênio na tabela periódica?",
+    correct: "N",
+    wrong: ["Ni", "Na", "Ne"]
+  },
+  {
+    q: "A deficiência de nitrogênio reduz a produtividade das culturas. Qual dos seguintes sintomas NÃO está associado à falta desse nutriente?",
+    correct: "Enrolamento e queima das margens das folhas velhas",
+    wrong: ["Amarelecimento das folhas mais velhas", "Redução do crescimento da planta", "Diminuição da produtividade geral"]
+  },
+  {
+    q: "Em culturas leguminosas, como soja e feijão, o nitrogênio pode ser obtido por um processo simbiótico. Qual microrganismo é responsável por essa fixação?",
+    correct: "Bactérias do gênero Rhizobium",
+    wrong: ["Fungos micorrízicos", "Leveduras saprófitas", "Algas verdes fixadoras"]
+  },
+ 
+  // FÓSFORO — 10 questões
+  {
+    q: "O fósforo desempenha papel essencial em qual processo dentro das células vegetais?",
+    correct: "Transferência de energia (compõe o ATP)",
+    wrong: ["Formação da clorofila", "Equilíbrio hídrico das células", "Formação da parede celular"]
+  },
+  {
+    q: "A deficiência de fósforo pode causar coloração arroxeada nas folhas. Isso ocorre devido ao acúmulo de qual substância?",
+    correct: "Antocianinas",
+    wrong: ["Clorofila b", "Carotenoides", "Lignina"]
+  },
+  {
+    q: "Qual fator de solo está frequentemente associado à indisponibilidade de fósforo para as plantas?",
+    correct: "Toxidez por alumínio em solos ácidos",
+    wrong: ["Excesso de magnésio", "Alta concentração de potássio", "Baixo teor de enxofre"]
+  },
+  {
+    q: "Qual é o símbolo químico do fósforo?",
+    correct: "P",
+    wrong: ["Ph", "Fe", "Pb"]
+  },
+  {
+    q: "O fósforo é classificado como um nutriente móvel na planta. Em qual estrutura vegetal esse nutriente apresenta papel estrutural fundamental?",
+    correct: "DNA e RNA",
+    wrong: ["Parede celular", "Vacúolo central", "Cutícula foliar"]
+  },
+  {
+    q: "Qual das alternativas descreve corretamente os sintomas de deficiência de fósforo?",
+    correct: "Folhas mais velhas escurecidas que podem ficar arroxeadas antes de amarelar",
+    wrong: ["Amarelecimento entre as nervuras das folhas novas", "Murchamento das folhas jovens com colapso do pecíolo", "Queima das margens das folhas mais velhas"]
+  },
+  {
+    q: "Qual das fontes a seguir é uma fonte primária de fósforo para adubação mineral?",
+    correct: "Fosfatos minerais e rochas fosfatadas",
+    wrong: ["Calcário dolomítico", "Fertilizantes nitrogenados", "Cinzas de madeira"]
+  },
+  {
+    q: "Além do pH ácido e da toxidez de alumínio, qual fator físico do solo reduz a disponibilidade de fósforo para as raízes?",
+    correct: "Compactação do solo",
+    wrong: ["Excesso de irrigação", "Alta temperatura do solo", "Presença de matéria orgânica decomposta"]
+  },
+  {
+    q: "Qual condição climática reduz a absorção de fósforo pelas plantas, mesmo quando o nutriente está presente no solo?",
+    correct: "Baixas temperaturas",
+    wrong: ["Alta umidade relativa do ar", "Elevada precipitação pluviométrica", "Alta insolação diária"]
+  },
+  {
+    q: "A matéria orgânica do solo beneficia a disponibilidade de fósforo de que maneira?",
+    correct: "Libera fósforo orgânico via mineralização microbiana",
+    wrong: ["Aumenta o pH elevando a fixação de fósforo", "Precipita alumínio impedindo a adsorção de fósforo", "Substitui os fosfatos minerais por compostos orgânicos estáveis"]
+  },
+ 
+  // POTÁSSIO — 10 questões
+  {
+    q: "O potássio é essencial para a formação e transporte de qual substância dentro das plantas?",
+    correct: "Açúcares",
+    wrong: ["Proteínas estruturais", "Vitaminas do complexo B", "Aminoácidos essenciais"]
+  },
+  {
+    q: "Qual é o símbolo químico do potássio?",
+    correct: "K",
+    wrong: ["Po", "Pt", "Ka"]
+  },
+  {
+    q: "A deficiência de potássio causa sintomas típicos nas folhas. Qual é o sinal mais característico?",
+    correct: "Amarelecimento e secamento nas margens das folhas mais velhas",
+    wrong: ["Arroxeamento das nervuras das folhas jovens", "Murchamento generalizado com colapso dos pecíolos", "Clorose internerval nas folhas novas"]
+  },
+  {
+    q: "O potássio aumenta a resistência das plantas a vários estresses. Qual das opções NÃO é uma resistência promovida pelo potássio?",
+    correct: "Resistência a toxidez por alumínio",
+    wrong: ["Resistência à seca", "Resistência ao frio", "Resistência a pragas e doenças"]
+  },
+  {
+    q: "O excesso de potássio no solo pode prejudicar a absorção de quais outros nutrientes?",
+    correct: "Cálcio e magnésio",
+    wrong: ["Nitrogênio e enxofre", "Fósforo e ferro", "Manganês e zinco"]
+  },
+  {
+    q: "Qual das seguintes fontes naturais fornece potássio para o solo?",
+    correct: "Cinzas de madeira",
+    wrong: ["Rochas fosfatadas", "Calcário calcítico", "Gesso agrícola"]
+  },
+  {
+    q: "O potássio atua na regulação da abertura e fechamento dos estômatos. Como isso impacta a planta?",
+    correct: "Regula o equilíbrio hídrico, controlando a perda de água por transpiração",
+    wrong: ["Aumenta a taxa de fotossíntese ao ampliar a absorção de CO₂", "Reduz a absorção de luz por diminuir a área foliar", "Impede a absorção de água pelo xilema"]
+  },
+  {
+    q: "O potássio é responsável por melhorar a qualidade dos produtos colhidos. Em qual aspecto ele contribui mais diretamente nos frutos?",
+    correct: "Maior teor de açúcar, sabor e firmeza dos frutos",
+    wrong: ["Maior teor de proteínas nas sementes", "Maior conteúdo de amido nas raízes", "Maior pigmentação de antocianinas nas folhas"]
+  },
+  {
+    q: "Quando há deficiência de potássio em gramíneas como o milho, qual estrutura além das folhas é visivelmente afetada?",
+    correct: "Os colmos ficam fracos e a planta tomba com facilidade",
+    wrong: ["As raízes ficam escurecidas e podres", "As flores ficam esterilizadas e não polinizam", "As sementes ficam rugosas e murchas"]
+  },
+  {
+    q: "Em qual processo de transportes dentro da planta o potássio desempenha papel fundamental?",
+    correct: "Transporte de fotoassimilados pelo floema",
+    wrong: ["Transporte de água pelo xilema", "Transporte de oxigênio pelos cloroplastos", "Transporte de aminoácidos pelos plasmodesmos"]
+  },
+ 
+  // CÁLCIO — 10 questões
+  {
+    q: "O cálcio é essencial para a formação de qual estrutura fundamental nas células vegetais?",
+    correct: "Parede celular",
+    wrong: ["Membrana tilacóide", "Cloroplasto", "Vacúolo central"]
+  },
+  {
+    q: "Qual é o símbolo químico do cálcio?",
+    correct: "Ca",
+    wrong: ["C", "Cl", "Cr"]
+  },
+  {
+    q: "A deficiência de cálcio provoca sintomas principalmente em quais partes da planta?",
+    correct: "Folhas e tecidos jovens, pois o cálcio tem baixa mobilidade na planta",
+    wrong: ["Folhas velhas que amarelecem e caem prematuramente", "Raízes que apodrecem pelo excesso de umidade", "Sementes que ficam enrugadas e não germinam"]
+  },
+  {
+    q: "Qual sintoma típico de deficiência de cálcio pode ser observado nas margens das folhas jovens?",
+    correct: "Amarelecimento e necrose das margens das folhas novas",
+    wrong: ["Arroxeamento intenso das folhas mais velhas", "Queima das bordas das folhas mais velhas", "Clorose internerval uniforme"]
+  },
+  {
+    q: "Qual corretivo agrícola é a principal fonte de cálcio e, ao mesmo tempo, corrige a acidez do solo?",
+    correct: "Calcário calcítico",
+    wrong: ["Gesso agrícola — que fornece só enxofre", "Sulfato de potássio", "Superfosfato simples"]
+  },
+  {
+    q: "O cálcio atua na fixação de flores e frutos. Sua deficiência pode causar qual problema em horticultura?",
+    correct: "Podridão apical em tomates e pimentões",
+    wrong: ["Rachamento dos frutos por excesso de açúcar", "Escurecimento enzimático das polpas", "Maturação precoce dos frutos"]
+  },
+  {
+    q: "Além do calcário, qual outra fonte de cálcio é amplamente usada na agricultura para melhorar solos compactados ou com excesso de sódio?",
+    correct: "Gesso agrícola (CaSO₄)",
+    wrong: ["Superfosfato triplo", "Cloreto de potássio", "Ureia revestida"]
+  },
+  {
+    q: "Por que o cálcio, sendo pouco móvel na planta, requer uma absorção contínua pela raiz?",
+    correct: "Porque não pode ser redistribuído das partes velhas para as partes novas em crescimento",
+    wrong: ["Porque é consumido rapidamente na fotossíntese", "Porque é volatilizado pelo calor nas folhas antigas", "Porque é depositado nas paredes celulares sem ser reciclado para o xilema"]
+  },
+  {
+    q: "O murchamento das folhas jovens é um sintoma de deficiência de cálcio. Qual é a causa fisiológica desse sintoma?",
+    correct: "Comprometimento da integridade das membranas celulares e da parede celular nas folhas novas",
+    wrong: ["Excesso de açúcar nas células que aumenta a pressão osmótica", "Fechamento excessivo dos estômatos por deficiência de potássio", "Paralisia dos cloroplastos por falta de magnésio"]
+  },
+  {
+    q: "O cálcio auxilia no desenvolvimento das raízes. Qual das seguintes afirmações sobre essa função é correta?",
+    correct: "O cálcio é essencial para a elongação e divisão celular nas pontas das raízes",
+    wrong: ["O cálcio fornece energia para o crescimento radicular via ATP", "O cálcio substitui o fósforo na formação de membranas das raízes", "O cálcio regula a abertura dos estômatos das células da raiz"]
+  },
+ 
+  // MAGNÉSIO — 10 questões
+  {
+    q: "O magnésio é o elemento central de qual molécula fundamental para a fotossíntese?",
+    correct: "Clorofila",
+    wrong: ["ATP", "NADPH", "Carotenóide"]
+  },
+  {
+    q: "Qual é o símbolo químico do magnésio?",
+    correct: "Mg",
+    wrong: ["Mn", "Mo", "Me"]
+  },
+  {
+    q: "A deficiência de magnésio provoca clorose internerval. Em quais folhas esse sintoma aparece primeiro?",
+    correct: "Folhas mais velhas, pois o magnésio é um nutriente móvel",
+    wrong: ["Folhas mais novas, pois são as mais exigentes", "Folhas de posição intermediária no caule", "Todas as folhas simultaneamente"]
+  },
+  {
+    q: "Além de compor a clorofila, o magnésio exerce qual outra função metabólica importante?",
+    correct: "Ativação de enzimas, especialmente as envolvidas na respiração e fotossíntese",
+    wrong: ["Formação da parede celular junto com o cálcio", "Regulação da abertura dos estômatos como o potássio", "Síntese de proteínas de membrana como o enxofre"]
+  },
+  {
+    q: "O magnésio auxilia na absorção de qual outro macronutriente pelas plantas?",
+    correct: "Fósforo",
+    wrong: ["Nitrogênio", "Cálcio", "Potássio"]
+  },
+  {
+    q: "Qual corretivo fornece tanto magnésio quanto cálcio e corrige a acidez do solo simultaneamente?",
+    correct: "Calcário dolomítico",
+    wrong: ["Calcário calcítico", "Gesso agrícola", "Superfosfato simples"]
+  },
+  {
+    q: "A deficiência de magnésio pode causar queda prematura de folhas. Esse sintoma ocorre porque:",
+    correct: "A planta redireciona o magnésio das folhas velhas para os tecidos novos, acelerando a senescência das folhas antigas",
+    wrong: ["O magnésio é necessário para a síntese de auxinas que mantêm as folhas presas ao caule", "A deficiência de magnésio bloqueia a produção de cera cuticular, causando a queda", "O magnésio impede a ação das protease que degradam as proteínas foliares"]
+  },
+  {
+    q: "Em qual situação a deficiência de magnésio tende a ocorrer com mais frequência em solos tropicais?",
+    correct: "Solos arenosos e ácidos com alta lixiviação e baixa capacidade de troca catiônica",
+    wrong: ["Solos argilosos com alta retenção de água e pH neutro", "Solos ricos em matéria orgânica com alta atividade microbiana", "Solos de várzea com excesso de sedimentos aluviais"]
+  },
+  {
+    q: "A deficiência de magnésio prejudica a formação de sementes. Por qual razão?",
+    correct: "Por ser componente da clorofila, sua falta reduz a fotossíntese e a produção de fotoassimilados necessários para encher as sementes",
+    wrong: ["O magnésio é incorporado diretamente na proteína de reserva das sementes", "O magnésio catalisa a síntese de óleo nos cotilédones das sementes", "A deficiência de magnésio impede a polinização por paralisar o crescimento do tubo polínico"]
+  },
+  {
+    q: "Qual dos seguintes sintomas NÃO é característico da deficiência de magnésio?",
+    correct: "Murchamento e enrolamento das folhas jovens com colapso do pecíolo",
+    wrong: ["Clorose internerval nas folhas mais velhas", "Queda prematura de folhas", "Amarelecimento entre as nervuras verdes"]
+  },
+ 
+  // ENXOFRE — 10 questões
+  {
+    q: "O enxofre participa da composição de quais biomoléculas essenciais para o metabolismo das plantas?",
+    correct: "Proteínas, vitaminas, enzimas e coenzimas",
+    wrong: ["DNA, RNA e ATP", "Clorofila e carotenoides", "Amido, celulose e lignina"]
+  },
+  {
+    q: "Qual é o símbolo químico do enxofre?",
+    correct: "S",
+    wrong: ["Su", "Se", "Sf"]
+  },
+  {
+    q: "A deficiência de enxofre nas plantas causa amarelecimento em quais folhas, diferentemente do nitrogênio?",
+    correct: "Folhas mais novas (jovens), pois o enxofre tem baixa mobilidade na planta",
+    wrong: ["Folhas mais velhas, assim como o nitrogênio", "Folhas de posição intermediária no caule", "Apenas nas folhas que recebem mais sol"]
+  },
+  {
+    q: "O enxofre está envolvido em qual processo simbiótico de grande importância agrícola?",
+    correct: "Fixação biológica de nitrogênio em leguminosas",
+    wrong: ["Formação de micorrizas em gramíneas", "Solubilização de fosfatos por bactérias do solo", "Nitrificação e desnitrificação por bactérias do solo"]
+  },
+  {
+    q: "A principal fonte de enxofre para as plantas no solo é:",
+    correct: "Matéria orgânica e fertilizantes sulfatados",
+    wrong: ["Rochas fosfatadas e calcário dolomítico", "Chuvas com descargas elétricas e fixação biológica", "Cinzas de madeira e resíduos vegetais ricos em potássio"]
+  },
+  {
+    q: "O enxofre tem baixa mobilidade na planta. Qual a consequência direta dessa característica para os sintomas de deficiência?",
+    correct: "Os sintomas de deficiência se manifestam primeiro nas folhas mais novas",
+    wrong: ["Os sintomas aparecem primeiro nas raízes e depois nas folhas velhas", "Os sintomas se distribuem uniformemente por toda a planta", "Os sintomas só aparecem em condições de estresse hídrico severo"]
+  },
+  {
+    q: "Qual nutriente, assim como o enxofre, também está envolvido na composição de proteínas e tem papel na fotossíntese?",
+    correct: "Nitrogênio",
+    wrong: ["Potássio", "Cálcio", "Fósforo"]
+  },
+  {
+    q: "O enxofre faz parte de aminoácidos sulfurados. Quais são eles?",
+    correct: "Metionina e cisteína",
+    wrong: ["Leucina e isoleucina", "Arginina e lisina", "Triptofano e fenilalanina"]
+  },
+  {
+    q: "Qual fertilizante fornece enxofre ao solo e é amplamente usado na adubação de culturas como soja e milho?",
+    correct: "Sulfato de amônio",
+    wrong: ["Ureia", "Superfosfato triplo", "Cloreto de potássio"]
+  },
+  {
+    q: "Em solos com boa matéria orgânica, por que a deficiência de enxofre ainda pode ocorrer?",
+    correct: "Porque o enxofre orgânico precisa ser mineralizado por microrganismos, processo que pode ser lento em condições adversas de temperatura e umidade",
+    wrong: ["Porque a matéria orgânica consome todo o enxofre disponível na síntese de húmus", "Porque o enxofre orgânico é imediatamente lixiviado pelo excesso de chuva", "Porque bactérias nitrificantes consomem o enxofre como fonte de energia"]
+  }
+];
+ 
+// ===================== STATE =====================
+let gameQuestions = [];
+let currentIdx = 0;
+let score = 0;
+let skipUsed = false;
+let elimUsed = false;
+let answered = false;
+ 
+// ===================== INIT =====================
+function createStars() {
+  const container = document.getElementById('stars');
+  for (let i = 0; i < 80; i++) {
+    const star = document.createElement('div');
+    star.className = 'star';
+    star.style.cssText = `
+      left: ${Math.random()*100}%;
+      top: ${Math.random()*100}%;
+      --dur: ${2 + Math.random()*4}s;
+      --delay: ${Math.random()*5}s;
+      --op: ${0.3 + Math.random()*0.7};
+    `;
+    container.appendChild(star);
+  }
+}
+createStars();
+ 
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+ 
+function startGame() {
+  gameQuestions = shuffle(ALL_QUESTIONS).slice(0, 10).map(q => {
+    const options = shuffle([q.correct, ...q.wrong]);
+    return { ...q, options };
+  });
+  currentIdx = 0;
+  score = 0;
+  skipUsed = false;
+  elimUsed = false;
+ 
+  document.getElementById('intro-screen').style.display = 'none';
+  document.getElementById('end-screen').style.display = 'none';
+  document.getElementById('game-screen').style.display = 'block';
+ 
+  document.getElementById('ll-skip').disabled = false;
+  document.getElementById('ll-elim').disabled = false;
+ 
+  buildPrizeLadder();
+  renderQuestion();
+}
+ 
+function buildPrizeLadder() {
+  const ladder = document.getElementById('prize-ladder');
+  ladder.innerHTML = '';
+  PRIZES.forEach((p, i) => {
+    const el = document.createElement('div');
+    el.className = 'prize-step' + (i === 0 ? ' current' : '');
+    el.id = `prize-step-${i}`;
+    el.textContent = p;
+    ladder.appendChild(el);
+  });
+}
+ 
+function updatePrizeLadder() {
+  PRIZES.forEach((_, i) => {
+    const el = document.getElementById(`prize-step-${i}`);
+    if (i < currentIdx) el.className = 'prize-step done';
+    else if (i === currentIdx) el.className = 'prize-step current';
+    else el.className = 'prize-step';
+  });
+}
+ 
+function renderQuestion() {
+  answered = false;
+  const q = gameQuestions[currentIdx];
+ 
+  document.getElementById('q-counter').textContent = `Questão ${currentIdx + 1} de 10`;
+  document.getElementById('prize-display').textContent = currentIdx > 0 ? PRIZES[currentIdx - 1] : 'R$ 0';
+  document.getElementById('q-label').textContent = `Questão ${currentIdx + 1} — ${PRIZES[currentIdx]}`;
+  document.getElementById('question-text').textContent = q.q;
+ 
+  const card = document.getElementById('question-card');
+  card.classList.remove('animate-in');
+  void card.offsetWidth;
+  card.classList.add('animate-in');
+ 
+  const letters = ['A', 'B', 'C', 'D'];
+  const grid = document.getElementById('options-grid');
+  grid.innerHTML = '';
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.id = `opt-${i}`;
+    btn.innerHTML = `<span class="opt-letter">${letters[i]}</span><span>${opt}</span>`;
+    btn.onclick = () => selectAnswer(i, opt);
+    grid.appendChild(btn);
+  });
+ 
+  document.getElementById('feedback-banner').className = 'feedback-banner';
+  document.getElementById('feedback-banner').textContent = '';
+  document.getElementById('btn-next').className = 'btn-next';
+ 
+  updatePrizeLadder();
+}
+ 
+function selectAnswer(idx, chosen) {
+  if (answered) return;
+  answered = true;
+ 
+  const q = gameQuestions[currentIdx];
+  const isCorrect = chosen === q.correct;
+ 
+  // Disable all
+  document.querySelectorAll('.option-btn').forEach(btn => btn.disabled = true);
+ 
+  // Highlight selected
+  document.getElementById(`opt-${idx}`).classList.add('selected');
+ 
+  setTimeout(() => {
+    // Reveal correct/wrong
+    q.options.forEach((opt, i) => {
+      if (opt === q.correct) document.getElementById(`opt-${i}`).classList.add('correct');
+      else if (i === idx && !isCorrect) document.getElementById(`opt-${i}`).classList.add('wrong');
+    });
+ 
+    const banner = document.getElementById('feedback-banner');
+    if (isCorrect) {
+      banner.textContent = '✅ Resposta Correta! Excelente conhecimento!';
+      banner.className = 'feedback-banner show correct-fb';
+      score++;
+    } else {
+      banner.textContent = `❌ Resposta Errada! A correta era: ${q.correct}`;
+      banner.className = 'feedback-banner show wrong-fb';
+    }
+ 
+    const nextBtn = document.getElementById('btn-next');
+    if (!isCorrect) {
+      nextBtn.textContent = '🏁 Ver Resultado';
+      nextBtn.className = 'btn-next show';
+      nextBtn.onclick = () => endGame(false);
+    } else if (currentIdx >= 9) {
+      nextBtn.textContent = '🏆 Ver Resultado Final!';
+      nextBtn.className = 'btn-next show';
+      nextBtn.onclick = () => endGame(true);
+    } else {
+      nextBtn.textContent = 'Próxima Questão →';
+      nextBtn.className = 'btn-next show';
+      nextBtn.onclick = nextQuestion;
+    }
+  }, 700);
+}
+ 
+function nextQuestion() {
+  currentIdx++;
+  renderQuestion();
+}
+ 
+function useSkip() {
+  if (skipUsed || answered) return;
+  skipUsed = true;
+  document.getElementById('ll-skip').disabled = true;
+ 
+  const banner = document.getElementById('feedback-banner');
+  banner.textContent = '⏭️ Questão pulada! Avançando para a próxima…';
+  banner.className = 'feedback-banner show';
+  banner.style.background = 'rgba(0,201,177,0.1)';
+  banner.style.borderColor = 'var(--teal)';
+  banner.style.color = 'var(--teal)';
+ 
+  setTimeout(() => {
+    banner.style.background = '';
+    banner.style.borderColor = '';
+    banner.style.color = '';
+    if (currentIdx >= 9) {
+      endGame(false);
+    } else {
+      currentIdx++;
+      renderQuestion();
+    }
+  }, 1200);
+}
+ 
+function useEliminate() {
+  if (elimUsed || answered) return;
+  elimUsed = true;
+  document.getElementById('ll-elim').disabled = true;
+ 
+  const q = gameQuestions[currentIdx];
+  const wrongOptions = q.options
+    .map((opt, i) => ({ opt, i }))
+    .filter(o => o.opt !== q.correct);
+ 
+  const toElim = shuffle(wrongOptions).slice(0, 2);
+  toElim.forEach(({ i }) => {
+    document.getElementById(`opt-${i}`).classList.add('eliminated');
+  });
+}
+ 
+function endGame(won) {
+  document.getElementById('game-screen').style.display = 'none';
+  document.getElementById('end-screen').style.display = 'block';
+ 
+  const prizeWon = score > 0 ? PRIZES[score - 1] : 'R$ 0';
+ 
+  document.getElementById('end-title').textContent = won ? '🎉 MILIONÁRIO!' : score >= 7 ? 'Muito Bem!' : score >= 4 ? 'Bom Desempenho' : 'Não Foi Dessa Vez…';
+  document.getElementById('end-prize').textContent = prizeWon;
+  document.getElementById('end-score').textContent = `${score} de 10 questões corretas`;
+  document.getElementById('end-trophy').textContent = won ? '🏆' : score >= 7 ? '🥈' : score >= 4 ? '🌱' : '📚';
+ 
+  const msgs = {
+    10: "Incrível! Você domina completamente os macronutrientes essenciais! Seu conhecimento em nutrição de plantas é de nível especialista!",
+    9: "Excelente! Quase perfeito! Você conhece muito bem N, P, K, Ca, Mg e S. Revise apenas os detalhes para atingir 100%!",
+    8: "Ótimo resultado! Você tem sólido conhecimento sobre nutrição de plantas. Continue estudando para dominar todos os detalhes!",
+    7: "Bom trabalho! Você sabe bastante sobre macronutrientes. Revise os pontos que errou e tente novamente!",
+    6: "Resultado razoável! Vale aprofundar o estudo sobre mobilidade dos nutrientes e seus sintomas de deficiência.",
+    5: "Continue estudando! Os macronutrientes têm muitas nuances. Foque nos sintomas de deficiência e nas fontes de cada nutriente.",
+    4: "Ainda há muito a aprender, mas você está no caminho certo! Revise as funções de cada nutriente na planta.",
+    0: "Não desista! Estude as funções de N, P, K, Ca, Mg e S e tente novamente. Você vai se surpreender!"
+  };
+  document.getElementById('end-msg').textContent = msgs[score] || msgs[Math.min(score, 6)];
+ 
+  if (won || score >= 8) launchConfetti();
+}
+ 
+function launchConfetti() {
+  const colors = ['#FFD700', '#00C9B1', '#FF6B6B', '#A78BFA', '#34D399', '#60A5FA'];
+  for (let i = 0; i < 80; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti-piece';
+    c.style.cssText = `
+      left: ${Math.random()*100}vw;
+      top: -20px;
+      background: ${colors[Math.floor(Math.random()*colors.length)]};
+      --dur: ${1.5 + Math.random()*2}s;
+      --delay: ${Math.random()*1.5}s;
+      transform: rotate(${Math.random()*360}deg);
+      width: ${6 + Math.random()*10}px;
+      height: ${6 + Math.random()*10}px;
+    `;
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 5000);
+  }
+}
+</script>
+</body>
+</html>
