@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quem Quer Ser um Milionário? — Micronutrientes</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #FFD700;
+    --gold-dim: #C9A800;
+    --gold-dark: #8B6914;
+    --blue-deep: #020B2A;
+    --blue-mid: #071A50;
+    --blue-glow: #0A3D9E;
+    --blue-bright: #1565C0;
+    --cyan: #00E5FF;
+    --cyan-dim: #0097A7;
+    --white: #FFFFFF;
+    --silver: #C0C0C0;
+    --correct: #00E676;
+    --wrong: #FF1744;
+    --lifeline-color: #FF9100;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--blue-deep);
+    font-family: 'Exo 2', sans-serif;
+    color: var(--white);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Animated star background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse at 20% 50%, rgba(21, 101, 192, 0.15) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, rgba(0, 229, 255, 0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 100%, rgba(255, 215, 0, 0.06) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .stars {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .star {
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+    animation: twinkle var(--dur, 3s) ease-in-out infinite;
+  }
+
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.2; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.4); }
+  }
+
+  /* Screens */
+  .screen { display: none; position: relative; z-index: 1; }
+  .screen.active { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+
+  /* ===== INTRO SCREEN ===== */
+  #intro {
+    text-align: center;
+    gap: 30px;
+  }
+
+  .logo-wrap {
+    position: relative;
+    margin-bottom: 10px;
+  }
+
+  .logo-ring {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    border: 4px solid var(--gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    position: relative;
+    animation: spin-ring 20s linear infinite;
+    box-shadow: 0 0 40px var(--gold-dim), inset 0 0 40px rgba(255,215,0,0.1);
+  }
+
+  .logo-ring::before {
+    content: '';
+    position: absolute;
+    inset: 8px;
+    border-radius: 50%;
+    border: 2px dashed rgba(255,215,0,0.4);
+    animation: spin-ring 10s linear infinite reverse;
+  }
+
+  @keyframes spin-ring {
+    to { transform: rotate(360deg); }
+  }
+
+  .logo-icon {
+    font-size: 64px;
+    animation: spin-ring 20s linear infinite reverse;
+  }
+
+  .game-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(18px, 4vw, 32px);
+    color: var(--gold);
+    text-shadow: 0 0 30px var(--gold-dim), 0 2px 4px rgba(0,0,0,0.8);
+    line-height: 1.3;
+    letter-spacing: 2px;
+  }
+
+  .game-subtitle {
+    font-size: 14px;
+    color: var(--cyan);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    opacity: 0.8;
+  }
+
+  .prize-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 13px;
+    color: var(--silver);
+    opacity: 0.7;
+  }
+
+  .prize-preview span { color: var(--gold); font-weight: 700; }
+
+  .btn-start {
+    background: linear-gradient(135deg, var(--gold-dark), var(--gold), var(--gold-dark));
+    color: var(--blue-deep);
+    border: none;
+    padding: 18px 60px;
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 18px;
+    font-weight: 700;
+    border-radius: 50px;
+    cursor: pointer;
+    letter-spacing: 2px;
+    box-shadow: 0 0 30px rgba(255,215,0,0.4), 0 4px 15px rgba(0,0,0,0.5);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-start::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%);
+    transform: translateX(-100%);
+    transition: transform 0.6s ease;
+  }
+
+  .btn-start:hover::after { transform: translateX(100%); }
+  .btn-start:hover { transform: translateY(-2px); box-shadow: 0 0 50px rgba(255,215,0,0.6), 0 8px 20px rgba(0,0,0,0.6); }
+  .btn-start:active { transform: translateY(0); }
+
+  .rules-info {
+    font-size: 13px;
+    color: var(--silver);
+    opacity: 0.6;
+    line-height: 1.8;
+  }
+
+  /* ===== GAME SCREEN ===== */
+  #game {
+    gap: 16px;
+    justify-content: flex-start;
+    padding: 16px 20px 20px;
+    max-width: 900px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  /* Header */
+  .game-header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255,215,0,0.2);
+  }
+
+  .q-counter {
+    font-size: 13px;
+    color: var(--cyan);
+    letter-spacing: 2px;
+  }
+
+  .prize-display {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(16px, 3vw, 24px);
+    color: var(--gold);
+    text-shadow: 0 0 20px var(--gold-dim);
+  }
+
+  /* Lifelines */
+  .lifelines {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .lifeline-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255,145,0,0.1);
+    border: 2px solid var(--lifeline-color);
+    border-radius: 12px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: var(--lifeline-color);
+    font-family: 'Exo 2', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    min-width: 120px;
+  }
+
+  .lifeline-btn .ll-icon { font-size: 22px; }
+  .lifeline-btn:hover:not(:disabled) {
+    background: rgba(255,145,0,0.2);
+    box-shadow: 0 0 20px rgba(255,145,0,0.4);
+    transform: translateY(-2px);
+  }
+
+  .lifeline-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    border-color: #444;
+    color: #444;
+    transform: none;
+  }
+
+  .lifeline-btn.used {
+    opacity: 0.25;
+    cursor: not-allowed;
+    filter: grayscale(1);
+  }
+
+  /* Question box */
+  .question-box {
+    width: 100%;
+    background: linear-gradient(135deg, rgba(7,26,80,0.9), rgba(2,11,42,0.95));
+    border: 2px solid rgba(255,215,0,0.3);
+    border-radius: 20px;
+    padding: 28px 32px;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 0 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,215,0,0.2);
+    animation: fadeInDown 0.5s ease;
+  }
+
+  @keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .question-box::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 22px;
+    background: linear-gradient(135deg, var(--gold-dim), transparent, var(--cyan-dim));
+    z-index: -1;
+    opacity: 0.5;
+  }
+
+  .question-number {
+    font-size: 11px;
+    color: var(--cyan);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    opacity: 0.7;
+  }
+
+  .question-text {
+    font-size: clamp(15px, 2.5vw, 20px);
+    line-height: 1.6;
+    font-weight: 400;
+    color: var(--white);
+  }
+
+  /* Answers grid */
+  .answers-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    width: 100%;
+    animation: fadeInUp 0.5s ease 0.2s both;
+  }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .answer-btn {
+    background: linear-gradient(135deg, rgba(10,61,158,0.6), rgba(7,26,80,0.8));
+    border: 2px solid rgba(255,215,0,0.25);
+    border-radius: 14px;
+    padding: 16px 20px;
+    cursor: pointer;
+    color: var(--white);
+    font-family: 'Exo 2', sans-serif;
+    font-size: clamp(13px, 2vw, 16px);
+    font-weight: 400;
+    text-align: left;
+    transition: all 0.25s ease;
+    position: relative;
+    line-height: 1.4;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .answer-btn .letter {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 14px;
+    color: var(--gold);
+    font-weight: 700;
+    min-width: 22px;
+    margin-top: 1px;
+  }
+
+  .answer-btn:hover:not(:disabled):not(.eliminated) {
+    background: linear-gradient(135deg, rgba(21,101,192,0.7), rgba(10,61,158,0.9));
+    border-color: var(--gold);
+    box-shadow: 0 0 20px rgba(255,215,0,0.2);
+    transform: translateY(-1px);
+  }
+
+  .answer-btn.selected {
+    background: linear-gradient(135deg, rgba(255,145,0,0.3), rgba(255,145,0,0.15));
+    border-color: var(--lifeline-color);
+    box-shadow: 0 0 25px rgba(255,145,0,0.3);
+  }
+
+  .answer-btn.correct {
+    background: linear-gradient(135deg, rgba(0,230,118,0.35), rgba(0,200,100,0.2));
+    border-color: var(--correct);
+    box-shadow: 0 0 30px rgba(0,230,118,0.4);
+    animation: correctPulse 0.6s ease;
+  }
+
+  .answer-btn.wrong {
+    background: linear-gradient(135deg, rgba(255,23,68,0.35), rgba(200,0,50,0.2));
+    border-color: var(--wrong);
+    box-shadow: 0 0 30px rgba(255,23,68,0.3);
+    animation: shake 0.5s ease;
+  }
+
+  .answer-btn.eliminated {
+    opacity: 0.2;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  .answer-btn:disabled {
+    cursor: default;
+    pointer-events: none;
+  }
+
+  @keyframes correctPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+    100% { transform: scale(1); }
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+
+  /* Prize ladder */
+  .prize-ladder {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    width: 100%;
+    max-width: 360px;
+  }
+
+  .ladder-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 5px 16px;
+    border-radius: 6px;
+    font-size: 12px;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+  }
+
+  .ladder-item .l-num { color: rgba(255,255,255,0.4); font-size: 11px; }
+  .ladder-item .l-prize { font-weight: 600; color: var(--silver); }
+
+  .ladder-item.current {
+    background: rgba(255,215,0,0.12);
+    border-color: var(--gold);
+    box-shadow: 0 0 15px rgba(255,215,0,0.2);
+  }
+
+  .ladder-item.current .l-prize { color: var(--gold); font-size: 14px; }
+  .ladder-item.completed { background: rgba(0,230,118,0.08); }
+  .ladder-item.completed .l-prize { color: var(--correct); }
+  .ladder-item.milestone { }
+  .ladder-item.milestone .l-prize { color: var(--cyan); }
+
+  /* Confirm dialog */
+  .confirm-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(2,11,42,0.92);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+
+  .confirm-overlay.active { display: flex; }
+
+  .confirm-box {
+    background: linear-gradient(135deg, var(--blue-mid), var(--blue-deep));
+    border: 2px solid var(--gold-dim);
+    border-radius: 20px;
+    padding: 40px;
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 0 60px rgba(255,215,0,0.2);
+    animation: popIn 0.3s ease;
+  }
+
+  @keyframes popIn {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  .confirm-box h3 {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 20px;
+    color: var(--gold);
+    margin-bottom: 12px;
+  }
+
+  .confirm-box p { color: var(--silver); margin-bottom: 24px; line-height: 1.6; }
+  .confirm-box .prize-amount { font-size: 28px; color: var(--gold); font-weight: 700; margin: 12px 0; }
+
+  .confirm-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+  }
+
+  .btn-confirm, .btn-cancel {
+    padding: 12px 28px;
+    border-radius: 30px;
+    border: 2px solid;
+    cursor: pointer;
+    font-family: 'Exo 2', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    transition: all 0.25s ease;
+    letter-spacing: 1px;
+  }
+
+  .btn-confirm { background: var(--correct); border-color: var(--correct); color: var(--blue-deep); }
+  .btn-confirm:hover { box-shadow: 0 0 20px rgba(0,230,118,0.5); }
+  .btn-cancel { background: transparent; border-color: var(--wrong); color: var(--wrong); }
+  .btn-cancel:hover { background: rgba(255,23,68,0.1); }
+
+  /* ===== END SCREEN ===== */
+  #end {
+    text-align: center;
+    gap: 24px;
+  }
+
+  .end-icon { font-size: 80px; animation: bounce 1s ease infinite; }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+  }
+
+  .end-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(22px, 5vw, 40px);
+    line-height: 1.3;
+  }
+
+  .end-title.win { color: var(--gold); text-shadow: 0 0 40px var(--gold-dim); }
+  .end-title.lose { color: var(--wrong); text-shadow: 0 0 30px rgba(255,23,68,0.5); }
+
+  .end-prize-label { color: var(--silver); font-size: 14px; letter-spacing: 2px; }
+  .end-prize-amount { font-size: clamp(36px, 8vw, 64px); font-weight: 700; color: var(--gold); text-shadow: 0 0 30px var(--gold-dim); }
+  .end-message { color: var(--silver); font-size: 15px; max-width: 400px; line-height: 1.7; }
+
+  .btn-restart {
+    background: transparent;
+    border: 2px solid var(--gold);
+    color: var(--gold);
+    padding: 14px 48px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 16px;
+    letter-spacing: 2px;
+    transition: all 0.3s ease;
+  }
+
+  .btn-restart:hover {
+    background: rgba(255,215,0,0.1);
+    box-shadow: 0 0 30px rgba(255,215,0,0.3);
+  }
+
+  /* Notification toast */
+  .toast {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-80px);
+    background: rgba(7,26,80,0.95);
+    border: 1px solid var(--cyan);
+    border-radius: 30px;
+    padding: 12px 28px;
+    font-size: 14px;
+    color: var(--cyan);
+    z-index: 200;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    text-align: center;
+    pointer-events: none;
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .answers-grid { grid-template-columns: 1fr; }
+    .lifelines { flex-wrap: wrap; }
+    .lifeline-btn { min-width: 100px; padding: 8px 14px; }
+    .question-box { padding: 20px; }
+  }
+
+  /* Continue button */
+  .btn-continue {
+    background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+    border: none;
+    color: var(--blue-deep);
+    padding: 14px 48px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    box-shadow: 0 0 30px rgba(255,215,0,0.4);
+    transition: all 0.3s ease;
+    display: none;
+  }
+
+  .btn-continue:hover { transform: translateY(-2px); box-shadow: 0 0 50px rgba(255,215,0,0.6); }
+  .btn-continue.visible { display: block; animation: fadeInUp 0.4s ease; }
+
+  /* Walk away button */
+  .btn-walk {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.4);
+    padding: 8px 24px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 12px;
+    font-family: 'Exo 2', sans-serif;
+    letter-spacing: 1px;
+    transition: all 0.25s ease;
+  }
+
+  .btn-walk:hover { border-color: rgba(255,255,255,0.5); color: rgba(255,255,255,0.7); }
+</style>
+</head>
+<body>
+
+<!-- Stars -->
+<div class="stars" id="stars"></div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Confirm dialog -->
+<div class="confirm-overlay" id="confirmDialog">
+  <div class="confirm-box">
+    <h3>🚶 Parar e Sair?</h3>
+    <p>Você está prestes a sair do jogo com:</p>
+    <div class="prize-amount" id="walkPrize">R$ 0</div>
+    <p style="font-size:13px;">Tem certeza? Você pode continuar e ganhar mais!</p>
+    <div class="confirm-actions">
+      <button class="btn-confirm" onclick="confirmWalk()">Sim, vou embora!</button>
+      <button class="btn-cancel" onclick="cancelWalk()">Continuar!</button>
+    </div>
+  </div>
+</div>
+
+<!-- INTRO SCREEN -->
+<div class="screen active" id="intro">
+  <div class="logo-wrap">
+    <div class="logo-ring">
+      <span class="logo-icon">🌱</span>
+    </div>
+  </div>
+  <div>
+    <div class="game-title">Quem Quer Ser<br>um Milionário?</div>
+    <div class="game-subtitle" style="margin-top:8px;">Edição Micronutrientes</div>
+  </div>
+  <div class="rules-info">
+    10 perguntas · 2 ajudas disponíveis<br>
+    ⏭️ Pular 1 vez &nbsp;|&nbsp; ❌ Eliminar 2 erradas 1 vez
+  </div>
+  <button class="btn-start" onclick="startGame()">JOGAR AGORA</button>
+  <div class="prize-preview">
+    Chegue até a pergunta 10 e ganhe <span>R$ 1.000.000</span>
+  </div>
+</div>
+
+<!-- GAME SCREEN -->
+<div class="screen" id="game">
+  <div class="game-header">
+    <div class="q-counter" id="qCounter">PERGUNTA 1 DE 10</div>
+    <div class="prize-display" id="currentPrize">R$ 0</div>
+    <button class="btn-walk" onclick="initiateWalk()">Sair</button>
+  </div>
+
+  <div class="lifelines">
+    <button class="lifeline-btn" id="llSkip" onclick="useSkip()">
+      <span class="ll-icon">⏭️</span>
+      <span>PULAR</span>
+    </button>
+    <button class="lifeline-btn" id="llElim" onclick="useElim()">
+      <span class="ll-icon">❌</span>
+      <span>ELIMINAR 2</span>
+    </button>
+  </div>
+
+  <div class="question-box">
+    <div class="question-number" id="qNumber">PERGUNTA 1</div>
+    <div class="question-text" id="questionText">Carregando...</div>
+  </div>
+
+  <div class="answers-grid" id="answersGrid"></div>
+
+  <button class="btn-continue" id="btnContinue" onclick="nextQuestion()">PRÓXIMA PERGUNTA ›</button>
+
+  <div class="prize-ladder" id="prizeLadder"></div>
+</div>
+
+<!-- END SCREEN -->
+<div class="screen" id="end">
+  <div class="end-icon" id="endIcon">🏆</div>
+  <div class="end-title" id="endTitle">Parabéns!</div>
+  <div class="end-prize-label" id="endLabel">VOCÊ GANHOU</div>
+  <div class="end-prize-amount" id="endAmount">R$ 0</div>
+  <div class="end-message" id="endMessage"></div>
+  <button class="btn-restart" onclick="restartGame()">JOGAR NOVAMENTE</button>
+</div>
+
+<script>
+// ===== STARS =====
+(function() {
+  const c = document.getElementById('stars');
+  for (let i = 0; i < 120; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const sz = Math.random() * 2.5 + 0.5;
+    s.style.cssText = `width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--dur:${2+Math.random()*4}s;animation-delay:${Math.random()*4}s;`;
+    c.appendChild(s);
+  }
+})();
+
+// ===== PRIZE LADDER =====
+const PRIZES = [
+  { label: 'R$ 1.000', safe: false },
+  { label: 'R$ 2.000', safe: false },
+  { label: 'R$ 3.000', safe: false },
+  { label: 'R$ 5.000', safe: true },
+  { label: 'R$ 10.000', safe: false },
+  { label: 'R$ 30.000', safe: false },
+  { label: 'R$ 50.000', safe: true },
+  { label: 'R$ 100.000', safe: false },
+  { label: 'R$ 300.000', safe: false },
+  { label: 'R$ 1.000.000', safe: false },
+];
+
+// ===== ALL 60 QUESTIONS =====
+const ALL_QUESTIONS = [
+  // BORO (B) - 10 questions
+  {
+    q: "Qual é o símbolo químico do Boro?",
+    correct: "B",
+    wrong: ["Bo", "Br", "Be"]
+  },
+  {
+    q: "O Boro é classificado como qual tipo de elemento na planta?",
+    correct: "Não metal pouco móvel",
+    wrong: ["Metal de alta mobilidade", "Metalóide muito móvel", "Não metal muito móvel"]
+  },
+  {
+    q: "Qual é uma das principais funções do Boro na planta?",
+    correct: "Formação e rigidez da parede celular",
+    wrong: ["Fixação biológica de nitrogênio", "Síntese de clorofila", "Redução de nitrato"]
+  },
+  {
+    q: "A deficiência de Boro ocorre principalmente em quais tipos de solo?",
+    correct: "Solos arenosos, pobres em matéria orgânica e muito lixiviados",
+    wrong: ["Solos argilosos e úmidos", "Solos com pH neutro e ricos em fósforo", "Solos alcalinos e salinos"]
+  },
+  {
+    q: "Os sintomas de deficiência de Boro aparecem principalmente em:",
+    correct: "Tecidos jovens e pontos de crescimento",
+    wrong: ["Folhas velhas e raízes", "Caule e ramos maduros", "Frutos em desenvolvimento"]
+  },
+  {
+    q: "Qual sintoma foliar caracteriza a deficiência de Boro?",
+    correct: "Folhas pequenas, deformadas e necrose das folhas novas",
+    wrong: ["Clorose internerval nas folhas velhas", "Queima nas margens de folhas velhas", "Amarelecimento uniforme das folhas"]
+  },
+  {
+    q: "A toxicidade por Boro ocorre principalmente em:",
+    correct: "Solos salinos",
+    wrong: ["Solos muito ácidos", "Solos arenosos e úmidos", "Solos com excesso de matéria orgânica"]
+  },
+  {
+    q: "O Boro é essencial para o desenvolvimento reprodutivo, especialmente para:",
+    correct: "Germinação do pólen",
+    wrong: ["Formação das raízes", "Síntese de aminoácidos", "Absorção de água"]
+  },
+  {
+    q: "Qual processo o Boro auxilia na planta além da formação da parede celular?",
+    correct: "Transporte de carboidratos",
+    wrong: ["Fixação de CO₂ na fotossíntese", "Síntese de lipídios", "Absorção de nitrogênio"]
+  },
+  {
+    q: "O sintoma de toxicidade por Boro manifesta-se nas folhas como:",
+    correct: "Necrose das margens e queima das folhas",
+    wrong: ["Clorose internerval nas folhas novas", "Morte dos pontos de crescimento", "Enrolamento das folhas jovens"]
+  },
+
+  // FERRO (Fe) - 10 questions
+  {
+    q: "O Ferro (Fe) é classificado quanto à mobilidade na planta como:",
+    correct: "Metal de baixa mobilidade",
+    wrong: ["Metal de alta mobilidade", "Não metal de baixa mobilidade", "Metal de mobilidade média"]
+  },
+  {
+    q: "Qual das seguintes funções é desempenhada pelo Ferro na planta?",
+    correct: "Síntese de clorofila",
+    wrong: ["Formação da parede celular", "Transporte de carboidratos", "Redução de sulfato"]
+  },
+  {
+    q: "A deficiência de Ferro é comum em solos:",
+    correct: "Alcalinos, com excesso de calcário ou fósforo",
+    wrong: ["Ácidos e alagados", "Arenosos e pobres em nutrientes", "Muito ácidos e ricos em manganês"]
+  },
+  {
+    q: "O sintoma clássico de deficiência de Ferro nas folhas é:",
+    correct: "Clorose internerval nas folhas novas, com nervuras verdes",
+    wrong: ["Clorose internerval nas folhas velhas", "Necrose nas margens das folhas maduras", "Amarelecimento uniforme de todas as folhas"]
+  },
+  {
+    q: "Em casos severos de deficiência de Ferro, as folhas podem:",
+    correct: "Ficar quase brancas",
+    wrong: ["Apresentar manchas marrons", "Enrolar-se para dentro", "Cair prematuramente"]
+  },
+  {
+    q: "A toxicidade por Ferro é considerada:",
+    correct: "Rara, ocorrendo principalmente em solos alagados e ácidos",
+    wrong: ["Comum em solos alcalinos", "Frequente em solos arenosos", "Comum em solos com excesso de calcário"]
+  },
+  {
+    q: "O Ferro participa da fotossíntese, respiração e também da:",
+    correct: "Fixação biológica de nitrogênio",
+    wrong: ["Síntese de auxinas", "Ativação da fotólise da água", "Redução de nitrato diretamente"]
+  },
+  {
+    q: "Qual é a relação entre excesso de fósforo e a disponibilidade de Ferro no solo?",
+    correct: "Excesso de fósforo pode provocar deficiência de Ferro",
+    wrong: ["Fósforo aumenta a absorção de Ferro", "Fósforo não interfere na absorção de Ferro", "Fósforo compete com Ferro pela mesma enzima"]
+  },
+  {
+    q: "O Ferro é importante para a resistência da planta a:",
+    correct: "Doenças",
+    wrong: ["Seca severa", "Salinidade do solo", "Ventos fortes"]
+  },
+  {
+    q: "Em que tipo de solo a toxicidade por Ferro ocorre com maior frequência?",
+    correct: "Solos alagados e ácidos",
+    wrong: ["Solos alcalinos e bem drenados", "Solos salinos e secos", "Solos argilosos neutros"]
+  },
+
+  // CLORO (Cl) - 8 questions
+  {
+    q: "O Cloro é absorvido pelas plantas na forma de:",
+    correct: "Cloreto (Cl⁻)",
+    wrong: ["Clorato (ClO₃⁻)", "Ácido clorídrico (HCl)", "Hipoclorito (ClO⁻)"]
+  },
+  {
+    q: "Quanto à mobilidade na planta, o Cloro apresenta:",
+    correct: "Alta mobilidade",
+    wrong: ["Baixa mobilidade", "Mobilidade muito reduzida", "Imobilidade total"]
+  },
+  {
+    q: "Uma das funções do Cloro na planta é o controle da:",
+    correct: "Abertura e fechamento dos estômatos",
+    wrong: ["Síntese de clorofila", "Fixação de nitrogênio", "Transporte de carboidratos"]
+  },
+  {
+    q: "A deficiência de Cloro nas plantas é considerada:",
+    correct: "Rara",
+    wrong: ["Muito comum em solos ácidos", "Frequente em solos arenosos", "Comum em solos alcalinos"]
+  },
+  {
+    q: "Qual é mais comum nas plantas em relação ao Cloro — deficiência ou toxicidade?",
+    correct: "Toxicidade",
+    wrong: ["Deficiência", "Ambas são igualmente comuns", "Nenhuma é observada na prática"]
+  },
+  {
+    q: "O Cloro atua na fotossíntese e também no:",
+    correct: "Equilíbrio iônico celular",
+    wrong: ["Transporte de auxinas", "Metabolismo de proteínas", "Síntese de ácidos graxos"]
+  },
+  {
+    q: "A toxicidade por Cloro manifesta-se principalmente como:",
+    correct: "Queimaduras nas margens das folhas e queda precoce da folhagem",
+    wrong: ["Clorose internerval nas folhas novas", "Morte do ponto de crescimento apical", "Escurecimento das nervuras"]
+  },
+  {
+    q: "Qual é um sintoma de deficiência de Cloro nas folhas?",
+    correct: "Folhas deformadas e necrose",
+    wrong: ["Folhas com manchas amarelo-douradas", "Necrose somente nas nervuras", "Engrossamento das nervuras"]
+  },
+
+  // MANGANÊS (Mn) - 8 questions
+  {
+    q: "O Manganês participa diretamente de qual etapa da fotossíntese?",
+    correct: "Fotólise da água",
+    wrong: ["Ciclo de Calvin", "Transporte de elétrons final", "Síntese de ATP pela ATP sintase"]
+  },
+  {
+    q: "A deficiência de Manganês é comum em solos com:",
+    correct: "pH elevado e excesso de calcário",
+    wrong: ["pH muito ácido e pobre em nutrientes", "Excesso de matéria orgânica", "Solos alagados e ácidos"]
+  },
+  {
+    q: "O sintoma de deficiência de Manganês nas folhas se apresenta como:",
+    correct: "Clorose internerval em forma de mosaico nas folhas novas",
+    wrong: ["Clorose uniforme em folhas velhas", "Necrose nas margens de folhas velhas", "Queima das pontas das folhas novas"]
+  },
+  {
+    q: "A toxicidade por Manganês ocorre em solos muito ácidos e pode causar:",
+    correct: "Necrose, deformações foliares e deficiência induzida de Ferro",
+    wrong: ["Clorose uniforme e engrossamento das raízes", "Acúmulo de amido nas folhas", "Morte do meristema apical"]
+  },
+  {
+    q: "Além da fotossíntese, o Manganês ativa enzimas relacionadas ao:",
+    correct: "Metabolismo do nitrogênio",
+    wrong: ["Metabolismo do fósforo", "Síntese de lipídios", "Transporte de água pelo xilema"]
+  },
+  {
+    q: "O Manganês contribui para a resistência da planta a:",
+    correct: "Doenças",
+    wrong: ["Deficiência hídrica", "Salinidade excessiva", "Temperaturas extremas"]
+  },
+  {
+    q: "Na deficiência de Manganês também podem aparecer:",
+    correct: "Manchas necróticas nas folhas novas",
+    wrong: ["Raízes curtas e escuras", "Internódios muito longos", "Queda prematura dos frutos"]
+  },
+  {
+    q: "A toxicidade por Manganês pode induzir deficiência de qual outro micronutriente?",
+    correct: "Ferro",
+    wrong: ["Boro", "Zinco", "Cobre"]
+  },
+
+  // COBRE (Cu) - 8 questions
+  {
+    q: "O Cobre possui qual característica quanto à mobilidade na planta?",
+    correct: "Baixa mobilidade",
+    wrong: ["Alta mobilidade", "Mobilidade intermediária", "Extremamente móvel em floema"]
+  },
+  {
+    q: "Por ter baixa mobilidade, os sintomas de deficiência de Cobre aparecem em:",
+    correct: "Tecidos jovens",
+    wrong: ["Folhas velhas e raízes", "Caule maduro", "Frutos e sementes"]
+  },
+  {
+    q: "Em quais condições de solo a deficiência de Cobre é mais comum?",
+    correct: "Solos ricos em matéria orgânica, com pH elevado ou competição com zinco e ferro",
+    wrong: ["Solos ácidos com excesso de alumínio", "Solos salinos e áridos", "Solos alagados e neutros"]
+  },
+  {
+    q: "A deficiência de Cobre pode causar qual sintoma característico?",
+    correct: "Morte da gema apical e enfraquecimento dos caules",
+    wrong: ["Clorose internerval em folhas velhas", "Necrose nas margens das folhas velhas", "Enrolamento das raízes"]
+  },
+  {
+    q: "A toxicidade por Cobre está geralmente associada ao:",
+    correct: "Uso excessivo de fungicidas cúpricos",
+    wrong: ["Excesso de calcário aplicado no solo", "Irrigação com água salina", "Uso intensivo de adubos nitrogenados"]
+  },
+  {
+    q: "Qual é uma das funções do Cobre na planta?",
+    correct: "Defesa antioxidante",
+    wrong: ["Fixação biológica de nitrogênio", "Formação da parede celular", "Transporte de açúcares pelo floema"]
+  },
+  {
+    q: "O Cobre atua na respiração celular e também na:",
+    correct: "Fotossíntese",
+    wrong: ["Absorção de fósforo", "Síntese de auxinas", "Regulação da transpiração"]
+  },
+  {
+    q: "O enrolamento das folhas novas é sintoma de deficiência de qual micronutriente?",
+    correct: "Cobre",
+    wrong: ["Manganês", "Ferro", "Boro"]
+  },
+
+  // MOLIBDÊNIO (Mo) - 8 questions
+  {
+    q: "O Molibdênio é fundamental para qual processo nas leguminosas?",
+    correct: "Fixação biológica de nitrogênio",
+    wrong: ["Síntese de clorofila", "Absorção de fósforo", "Formação da parede celular"]
+  },
+  {
+    q: "A deficiência de Molibdênio ocorre principalmente em:",
+    correct: "Solos ácidos",
+    wrong: ["Solos alcalinos com excesso de calcário", "Solos salinos e alagados", "Solos arenosos muito secos"]
+  },
+  {
+    q: "Os sintomas de deficiência de Molibdênio são semelhantes aos de deficiência de:",
+    correct: "Nitrogênio",
+    wrong: ["Ferro", "Boro", "Zinco"]
+  },
+  {
+    q: "Qual é a deformação foliar característica de deficiência de Molibdênio na couve-flor?",
+    correct: "Cauda de chicote",
+    wrong: ["Roseta", "Mosaico internerval", "Queima das margens"]
+  },
+  {
+    q: "O Molibdênio é essencial para quais enzimas?",
+    correct: "Enzimas responsáveis pela redução de nitrato e sulfato",
+    wrong: ["Enzimas da fotólise da água", "Enzimas da síntese de lipídios", "Enzimas da quebra de amido"]
+  },
+  {
+    q: "Em leguminosas com deficiência de Molibdênio, o que ocorre com os nódulos?",
+    correct: "Baixo desenvolvimento dos nódulos",
+    wrong: ["Nódulos muito grandes e ineficientes", "Ausência de nódulos visíveis", "Nódulos escuros e ativos"]
+  },
+  {
+    q: "A toxicidade por Molibdênio é considerada:",
+    correct: "Rara",
+    wrong: ["Muito comum em solos ácidos", "Frequente em solos com excesso de calcário", "Comum após aplicação de fertilizantes"]
+  },
+  {
+    q: "Qual é a principal função do Molibdênio nas plantas além da fixação de nitrogênio?",
+    correct: "Redução de nitrato e sulfato",
+    wrong: ["Fotólise da água na fotossíntese", "Síntese de clorofila", "Transporte de carboidratos"]
+  },
+
+  // ZINCO (Zn) - 8 questions
+  {
+    q: "O Zinco participa da síntese de quais hormônios vegetais?",
+    correct: "Auxinas",
+    wrong: ["Citocininas", "Giberelinas", "Etileno"]
+  },
+  {
+    q: "A deficiência de Zinco está associada a solos com:",
+    correct: "pH elevado, excesso de fósforo, calagem excessiva e baixa fertilidade",
+    wrong: ["pH ácido e excesso de matéria orgânica", "Solos alagados e compactados", "Excesso de potássio e sódio"]
+  },
+  {
+    q: "Qual é o aspecto característico das plantas com deficiência de Zinco?",
+    correct: "Roseta — folhas pequenas e internódios curtos",
+    wrong: ["Estiolamento — caules longos e finos", "Clorose uniforme em toda a planta", "Necrose das pontas das raízes"]
+  },
+  {
+    q: "A deficiência de Zinco causa qual tipo de clorose nas folhas?",
+    correct: "Clorose internerval",
+    wrong: ["Clorose uniforme de todas as folhas", "Clorose apenas das nervuras", "Manchas douradas circulares"]
+  },
+  {
+    q: "A toxicidade por Zinco ocorre geralmente em:",
+    correct: "Solos ácidos ou com aplicação excessiva de resíduos ricos em zinco",
+    wrong: ["Solos alcalinos com excesso de calcário", "Solos com pH neutro e alta CTC", "Solos bem drenados e férteis"]
+  },
+  {
+    q: "O Zinco participa do crescimento apical e da:",
+    correct: "Ativação enzimática e síntese de proteínas",
+    wrong: ["Fixação de nitrogênio atmosférico", "Absorção de fósforo pelo floema", "Síntese de clorofila diretamente"]
+  },
+  {
+    q: "A toxicidade por Zinco é considerada:",
+    correct: "Pouco frequente",
+    wrong: ["Muito comum em solos ácidos", "A mais comum entre os micronutrientes", "Frequente em solos com excesso de calcário"]
+  },
+  {
+    q: "O Zinco participa da respiração e da:",
+    correct: "Síntese de proteínas",
+    wrong: ["Fotólise da água", "Fixação de sulfato", "Absorção de cloretos"]
+  }
+];
+
+// ===== GAME STATE =====
+let gameQuestions = [];
+let currentQ = 0;
+let usedSkip = false;
+let usedElim = false;
+let lastSafePrize = 0;
+let answered = false;
+let selectedAnswers = [];
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function pickQuestions() {
+  const shuffled = shuffle(ALL_QUESTIONS);
+  return shuffled.slice(0, 10).map(q => {
+    const opts = shuffle([q.correct, ...q.wrong]);
+    return { q: q.q, correct: q.correct, options: opts };
+  });
+}
+
+function startGame() {
+  gameQuestions = pickQuestions();
+  currentQ = 0;
+  usedSkip = false;
+  usedElim = false;
+  lastSafePrize = 0;
+  answered = false;
+
+  showScreen('game');
+  buildLadder();
+  loadQuestion();
+  updateLifelines();
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function buildLadder() {
+  const ladder = document.getElementById('prizeLadder');
+  ladder.innerHTML = '';
+  [...PRIZES].reverse().forEach((p, i) => {
+    const realIdx = 9 - i;
+    const div = document.createElement('div');
+    div.className = 'ladder-item' + (p.safe ? ' milestone' : '');
+    div.id = `ladder-${realIdx}`;
+    div.innerHTML = `<span class="l-num">${realIdx + 1}</span><span class="l-prize">${p.label}</span>`;
+    ladder.appendChild(div);
+  });
+  updateLadder();
+}
+
+function updateLadder() {
+  PRIZES.forEach((_, i) => {
+    const el = document.getElementById(`ladder-${i}`);
+    if (!el) return;
+    el.classList.remove('current', 'completed');
+    if (i < currentQ) el.classList.add('completed');
+    else if (i === currentQ) el.classList.add('current');
+  });
+}
+
+function loadQuestion() {
+  answered = false;
+  const qData = gameQuestions[currentQ];
+  document.getElementById('qCounter').textContent = `PERGUNTA ${currentQ + 1} DE 10`;
+  document.getElementById('currentPrize').textContent = currentQ > 0 ? PRIZES[currentQ - 1].label : 'R$ 0';
+  document.getElementById('qNumber').textContent = `PERGUNTA ${currentQ + 1}`;
+  document.getElementById('questionText').textContent = qData.q;
+  document.getElementById('btnContinue').classList.remove('visible');
+
+  const letters = ['A', 'B', 'C', 'D'];
+  const grid = document.getElementById('answersGrid');
+  grid.innerHTML = '';
+  qData.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'answer-btn';
+    btn.id = `ans-${i}`;
+    btn.innerHTML = `<span class="letter">${letters[i]}</span><span>${opt}</span>`;
+    btn.onclick = () => selectAnswer(i, opt, qData.correct);
+    grid.appendChild(btn);
+  });
+
+  updateLadder();
+}
+
+function selectAnswer(idx, chosen, correct) {
+  if (answered) return;
+  const btn = document.getElementById(`ans-${idx}`);
+  btn.classList.add('selected');
+  
+  // Disable all buttons temporarily
+  disableAnswers();
+
+  setTimeout(() => {
+    if (chosen === correct) {
+      btn.classList.remove('selected');
+      btn.classList.add('correct');
+      answered = true;
+
+      if (currentQ === 9) {
+        // Won!
+        setTimeout(() => endGame(true), 1200);
+      } else {
+        document.getElementById('btnContinue').classList.add('visible');
+        // Update safe prize
+        if (PRIZES[currentQ].safe || currentQ === 9) lastSafePrize = currentQ;
+      }
+    } else {
+      btn.classList.remove('selected');
+      btn.classList.add('wrong');
+      // Show correct answer
+      const qData = gameQuestions[currentQ];
+      const allBtns = document.querySelectorAll('.answer-btn');
+      allBtns.forEach(b => {
+        const text = b.querySelector('span:last-child').textContent;
+        if (text === qData.correct) b.classList.add('correct');
+      });
+      answered = true;
+      setTimeout(() => endGame(false), 1500);
+    }
+  }, 900);
+}
+
+function disableAnswers() {
+  document.querySelectorAll('.answer-btn').forEach(b => b.disabled = true);
+}
+
+function enableAnswers() {
+  document.querySelectorAll('.answer-btn').forEach(b => {
+    if (!b.classList.contains('eliminated')) b.disabled = false;
+  });
+}
+
+function nextQuestion() {
+  currentQ++;
+  loadQuestion();
+  updateLifelines();
+}
+
+function updateLifelines() {
+  document.getElementById('llSkip').disabled = usedSkip;
+  document.getElementById('llElim').disabled = usedElim;
+  if (usedSkip) document.getElementById('llSkip').classList.add('used');
+  if (usedElim) document.getElementById('llElim').classList.add('used');
+}
+
+function useSkip() {
+  if (usedSkip || answered) return;
+  usedSkip = true;
+  updateLifelines();
+  showToast('⏭️ Pergunta pulada! Próxima questão...');
+  setTimeout(() => {
+    if (currentQ < 9) {
+      nextQuestion();
+    } else {
+      endGame(true); // Last question skipped = win at previous prize
+    }
+  }, 1200);
+}
+
+function useElim() {
+  if (usedElim || answered) return;
+  usedElim = true;
+  updateLifelines();
+
+  const qData = gameQuestions[currentQ];
+  const allBtns = document.querySelectorAll('.answer-btn');
+  let eliminated = 0;
+  const wrongIdxs = [];
+
+  allBtns.forEach((b, i) => {
+    const text = b.querySelector('span:last-child').textContent;
+    if (text !== qData.correct) wrongIdxs.push(i);
+  });
+
+  const toElim = shuffle(wrongIdxs).slice(0, 2);
+  toElim.forEach(i => {
+    allBtns[i].classList.add('eliminated');
+    allBtns[i].disabled = true;
+  });
+
+  showToast('❌ Duas alternativas erradas eliminadas!');
+}
+
+function initiateWalk() {
+  const safePrize = lastSafePrize > 0 ? PRIZES[lastSafePrize - 1].label : (currentQ > 0 ? PRIZES[currentQ - 1].label : 'R$ 0');
+  document.getElementById('walkPrize').textContent = currentQ > 0 ? PRIZES[currentQ - 1].label : 'R$ 0';
+  document.getElementById('confirmDialog').classList.add('active');
+}
+
+function confirmWalk() {
+  document.getElementById('confirmDialog').classList.remove('active');
+  const prize = currentQ > 0 ? PRIZES[currentQ - 1].label : 'R$ 0';
+  showEndScreen(true, prize, '🚶 Você foi prudente e saiu com o seu prêmio. Até a próxima!');
+}
+
+function cancelWalk() {
+  document.getElementById('confirmDialog').classList.remove('active');
+}
+
+function endGame(won) {
+  if (won && currentQ === 9) {
+    showEndScreen(true, PRIZES[9].label, '🎉 INCRÍVEL! Você chegou ao topo e ganhou o prêmio máximo! Você é um expert em micronutrientes!');
+  } else if (won) {
+    // Skipped last question
+    const prize = currentQ > 0 ? PRIZES[currentQ - 1].label : 'R$ 0';
+    showEndScreen(true, prize, '⏭️ Você pulou a última pergunta. Próximo desafio te espera!');
+  } else {
+    const safePrize = getSafePrize();
+    showEndScreen(false, safePrize, '😔 Não foi dessa vez! Estude mais sobre micronutrientes e tente de novo!');
+  }
+}
+
+function getSafePrize() {
+  // Find last milestone before currentQ
+  for (let i = currentQ - 1; i >= 0; i--) {
+    if (PRIZES[i].safe) return PRIZES[i].label;
+  }
+  return 'R$ 0';
+}
+
+function showEndScreen(won, prize, msg) {
+  showScreen('end');
+  document.getElementById('endIcon').textContent = won ? '🏆' : '💔';
+  document.getElementById('endTitle').textContent = won ? 'Parabéns!' : 'Que pena...';
+  document.getElementById('endTitle').className = 'end-title ' + (won ? 'win' : 'lose');
+  document.getElementById('endLabel').textContent = won ? 'VOCÊ GANHOU' : 'VOCÊ SAIU COM';
+  document.getElementById('endAmount').textContent = prize;
+  document.getElementById('endMessage').textContent = msg;
+}
+
+function restartGame() {
+  startGame();
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+</script>
+</body>
+</html>
